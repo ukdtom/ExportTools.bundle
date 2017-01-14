@@ -1,0 +1,611 @@
+v1.0.0.0:
+******* Changed name to Export Tools for Plex *******
+*
+* We now also export in the xlsx format
+*
+*****************************************************
+
+	- Movies:
+			- Added "MetaData Language" field, that indicates the language setting of the primary agent of the library
+			- Can now export posters as well
+			- Added Special Level 2 with the following fields:
+				- Title, Audio Stream Language, Audio Title, Container, Part File, Audio Stream Index, Audio Stream Language Code
+	- TV-Shows:
+			- Added "MetaData Language" field, that indicates the language setting of the primary agent of the library
+			- Changed fieldname "TV Show ID" to "Media ID" to make better consistance between the different type of exports
+			- Shows Only: Moved "MetaDB Link" to level 3
+			- Shows Only: Level 2 now also export the fields: Directors, Writers, Roles and Genres
+			- Shows Only: Added "Media ID" to level 1 and above
+			- Shows Only: Level 3 (Costly, since it req. an additional call towards PMS) now exports Labels and File Location, as well as MetaDB Link
+			- Can now export posters as well
+	- Photos:
+			- Changed fieldname "Photo ID" to "Media ID" to make better consistance between the different type of exports			
+	- Audio:
+			- Changed fieldname "Track ID" to "Media ID" to make better consistance between the different type of exports						
+	- General:
+			- Will now strip leading spaces from a library section name for the output file
+			- Added native .xlsx (Excel) output, including some formating as well. See the settings of the channel
+				- See Setting of the channel for options, and note, that some of them are only honored by Excel!
+			- Added dynamic parameters for querying PMS, leading to faster execution in some cases, especially for lower levels of export
+
+v0.0.4.19:
+	- Movies:
+		- Added "Part Deep Analysis Version" and "Required Bandwidths" to level 5 for the part as a whole
+		- Added "Required Bandwidths" for the individual streams in level 6
+	- TV-Shows:
+		- Added "Part Deep Analysis Version" and "Required Bandwidths" to level 4 for the part as a whole
+		- Added "Required Bandwidths" for the individual streams in level 5 (Video) and level 6 (Audio, Subtitle)
+
+v0.0.4.18:
+	- Movies:
+		- Added Forced flag to subtitles export on level 3 and above
+	- TV-Shows:
+		- Added Forced flag to subtitles export on level 6 and above
+
+v0.0.4.17:
+	- General:
+		- Some exports was missing the default (N/A) and showed as empty instead
+	- Movies:
+		- Added "Chapter Source" to level 3		(This is where chapters was fetched from)
+			- Can be one of the following: 
+				- N/A, agent, media, mixed
+		- Added "Chapter Title"
+
+v0.0.4.16:
+	- Audio:
+		- Added field "Part Size as Bytes" to level 4
+	- Photo:
+		- Added field "Part Size as Bytes" to level 3
+	- TV-Shows:
+		- Added field "Part Size as Bytes" to level 4
+		- Added new level named "Show Only 1", that only export TV-Show info on the show level, not seasons nor episodes.
+		- Added new level named "Show Only 2", that only export TV-Show info on the show level, not seasons nor episodes.
+	- Movies:
+		- Added field "Part Size as Bytes" to level 5
+	- Known issues:
+		- When returning to the main menu after a scan, another scan is sadly initiated. As such, it's for now recommended not to use the menu to go back, but instead the breadcrumbs
+
+
+v0.0.4.15:
+	- Audio:
+		- 3 new fields has been added to level 5:
+			- Lyrics Codec
+			- Lyrics Provider
+			- Lyrics Timed
+	- General:
+		- File size nw no longer forced to GB size, but instead intelligently detected as KB, MB, TB etc. 
+	- Known issues:
+		- When returning to the main menu after a scan, another scan is sadly initiated. As such, it's for now recommended not to use the menu to go back, but instead the breadcrumbs
+
+v0.0.4.14:
+	- General:
+		- Exported file path of a part file was url safe, meaning extended characters was not readable to a human
+			- HUGE thanks goes to SvenErik1968 @ GitHub for not only finding this, but also for his support and dedication
+
+v0.0.4.13:
+	- TV-Shows:
+		- Locked fields column was duplicated in level 4 and above
+
+v0.0.4.12:
+	- General:
+		- made sure that all dates where following ISO 8601 format (Year-Month-Day)
+
+v0.0.4.11:
+- Movies:
+  - Added support for the following metadata agents:
+    (data18)
+- TV-Shows:
+  - Added support for the following metadata agents:
+    (themoviedb, anidb)
+
+v0.0.4.10:
+- General:
+	- Added a timeout parameter to all PMS calls, to prevent problems on a slow PMS
+- Movies:
+	- Changed the IMDB id column into MetaDB Link
+		( Now supports both imdb and the movie db)
+- TV-Shows:
+	- Added column MetaDB Link to export level 4
+		( Supports thetvdb )
+	- TV Episodes now fetched in smaller chuncks
+
+v0.0.4.9:
+- Movies:
+	- Changed the IMDB id into the url towards IMDB
+	- Part Size (Level 5) will now be shown in GB not Bytes
+		- Huge thanks to rabelux for this 
+
+v0.0.4.8:
+- TV-Shows:
+	- Added collections to level 2
+	- Added Locked Fields to level 2
+
+v0.0.4.7:
+-	Movies:
+	- Added thumbs and art uri to level 3
+- TV-Shows:
+	- Added thumbs uri to level 2
+
+v0.0.4.6:
+-	Movies:
+	- IMDB number didn't work :-(
+		-	Fixed by moving it to level 3
+
+v0.0.4.5:
+-	Movies:
+	- Added special level 1
+
+v0.0.4.4:
+- General:
+	- Added a general preference, called "TimeOut", that might help with a slow NAS
+
+v0.0.4.3:
+- General:
+	- Fixed an issue, where Plex2CSV would not respond, if not used for a long time
+
+v0.0.4.2:
+- General:
+	- So now all export types has been migrated to the new way, meaning that if you stumple on a field I missed, then it'll be very easy for me to add it :-) 
+- Photos:
+	- Yep...Photos can now be exported as well :-)
+	-	Total amount of pictures to be exported can however not be calculated, since pictures can be nested in multiple levels of folders
+		And here's the levels:
+		-	Level 1:
+			- Photo ID
+			-	Title
+			-	Summary
+			-	Originally Available At
+			-	Added At
+			-	Updated At
+		-	Level 2:
+			-	Media Width
+			-	Media Height
+			-	Media Aspect Ratio
+			-	Media Container
+			-	Media Title
+		-	Level 3:
+			-	Part File
+			-	Part Size
+			-	Part Container
+			-	Part Orientation
+- Movies:
+	- Added the following Subtitle stream info to level 6:
+		- Subtitle Stream Codec
+		- Subtitle Stream Index
+		- Subtitle Stream Language
+		- Subtitle Stream Language Code
+		- Subtitle Stream Codec ID
+		- Subtitle Stream Format
+		- Subtitle Stream Title
+		- Subtitle Stream Selected
+	- Added the following Video stream info to level 6:
+		- Video Stream Default
+		- Video Stream Index
+		- Video Stream Duration
+		- Video Stream Level
+		- Video Stream Title
+- TV Shows
+	- TV Shows is now migrated to the new fancy methode of extracting info as well. This means a rename of the 
+		different levels, so if you are upgrading, you MUST go into the prefs. and select the desired level.
+		Note that level 1 -> 3 is a lot faster, since they only req. a single call towards the PMS
+		Also lots of more info has been added to TV Shows export, so the levels for TV Shows is now:
+		- Level 1:
+			- TV Show ID
+			- Series Title
+			- Episode Sort Title
+			- Episode Title
+			- Year
+			- Season
+			- Episode
+			- Content Rating
+			- Summary
+			- Rating
+		- Level 2:
+			- Studio
+			- Originally Aired
+			- Directors
+			- Writers
+			- Duration
+			- Added
+			- Updated
+		- Level 3:
+			- Media Video Resolution
+			- Media Video Duration
+			- Media Video Bitrate
+			- Media Video Width
+			- Media Video Height
+			- Media Video Aspect Ratio
+			- Media Video Audio Channels
+			- Media Video Audio Codec
+			- Media Video Video Codec
+			- Media Video Container
+			- Media Video FrameRate
+			- Media Video Profile
+			- Media Video Title
+		- Level 4:
+			- Part File
+			- Part Duration
+			- Part Size
+			- Part Container
+			- Part Video Profile
+			- Part Optimized for Streaming
+			- Part Indexed
+			- Locked Fields
+			- Extras
+		- Level 5:
+			- Video Stream Title
+			- Video Stream Default
+			- Video Stream Codec
+			- Video Stream Index
+			- Video Stream Bitrate
+			- Video Stream Language
+			- Video Stream Language Code
+			- Video Stream Bit Depth
+			- Video Stream Cabac
+			- Video Stream Chroma Sub Sampling
+			- Video Stream Codec ID
+			- Video Stream Color Range
+			- Video Stream Color Space
+			- Video Stream Duration
+			- Video Stream Frame Rate
+			- Video Stream Frame Rate Mode
+			- Video Stream Has Scaling Matrix
+			- Video Stream Height
+			- Video Stream Width
+			- Video Stream Level
+			- Video Stream Pixel Format
+			- Video Stream Profile
+			- Video Stream Ref Frames
+			- Video Stream Scan Type
+		- Level 6:
+			- Audio Stream Selected
+			- Audio Stream Default
+			- Audio Stream Codec
+			- Audio Stream Index
+			- Audio Stream Channels
+			- Audio Stream Bitrate
+			- Audio Stream Language
+			- Audio Stream Language Code
+			- Audio Stream Audio Channel Layout
+			- Audio Stream Bit Depth
+			- Audio Stream Bitrate Mode
+			- Audio Stream Codec ID
+			- Audio Stream Duration
+			- Audio Stream Profile
+			- Audio Stream Sampling Rate
+			- Subtitle Stream Codec
+			- Subtitle Stream Index
+			- Subtitle Stream Language
+			- Subtitle Stream Language Code
+			- Subtitle Stream Codec ID
+			- Subtitle Stream Format
+			- Subtitle Stream Title
+			- Subtitle Stream Selected
+- Audio
+	- Audio now migrated to the new fancy methode of extracting info as well. This means a rename of the 
+		different levels, so if you are upgrading, you MUST go into the prefs. and select the desired level.
+		Note that level 1 -> 4 is a lot faster, since they only req. a single call towards the PMS
+		Also lots of more info has been added to Audio export, so the levels for Audio is now:
+		- Level 1:
+			- Track ID
+			- Title
+			- Artist
+			- Album
+		Level 2:
+			- Rating Count
+			- Track No
+			-	Year
+			- Duration
+			- Added
+			- Updated
+		Level 3:
+			- Media ID
+			- Bitrate
+			- Audio Channels
+			- Audio Codec
+			- Container
+			- Media Title
+		Level 4:
+			- Part Duration
+			- Part File
+			- Part Size
+			- Part Container
+		Level 5:
+			- Mood
+			- Stream Selected
+			- Stream Codec
+			- Stream Index
+			- Stream Channels
+			- Stream Bitrate
+			- Stream Audio Channel Layout
+			- Stream Bitrate Mode
+			- Stream Duration
+			- Stream Sampling Rate
+		Level 666:
+			- PMS Media Path
+
+v0.0.4.1:
+- Movies:
+	- Added the following Audio Stream info to level 6:
+		- Audio Stream Selected
+		- Audio Stream Default
+		- Audio Stream Codec
+		- Audio Stream Index
+		- Audio Stream Channels
+		- Audio Stream Bitrate
+		- Audio Stream Language
+		- Audio Stream Language Code
+		- Audio Stream Audio Channel Layout
+		- Audio Stream Bit Depth
+		- Audio Stream Bitrate Mode
+		- Audio Stream Codec ID
+		- Audio Stream Duration
+		- Audio Stream Profile
+		- Audio Stream Sampling Rate
+
+v0.0.4.0:
+- Movies:
+	- Changed the way the Movies info is extracted all together.
+		- Info about all Movie info and fields are stored in the file named moviefields.py
+		- Level names has now changed, so you MUST go into the prefs of this Channel, and select the desirered level, if
+			this is an upgrade!
+		-	To see the levels, and the exported fields, go here: https://github.com/ukdtom/plex2csv.bundle/wiki/Movie-Export-Level
+		- Individual stream info is now also exported in level 6
+		- Note that level 1 & 2 are a lot faster, since they req. min. requests towards the Plex Media Server
+		- Note that levels above that req. a call towards the Plex Media Server for each movie (Like it always has been)
+		- Note that level 666 req. 2 calls against the Plex Media Server for each Movie!
+- The way noted above will sooner or later makes it to other export types as well!
+
+v0.0.3.7:
+- Movies:
+	- Added info about if subs are internal or not
+	- Added info about the format of the subs
+	- Added title of the Audio track
+	- Added title of the subtitle track
+	- Added support for Audio language zxx
+- TV-Shows:
+	- Added info about if subs are internal or not
+	- Added info about the format of the subs
+	- Added title of the Audio track
+	- Added title of the subtitle track
+	- Added support for Audio language zxx
+
+v0.0.3.6:
+-	Audio:
+	- Fixed a problem with very large albums would make the plugin crash
+		(Various Artists mostly)
+		This sadly meant a complete rewrite of the Audio export, but sadly
+		caused a different output than before. Export is however faster :-)
+			-	And Kudo goes to OttoKerner for spoting this issue
+
+V0.0.3.5:
+- Playlists:
+	- Movie/TV-Shows:
+		- Added Playlist Item Id
+		- Added Basic export level
+	- Audio:
+		- Added Playlist Item Id
+		- Added Basic export level
+	- Photo:
+		- Added simple info for a photo playlist
+		- Added Basic export level
+
+V0.0.3.4:
+- Movies:
+	- Added Country as field for export level Basic and above
+- Playlists:
+	- Can now export a simple info for an movies/tv-shows playlist
+	- Can now export a simple info for an audio playlist
+
+V0.0.3.3:
+- Audio:
+	- Added Extended level...See github Wiki for the new fields
+
+V0.0.3.2:
+-	General:
+	- Fixed a bug causing the sections not to show on newer versions of PMS
+
+V0.0.3.1:
+-	General:
+	-	Added a new pref. setting named "Auto Select Export path to match the section exported"
+		-	When above is selected, the export file will be created in the same directory as the items scanned.
+		-	This should help people having trouble setting a custom export path
+
+V0.0.3.0
+- General:
+	- Since we are back into the framework, token auth. is no longer needed, and as such, has been removed
+- Movies:
+	- Fixed an issue, where a guid was exported as IMDB id, even though none existed for a Home movie section
+	- Fixed a regression with export of a large movie library, where the counter was fixed at 0 on the screen...cosmetic error only
+- Audio:
+	- Moved Audio export back into the framework, so now we don't stress PMS when dealing with a huge Audio library, but grap it in trunks of 3
+		- Last thing, that still req. plex.tv auth, if in home mode, but now all is good
+
+V0.0.2.9
+- General
+	- Reorganized the code
+- Movies:
+	- Removed Metadata language column again, since this wasn't what I thougt it would be
+	- Reorganized code a bit more
+	- Subtitle language column will now be wrapped as well
+- TV-Shows:
+	- Reorganized code a bit more
+	- Subtitle language column will now be wrapped as well
+	- Part file infos will now be wrapped as well
+	- Will now detect possible duplicates
+
+V0.0.2.8:
+- General
+	-	Main menu now shows the relevant sections with their own icons
+- Movies
+	- Moved Movie section scaning away from native Python, and back to the Plex framework.
+	  This means less impact on the Plex Media Server while exporting a Movie section, since we now process
+	  items in chunks of 20
+	- Movie related stuff now in it's own file, making is a tad more easy to digest when coding
+	- Speed has been improved
+	- If level is set to Basic or above, both IMDB ID and Metadata Language will be exported as well
+- TV-Shows
+	- Moved TV section scaning away from native Python, and back to the Plex framework.
+	  This means less impact on the Plex Media Server while exporting a Movie section, since we now process
+	  items in chunks of 5
+	- TV related stuff now in it's own file, making is a tad more easy to digest when coding
+	- Speed has been improved
+- Audio
+	- Moved Audio related code into it's own file, making coding more easy to digest
+	- ToDo: Start to use Plex FramWork again
+
+V0.0.2.7:
+- Fixed issue with TV-Series in Extreme 2 level multiplied
+- Started to reorganize code into sub files, making development a tad more easy
+
+V0.0.2.6:
+- Added new export level to Movies, called "Extreme 3"
+  - Allows export of the path where metadata is stored, like subtitles
+- Added new export level to TV-Shows, called "Extreme 2"
+  - Allows export of the path where metadata is stored, like subtitles
+
+V0.0.2.5:
+- Added export of Audio Language for movies and TV-Shows
+- Added export of Subtitle Language for movies and TV-Shows
+*** Above was made by a new lost soul here......CCarpo
+
+V0.0.2.4:
+- Fixed issue with some requests having token in the url, instead of in the header
+- Added Simple and basic mode to Music sections
+
+V0.0.2.3:
+- Added posibillity to reset the local cached token from prefs, if user deletes the Plex2CSV from the device list
+
+V0.0.2.2:
+- Added export of labels for Movies in basic mode
+	ToDO: get it for TV-Shows as well
+- Added support for the new fancy Home mode
+	Note: If using Home mode, then you must configure Plex2CSV in the settings to authenticate towards plex.tv
+
+V0.0.2.1:
+- Made a buh-buh....But fixed now, causing TV-Shows to fail in Extended or above mode
+
+V0.0.2.0:
+- Added "View Count" to TV-Shows in Basic Mode
+- Added "Last Viewed" to TV-Shows in Basic Mode
+- HUGE speed increase, when exporting TV-Shows when running Extended mode or above
+- Changed fieldname "Watched" in Movie export to "View Count"
+- Added "Last Viewed" to Movies in Basic mode
+- Moved away from Plex Channel framework for grapping sections and episodes, and instead use native Python calls
+- Speed increase when calculating amount of extras for Movies
+- Fixed so extras doesn't mess up the part information for movies in level Extreme2
+
+V0.0.1.23:
+- Found out, that I wasn't following my own milestones regarding versioning....Hehehe.....Version now bumped to 0.0.1.23
+- Moved away from Plex framework for Movies, since the framework breaks, if mandentory data is missing
+- HUGE speed inprovement when generating output for movies, and running Extended mode or above
+- Added Watched status to Basic level and above for movies
+
+V0.0.0.22:
+- Improved on logging
+- Added list of admin locked fields to "Extend" mode for TV-Shows
+- Added count of extras for TV-Shows to "Extend" mode
+- Added "Episode Sort Title" to "Basic" mode for TV-Shows
+- Added list of admin locked fields to "Basic" mode for Movies
+- Added count of extras for Movies to "Basic" mode
+- Added "Sort title" to "Simple" mode for Movies
+
+V0.0.0.21:
+- Made an error, since I left some debug console printing in the code, that could cause the plug-in to fail
+
+V0.0.0.20:
+- Fixed issue 27: Added delimiter to the preferences, allowing user to specify which caracter to be used as field seperator
+- Added a forced quote for fields when exporting
+- Fixed issue 28: Section containing invalid caracters will not save
+
+V0.0.0.19:
+- Fixed a bug if a field was containing a CR, LF or CRLF caracters, since that would break the output
+
+V0.0.0.18:
+- Fixed a bug if timestam was missing
+- Added algorithm so when exporting media or part info, it would only
+  skip to a new line, if more than 1 item was present
+- Added export level to the exported filename
+
+V0.0.0.17:
+- Added Extreme level to TV-Seris
+-- This level was formerly known as the extended level
+-- The Extended level now instead adds resolution info etc. about a show
+
+V0.0.0.16:
+- Added Extended level to TV-Series
+-- This level will now export info about the different parts of an episode, 
+-- like indexes, duration of the different parts of the episode, as well as the filename 
+-- with the full path
+
+V0.0.0.15:
+- Added Extreme 2 level to movies
+-- This level will now export info about the different parts of a movie, 
+-- like indexes, duration of the different parts of the movie, as well as the filename 
+-- with the full path
+
+V0.0.0.14:
+- Added some code to do wrapping on extended fields, if needed
+- Added seperator to Prefs, that's used to seperate multiple info in the same field, like actors
+- Added "Simple" and "Basic levels to TV-Shows
+- Did a lot of Code clean-up for TV-Shows
+- Added wrapping for TV-Shows as well
+- Added round off of ratings to one digit
+
+V0.0.0.13:
+- Fixed exception in extreme mode, if data wasn't avail
+- Did some additional code clean-up
+
+V0.0.0.12:
+- Added Extreme as an output profile
+
+V0.0.0.11:
+- Will now check if a valid export path is set, and if not, only prefs is avail
+
+V0.0.0.10:
+- Removed some undeeded code.
+- Don't show music sections until code for it is added.
+- Tweaked some wording.
+- Renamed results() to complete()
+- Got rid of "Click to get results" screen.
+- Fixed a crash when myMedia.get('updatedAt') returned a null value.
+
+V0.0.0.9:
+- Removed un-needed console print
+- Switched away from Extended mode, and into 'Simple'-'Basic'-'Extended'
+- Internal clean-up of Movie export functions
+- Added 'Line Wrap' option, with adj. length in preferrences
+
+V0.0.0.8:
+- Added srazer as developer in the credits
+- Added "Added At" field to both movies, movies extended and TV-Shows
+- Added "Updated At" field to both movies, movies extended and TV-Shows
+
+V0.0.0.7:
+- Fixed issue with exception in extended mode, when a movie is missing either Actor or Cast
+
+V0.0.0.6:
+- Internal cleanup in imported modules
+- Added extended info export for movies
+- Added Collection export (Only in extended mode)
+- Added export of all actors as well as their role (Only in extended mode)
+
+V0.0.0.5:
+- Corrected a bug in TV-Shows for not exporting Directors and Authors
+- Added duration for both Movies and TV-Shows
+- Corrected a Spelling error in TV-Shows header
+- Changed some header values to more meaningful names
+- Reordered the columes
+
+V0.0.0.4:
+- Added menu option to go to main menu
+
+V0.0.0.3:
+- TV Series can now be exported
+- Fixed issue with running a new export right after the first had finished
+
+V0.0.0.2:
+- Movie section can now be exported
+
+V0.0.0.1:
+- Initial version

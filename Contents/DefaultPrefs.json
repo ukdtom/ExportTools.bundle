@@ -1,0 +1,118 @@
+[
+	{
+		"id":"Output_Format",
+		"label":"Output format (If on Windows, use latest version of Plex Media Server)",
+		"type":"enum",
+		"values" : ["csv", "xlsx"],
+		"default": "csv"
+	},
+	{
+		"id":"Autosize_Column",
+		"label":"Autosize column (xlsx only)",
+		"type":"bool",
+		"default":"true"
+	},
+	{
+		"id":"Autosize_Row",
+		"label":"Autosize row (xlsx only)",
+		"type":"bool",
+		"default":"true"
+	},
+	{
+		"id":"Export_Posters",
+		"label":"Export posters - Req. level 3 for movies, and level 2 for shows as a minimum. Takes longer time!",
+		"type":"bool",
+		"default":"false"
+	},
+	{
+		"id":"Poster_Hight",
+		"label":"Poster hight",
+		"type":"text",
+		"default":"75"
+	},
+	{
+		"id":"Poster_Width",
+		"label":"Poster Width",
+		"type":"text",
+		"default":"50"
+	},
+	{
+		"id":"Export_Path",
+		"label":"Path to export media to",
+		"type":"text",
+		"default":"None"
+	},
+	{
+		"id":"Auto_Path",
+		"label":"Ignore export path and write output to the media storage instead",
+		"type":"bool",
+		"default":"true"
+	},
+	{
+		"id":"Delimiter",
+		"label":"Delimiter between fields in CSV file....NOTE.....Only one character!!!",
+		"type":"text",
+		"default":","
+	}, 
+	{
+		"id":"Line_Wrap",
+		"label":"Wrap lines",
+		"type":"bool",
+		"default":"true"
+	},
+	{
+		"id":"Line_Length",
+		"label":"Max lines length",
+		"type":"text",
+		"default":"40"
+	},	
+	{
+		"id":"Seperator",
+		"label":"Seperator, with multiple info in same field",
+		"type":"text",
+		"default":" - "
+	},	
+	{
+		"id": "Movie_Level",
+		"label": "Movie Export Level.......",
+		"type": "enum",
+		"values" : ["Level 1","Level 2","Level 3", "Level 4", "Level 5", "Level 6", "Special Level 1", "Special Level 2", "Level 666"],
+		"default": "Level 2"
+	},
+	{
+		"id": "TV_Level",
+		"label": "TV Export Level..........",
+		"type": "enum",
+		"values" : ["Level 1","Level 2","Level 3", "Level 4", "Level 5", "Level 6", "Level 666", "Show Only 1", "Show Only 2", "Show Only 3"],
+		"default": "Level 2"
+	},
+	{
+		"id": "Artist_Level",
+		"label": "Audio Export Level.......",
+		"type": "enum",
+		"values" : ["Level 1", "Level 2", "Level 3", "Level 4", "Level 5", "Level 666"],
+		"default": "Level 2"
+
+	},
+	{
+		"id": "Photo_Level",
+		"label": "Photo Export Level.......",
+		"type": "enum",
+		"values" : ["Level 1", "Level 2", "Level 3"],
+		"default": "Level 1"
+
+	},
+	{
+		"id": "PlayList_Level",
+		"label": "PlayList Export Level....",
+		"type": "enum",
+		"values" : ["Simple", "Basic"],
+		"default": "Simple"
+	},
+	{
+		"id":"Check_Files",
+		"label":"Perform 'file present/accessibility' check. Requires more time. Useful when part of media file storage was accidentally lost",
+		"type":"bool",
+		"default":"false"
+	}
+]
