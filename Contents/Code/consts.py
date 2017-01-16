@@ -15,10 +15,8 @@ PLAYLIST = 'playlist.png'
 DEFAULT = 'N/A'
 
 # How many items we ask for each time, when accessing a section or Show
-#CONTAINERSIZEMOVIES = 30
-CONTAINERSIZEMOVIES = 5
-''' Do not change CONTAINERSIZETV, since ShowOnly then will break '''
-CONTAINERSIZETV = 1
+CONTAINERSIZEMOVIES = 30
+CONTAINERSIZETV = 20
 CONTAINERSIZEEPISODES = 30
 CONTAINERSIZEAUDIO = 10
 CONTAINERSIZEPHOTO = 20

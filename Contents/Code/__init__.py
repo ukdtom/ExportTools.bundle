@@ -113,10 +113,8 @@ def Start():
 def MainMenu(random=0):
 	Log.Debug("**********  Starting MainMenu  **********")
 	global sectiontype
-#	ObjectContainer.art = R(consts.ART)
 	title = consts.NAME  + consts.VERSION
-#	ObjectContainer.title1 = title
-	oc = ObjectContainer(title1=title, no_cache=True, art=R(consts.ART))
+	oc = ObjectContainer(title1=title, no_cache=True, no_history=True, art=R(consts.ART))
 	oc.view_group = 'List'
 	try:
 		if ValidateExportPath():
@@ -190,7 +188,7 @@ def complete(title=''):
 	Log.Debug("*******  All done, tell my Master  ***********")
 	title = ('Export Completed for %s' %(title))
 	message = 'Check the file: %s' %(EXPORTPATH) 
-	oc2 = ObjectContainer(title1=title,  no_history=True, message=message)
+	oc2 = ObjectContainer(title1=title, no_history=True, message=message)
 	oc2.add(DirectoryObject(key=Callback(MainMenu, random=time.clock()), title="Go to the Main Menu"))
 	# Reset the scanner status
 	bScanStatus = 0
@@ -429,7 +427,10 @@ def scanShowDB(myMediaURL, outFile):
 		while True:
 			Log.Debug("Walking medias")
 			iCount = bScanStatusCount
-			fetchURL = myMediaURL + '?X-Plex-Container-Start=' + str(iCount) + '&X-Plex-Container-Size=' + str(consts.CONTAINERSIZETV)			
+			if 'Show Only' in Prefs['TV_Level']:
+				fetchURL = myMediaURL + '?X-Plex-Container-Start=' + str(iCount) + '&X-Plex-Container-Size=1'
+			else:			
+				fetchURL = myMediaURL + '?X-Plex-Container-Start=' + str(iCount) + '&X-Plex-Container-Size=' + str(consts.CONTAINERSIZETV)			
 			partMedias = XML.ElementFromURL(fetchURL, timeout=float(consts.PMSTIMEOUT))
 			if bScanStatusCount == 0:
 				bScanStatusCountOf = partMedias.get('totalSize')
@@ -445,7 +446,7 @@ def scanShowDB(myMediaURL, outFile):
 					myRow = {}
 					# Export the info			
 					myRow = tvseries.getShowOnly(TVShow, myRow, Prefs['TV_Level'])
-					iCount += consts.CONTAINERSIZETV - 1
+#					iCount += consts.CONTAINERSIZETV - 1
 					try:
 						output.writerow(myRow)
 					except Exception, e:
