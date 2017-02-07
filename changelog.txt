@@ -1,0 +1,33 @@
+v1.0.0.0:
+******* Changed name to Export Tools for Plex *******
+*
+* This bundle is a remake of Plex2CSV!
+* We now also export in the xlsx format
+*
+* If you also have Plex2CSV installed, we strongly recommend, that you uninstall that
+*
+*****************************************************
+
+	- Movies:
+			- Added "MetaData Language" field, that indicates the language setting of the primary agent of the library
+			- Can now export posters as well
+			- Added Special Level 2 with the following fields:
+				- Title, Audio Stream Language, Audio Title, Container, Part File, Audio Stream Index, Audio Stream Language Code
+	- TV-Shows:
+			- Added "MetaData Language" field, that indicates the language setting of the primary agent of the library
+			- Changed fieldname "TV Show ID" to "Media ID" to make better consistance between the different type of exports
+			- Shows Only: Moved "MetaDB Link" to level 3
+			- Shows Only: Level 2 now also export the fields: Directors, Writers, Roles and Genres
+			- Shows Only: Added "Media ID" to level 1 and above
+			- Shows Only: Level 3 (Costly, since it req. an additional call towards PMS) now exports Labels and File Location, as well as MetaDB Link
+			- Can now export posters as well
+	- Photos:
+			- Changed fieldname "Photo ID" to "Media ID" to make better consistance between the different type of exports			
+	- Audio:
+			- Changed fieldname "Track ID" to "Media ID" to make better consistance between the different type of exports						
+	- General:
+			- Will now strip leading spaces from a library section name for the output file
+			- Added native .xlsx (Excel) output, including some formating as well. See the settings of the channel
+				- See Settings of the channel for options, and note, that some of them are only honored by Excel!
+			- Added dynamic parameters for querying PMS, leading to faster execution in some cases, especially for lower levels of export
+
