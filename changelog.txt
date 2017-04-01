@@ -1,3 +1,7 @@
+v1.0.1.0:
+	- PlayLists:
+		- Added filename to Video, Audio and Photos when exporting Basic level or above
+
 v1.0.0.0:
 ******* Changed name to Export Tools for Plex *******
 *
@@ -30,4 +34,5 @@ v1.0.0.0:
 			- Added native .xlsx (Excel) output, including some formating as well. See the settings of the channel
 				- See Settings of the channel for options, and note, that some of them are only honored by Excel!
 			- Added dynamic parameters for querying PMS, leading to faster execution in some cases, especially for lower levels of export
+
 

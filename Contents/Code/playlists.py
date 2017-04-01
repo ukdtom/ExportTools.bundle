@@ -3,7 +3,7 @@
 # This one handles playlists
 ####################################################################################################
 
-import misc
+import misc, consts
 
 ####################################################################################################
 # This function will return the header for the CSV file for playlists
@@ -20,7 +20,7 @@ def getPlayListHeader(listtype, level):
 				'Summary',
 				'Year'
 				)
-		# Basic fields
+		# Video Basic fields
 		if (level in ['Basic','Extended','Extreme', 'Extreme 2', 'Extreme 3']):
 			fieldnames = fieldnames + (
 			'Studio',
@@ -29,7 +29,8 @@ def getPlayListHeader(listtype, level):
 			'Duration',
 			'Originally Available At',
 			'Added At',
-			'Updated At'
+			'Updated At',
+			'File Name'
 			)
 	elif listtype == 'audio':
 		# Audio list Simple
@@ -42,13 +43,14 @@ def getPlayListHeader(listtype, level):
 				'Summary',
 				'Year'
 				)
-		# Basic fields
+		# Audio Basic fields
 		if (level in ['Basic','Extended','Extreme', 'Extreme 2', 'Extreme 3']):
 			fieldnames = fieldnames + (
 				'Rating Count',
 				'Duration',
 				'Added At',
-				'Updated At'
+				'Updated At',
+				'File Name'
 				)
 	elif listtype == 'photo':
 		# Photo list Simple
@@ -59,12 +61,13 @@ def getPlayListHeader(listtype, level):
 				'Summary',
 				'Year'
 				)
-		# Basic fields
+		# Photo Basic fields
 		if (level in ['Basic','Extended','Extreme', 'Extreme 2', 'Extreme 3']):
 			fieldnames = fieldnames + (
 				'Originally Available At',
 				'Added At',
-				'Updated At'
+				'Updated At',
+				'File Name'
 			)
 	return fieldnames
 
@@ -133,7 +136,7 @@ def getPlayListSimpleAudio(playListItem, myRow):
 	return myRow
 
 ####################################################################################################
-# This function will export and return the simple info for the Playlist for audio types
+# This function will export and return the simple info for the Playlist for photo types
 ####################################################################################################
 def getPlayListSimplePhoto(playListItem, myRow):
 	# Get the Playlist ItemID
@@ -168,6 +171,8 @@ def getPlayListBasicVideo(playListItem, myRow):
 	myRow['Added At'] = misc.ConvertDateStamp(misc.GetRegInfo(playListItem, 'addedAt', '0')).encode('utf8') + ' ' + misc.ConvertTimeStamp(misc.GetRegInfo(playListItem, 'addedAt', '0')).encode('utf8')
 	# Get Updated At
 	myRow['Updated At'] = misc.ConvertDateStamp(misc.GetRegInfo(playListItem, 'updatedAt', '0')).encode('utf8') + ' ' + misc.ConvertTimeStamp(misc.GetRegInfo(playListItem, 'updatedAt', '0')).encode('utf8')
+	# Grab the FileName(s)
+	myRow['File Name'] = getFileNamesFromObject(playListItem)
 	return myRow
 
 ####################################################################################################
@@ -182,6 +187,8 @@ def getPlayListBasicAudio(playListItem, myRow):
 	myRow['Added At'] = misc.ConvertDateStamp(misc.GetRegInfo(playListItem, 'addedAt', '0')).encode('utf8') + ' ' + misc.ConvertTimeStamp(misc.GetRegInfo(playListItem, 'addedAt', '0')).encode('utf8')
 	# Get Updated At
 	myRow['Updated At'] = misc.ConvertDateStamp(misc.GetRegInfo(playListItem, 'updatedAt', '0')).encode('utf8') + ' ' + misc.ConvertTimeStamp(misc.GetRegInfo(playListItem, 'updatedAt', '0')).encode('utf8')
+	# Grab the FileName(s)
+	myRow['File Name'] = getFileNamesFromObject(playListItem)
 	return myRow
 
 ####################################################################################################
@@ -194,5 +201,29 @@ def getPlayListBasicPhoto(playListItem, myRow):
 	myRow['Added At'] = misc.ConvertDateStamp(misc.GetRegInfo(playListItem, 'addedAt', '0')).encode('utf8') + ' ' + misc.ConvertTimeStamp(misc.GetRegInfo(playListItem, 'addedAt', '0')).encode('utf8')
 	# Get Updated At
 	myRow['Updated At'] = misc.ConvertDateStamp(misc.GetRegInfo(playListItem, 'updatedAt', '0')).encode('utf8') + ' ' + misc.ConvertTimeStamp(misc.GetRegInfo(playListItem, 'updatedAt', '0')).encode('utf8')
+	# Grab the FileName(s)
+	myRow['File Name'] = getFileNamesFromObject(playListItem)
 	return myRow
+
+####################################################################################################
+# This function will return a string of filenames for an item
+####################################################################################################
+def getFileNamesFromObject(item):
+	# Grab the FileName(s)
+	fileNames = []
+	parts = item.xpath('.//Part')
+	for part in parts:
+		fileNames.append(part.get('file'))
+	Field = ''
+	for File in fileNames:
+		if File == None:
+			Field = consts.DEFAULT
+		if File == '':
+			Field = consts.DEFAULT
+		if Field == '':
+			Field = File
+		else:
+			Field = Field + Prefs['Seperator'] + File
+	return Field
+
 
