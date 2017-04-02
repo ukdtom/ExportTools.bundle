@@ -111,7 +111,7 @@
 	},
 	{
 		"id": "mu_Level",
-		"label": ".3mu8 file level to export, if exporting a playlist.",
+		"label": ".m3u8 file level to export, if exporting a playlist.",
 		"type": "enum",
 		"values" : ["Disabled", "Simple", "Enhanced"],
 		"default": "Disabled"
