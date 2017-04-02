@@ -110,6 +110,14 @@
 		"default": "Simple"
 	},
 	{
+		"id": "mu_Level",
+		"label": ".3mu8 file level to export, if exporting a playlist.",
+		"type": "enum",
+		"values" : ["Disabled", "Simple", "Enhanced"],
+		"default": "Disabled"
+
+	},
+	{
 		"id":"Check_Files",
 		"label":"Perform 'file present/accessibility' check. Requires more time. Useful when part of media file storage was accidentally lost",
 		"type":"bool",

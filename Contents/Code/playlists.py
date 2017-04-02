@@ -18,7 +18,9 @@ def getPlayListHeader(listtype, level):
 				'Title',				
 				'Rating',
 				'Summary',
-				'Year'
+				'Year',
+				'Duration',
+				'File Name'
 				)
 		# Video Basic fields
 		if (level in ['Basic','Extended','Extreme', 'Extreme 2', 'Extreme 3']):
@@ -26,11 +28,9 @@ def getPlayListHeader(listtype, level):
 			'Studio',
 			'Content Rating',
 			'Tagline',
-			'Duration',
 			'Originally Available At',
 			'Added At',
-			'Updated At',
-			'File Name'
+			'Updated At'			
 			)
 	elif listtype == 'audio':
 		# Audio list Simple
@@ -41,16 +41,16 @@ def getPlayListHeader(listtype, level):
 				'Album',
 				'Title',				
 				'Summary',
-				'Year'
+				'Year',
+				'Duration',
+				'File Name'
 				)
 		# Audio Basic fields
 		if (level in ['Basic','Extended','Extreme', 'Extreme 2', 'Extreme 3']):
 			fieldnames = fieldnames + (
 				'Rating Count',
-				'Duration',
 				'Added At',
-				'Updated At',
-				'File Name'
+				'Updated At'
 				)
 	elif listtype == 'photo':
 		# Photo list Simple
@@ -59,15 +59,15 @@ def getPlayListHeader(listtype, level):
 				'Type', 
 				'Title',				
 				'Summary',
-				'Year'
+				'Year',
+				'File Name'
 				)
 		# Photo Basic fields
 		if (level in ['Basic','Extended','Extreme', 'Extreme 2', 'Extreme 3']):
 			fieldnames = fieldnames + (
 				'Originally Available At',
 				'Added At',
-				'Updated At',
-				'File Name'
+				'Updated At'
 			)
 	return fieldnames
 

@@ -9,6 +9,7 @@ import json
 import misc
 import os, io
 import urllib2
+import codecs
 
 import sys
 import encodings
@@ -16,13 +17,18 @@ import encodings
 extension = ''
 writer = ''
 targetfile = ''
-
+muFile = ''
+writer3muFile = ''
 
 ''' Create the output file, based on section title, timestamp and output type '''
 def createFile(sectionKey, sectionType, title):
 	global newtitle
 	# Type of export
 	global extension
+	# Name of muFile
+	global muFile
+	# fileObject for 3mu file
+	global writer3muFile
 	extension = '.' + Prefs['Output_Format']
 	# Placeholder for return array
 	retVal =[]
@@ -52,6 +58,11 @@ def createFile(sectionKey, sectionType, title):
 	newtitle = re.sub('[\/[:#*?"<>|]', '_', title).strip()
 	if sectionType == 'playlists':
 		outFile = os.path.join(Prefs['Export_Path'], consts.NAME, 'Playlist-' + newtitle + '-' + myLevel + '-' + timestr + extension)
+		if Prefs['mu_Level'] != 'Disabled':
+			muFile = os.path.join(Prefs['Export_Path'], consts.NAME, 'Playlist-' + newtitle + '-' + Prefs['mu_Level'] + '-' + timestr + '.3mu8')
+			writer3muFile = codecs.open(muFile,'w', encoding='utf8')
+			if Prefs['mu_Level'] == 'Enhanced':
+				writer3muFile.write(unicode('#EXTM3U') + '\n')
 	else:
 		if Prefs['Auto_Path']:
 			# Need to grap the first location for the section
@@ -150,6 +161,26 @@ def writerow(rowentry):
 					columnwidth[key] = len(str(value))
 			col += 1
 		row += 1	
+	try:
+		if muFile != '':
+			if Prefs['mu_Level'] == 'Enhanced':
+				try:
+					# Get duration as seconds
+					h, m, s = rowentry['Duration'].split(':')
+					seconds = int(h) * 3600 + int(m) * 60 + int(s)
+				except Exception, e:
+					# No duration found (Pictures) or invalid
+					seconds = -1
+					pass
+				line = '#EXTINF:' + str(seconds) + ',' + rowentry['Title']
+				# Write Enhanced Info
+				writer3muFile.write(unicode(line) + '\n')
+			# Write FileName
+			writer3muFile.write(unicode(rowentry['File Name']) + '\n')
+	except Exception, e:
+		Log.Exception('Exception writing 3mu entry was %s' %(str(e)))
+		pass
+
 	if doPosters:
 		posterUrl = 'http://127.0.0.1:32400/photo/:/transcode?width=' + str(Prefs['Poster_Width']) + '&height=' + str(Prefs['Poster_Hight']) + '&minSize=1&url=' + String.Quote(rowentry['Poster url'])
 		try:
@@ -162,8 +193,10 @@ def writerow(rowentry):
 
 ''' Close file again '''
 def closefile():
+	global targetfile
+	global writer3muFile
 	if extension == '.csv':
-		targetfile.close
+		targetfile.close()
 	elif extension == '.xlsx':
 		# Add autofilter
 		writer.autofilter(0, 0, row, maxCol-1)
@@ -172,6 +205,8 @@ def closefile():
 		# lock the header row
 		writer.freeze_panes(1, 0)
 		targetfile.close()
+	if muFile != '':
+		writer3muFile.close()
 
 ''' Keep track of column hight '''
 def setOptimalColWidth():
