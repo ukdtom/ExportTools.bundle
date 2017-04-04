@@ -2,6 +2,7 @@ v1.0.2.0:
 	- Playlists:
 		- Moved duration and filename to export level Simple
 		- Added posibillity to export playlists as .m3u8 files
+		- Added "original title" as a simple field
 	- General:
 		- Fixed #20: Export file is zero bytes 
 

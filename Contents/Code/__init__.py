@@ -528,7 +528,10 @@ def selectPList():
 	playlists = XML.ElementFromURL(misc.GetLoopBack() + '/playlists/all', timeout=float(consts.PMSTIMEOUT)).xpath('//Playlist')
 	for playlist in playlists:
 		title = playlist.get('title')
-		thumb = misc.GetLoopBack() + playlist.get('composite')
+		try:
+			thumb = misc.GetLoopBack() + playlist.get('composite')
+		except:
+			pass
 		playListType= playlist.get('playlistType')
 		if playListType in ['video','audio', 'photo']:
 			key = playlist.get('key')

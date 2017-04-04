@@ -29,6 +29,7 @@ def createFile(sectionKey, sectionType, title):
 	global muFile
 	# fileObject for 3mu file
 	global writer3muFile
+	global playListType
 	extension = '.' + Prefs['Output_Format']
 	# Placeholder for return array
 	retVal =[]
@@ -59,7 +60,7 @@ def createFile(sectionKey, sectionType, title):
 	if sectionType == 'playlists':
 		outFile = os.path.join(Prefs['Export_Path'], consts.NAME, 'Playlist-' + newtitle + '-' + myLevel + '-' + timestr + extension)
 		if Prefs['mu_Level'] != 'Disabled':
-			muFile = os.path.join(Prefs['Export_Path'], consts.NAME, 'Playlist-' + newtitle + '-' + Prefs['mu_Level'] + '-' + timestr + '.3mu8')
+			muFile = os.path.join(Prefs['Export_Path'], consts.NAME, 'Playlist-' + newtitle + '-' + Prefs['mu_Level'] + '-' + timestr + '.m3u8')
 			writer3muFile = codecs.open(muFile,'w', encoding='utf8')
 			if Prefs['mu_Level'] == 'Enhanced':
 				writer3muFile.write(unicode('#EXTM3U') + '\n')
@@ -146,33 +147,68 @@ def createHeader(outFile, sectionType, playListType = ''):
 def writerow(rowentry):
 	global row
 	global columnwidth
-	if extension == '.csv':
-		writer.writerow(rowentry)
-	elif extension == '.xlsx':
-		col = 0
-		for key, value in rowentry.items():
-			if Prefs['Autosize_Row']:
-				writer.write(row, fieldnames.index(key), value, wrap)				
-			else:
-				writer.write(row, fieldnames.index(key), value)
-			# Add lenght of field for later use with optimal column width, if needed
-			if Prefs['Autosize_Column']:
-				if columnwidth[key] < len(str(value)):
-					columnwidth[key] = len(str(value))
-			col += 1
-		row += 1	
 	try:
-		if muFile != '':
+		if extension == '.csv':
+			writer.writerow(rowentry)
+		elif extension == '.xlsx':
+			col = 0
+			for key, value in rowentry.items():
+				if Prefs['Autosize_Row']:
+					writer.write(row, fieldnames.index(key), value, wrap)				
+				else:
+					writer.write(row, fieldnames.index(key), value)
+				# Add lenght of field for later use with optimal column width, if needed
+				if Prefs['Autosize_Column']:
+					if columnwidth[key] < len(str(value)):
+						columnwidth[key] = len(str(value))
+				col += 1
+			row += 1	
+	except Exception, e:
+		Log.Exception('Exception happened in WriteRow was %s' %(str(e)))
+	try:
+		if muFile != '':	
 			if Prefs['mu_Level'] == 'Enhanced':
 				try:
-					# Get duration as seconds
-					h, m, s = rowentry['Duration'].split(':')
-					seconds = int(h) * 3600 + int(m) * 60 + int(s)
+					# Audio playlist?
+					if playListType == 'audio':
+						try:
+							if rowentry['Original Title'] == consts.DEFAULT:
+								line = '#EXTINF:' + rowentry['Duration'] + ',' + rowentry['Artist'].replace(' - ', ' ') + ' - ' + rowentry['Title'].replace(' - ', ' ')
+							else:
+								line = '#EXTINF:' + rowentry['Duration'] + ',' + rowentry['Original Title'].replace(' - ', ' ') + ' - ' + rowentry['Title'].replace(' - ', ' ')
+						except Exception, e:
+							Log.Exception('Unknown error in WriteRow for .m3u8 was %s' %(str(e)))					
+					else:
+						try:
+							# Get duration as seconds
+							h, m, s = rowentry['Duration'].split(':')
+							seconds = int(h) * 3600 + int(m) * 60 + int(s)
+						except Exception, e:
+							# No duration found (Pictures) or invalid
+							seconds = -1
+							pass
+						try:
+							if playListType == 'video':
+								try:
+									entryType =  rowentry['Type']
+									if entryType == 'movie':
+										# Movie
+										line = '#EXTINF:' + str(seconds) + ',' + rowentry['Studio'] + ' - ' + rowentry['Title']
+									else:
+										# Show
+										line = '#EXTINF:' + str(seconds) + ',' + rowentry['TV-Show'] + ' - ' + rowentry['Title']
+								except Exception, e:
+									Log.Exception('Exception happened when digesting the line for Playlist was %s' %(str(e)))
+									pass
+							else:
+								try:
+									line = '#EXTINF:' + str(seconds) + ',' + rowentry['Title'].replace(' - ', ' ')
+								except Exception, e:
+									Log.Exception('Exception in WriteRow during generating line was: %s' %(str(e)))							
+						except Exception, e:
+							Log.Exception('Exception in WriteRow during generating line was: %s' %(str(e)))
 				except Exception, e:
-					# No duration found (Pictures) or invalid
-					seconds = -1
-					pass
-				line = '#EXTINF:' + str(seconds) + ',' + rowentry['Title']
+					Log.Exception('Exception in WriteRow for PlayLists was: %s' %(str(e)))					
 				# Write Enhanced Info
 				writer3muFile.write(unicode(line) + '\n')
 			# Write FileName
