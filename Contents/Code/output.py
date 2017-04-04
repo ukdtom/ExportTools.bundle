@@ -169,24 +169,23 @@ def writerow(rowentry):
 		if muFile != '':	
 			if Prefs['mu_Level'] == 'Enhanced':
 				try:
+					try:
+						# Get duration as seconds
+						h, m, s = rowentry['Duration'].split(':')
+						seconds = int(h) * 3600 + int(m) * 60 + int(s)
+					except Exception, e:
+						# No duration found (Pictures) or invalid
+						seconds = -1
+						pass
 					# Audio playlist?
 					if playListType == 'audio':
 						try:
 							if rowentry['Original Title'] == consts.DEFAULT:
-								line = '#EXTINF:' + rowentry['Duration'] + ',' + rowentry['Artist'].replace(' - ', ' ') + ' - ' + rowentry['Title'].replace(' - ', ' ')
+								line = '#EXTINF:' + str(seconds) + ',' + rowentry['Artist'].replace(' - ', ' ') + ' - ' + rowentry['Title'].replace(' - ', ' ')
 							else:
-								line = '#EXTINF:' + rowentry['Duration'] + ',' + rowentry['Original Title'].replace(' - ', ' ') + ' - ' + rowentry['Title'].replace(' - ', ' ')
+								line = '#EXTINF:' + str(seconds) + ',' + rowentry['Original Title'].replace(' - ', ' ') + ' - ' + rowentry['Title'].replace(' - ', ' ')
 						except Exception, e:
 							Log.Exception('Unknown error in WriteRow for .m3u8 was %s' %(str(e)))					
-					else:
-						try:
-							# Get duration as seconds
-							h, m, s = rowentry['Duration'].split(':')
-							seconds = int(h) * 3600 + int(m) * 60 + int(s)
-						except Exception, e:
-							# No duration found (Pictures) or invalid
-							seconds = -1
-							pass
 						try:
 							if playListType == 'video':
 								try:
