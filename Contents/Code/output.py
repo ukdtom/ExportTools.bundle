@@ -9,6 +9,7 @@ import json
 import misc
 import os, io
 import urllib2
+import codecs
 
 import sys
 import encodings
@@ -16,13 +17,19 @@ import encodings
 extension = ''
 writer = ''
 targetfile = ''
-
+muFile = ''
+writer3muFile = ''
 
 ''' Create the output file, based on section title, timestamp and output type '''
 def createFile(sectionKey, sectionType, title):
 	global newtitle
 	# Type of export
 	global extension
+	# Name of muFile
+	global muFile
+	# fileObject for 3mu file
+	global writer3muFile
+	global playListType
 	extension = '.' + Prefs['Output_Format']
 	# Placeholder for return array
 	retVal =[]
@@ -52,6 +59,13 @@ def createFile(sectionKey, sectionType, title):
 	newtitle = re.sub('[\/[:#*?"<>|]', '_', title).strip()
 	if sectionType == 'playlists':
 		outFile = os.path.join(Prefs['Export_Path'], consts.NAME, 'Playlist-' + newtitle + '-' + myLevel + '-' + timestr + extension)
+		if Prefs['mu_Level'] != 'Disabled':
+			muFile = os.path.join(Prefs['Export_Path'], consts.NAME, 'Playlist-' + newtitle + '-' + Prefs['mu_Level'] + '-' + timestr + '.m3u8')
+			writer3muFile = codecs.open(muFile,'w', encoding='utf8')
+			if Prefs['mu_Level'] == 'Enhanced':
+				writer3muFile.write(unicode('#EXTM3U') + '\n')
+				writer3muFile.write(unicode('#Written by ExportTools for Plex') + '\n')
+				writer3muFile.write(unicode('#Playlist name: ' + newtitle) + '\n')
 	else:
 		if Prefs['Auto_Path']:
 			# Need to grap the first location for the section
@@ -135,21 +149,78 @@ def createHeader(outFile, sectionType, playListType = ''):
 def writerow(rowentry):
 	global row
 	global columnwidth
-	if extension == '.csv':
-		writer.writerow(rowentry)
-	elif extension == '.xlsx':
-		col = 0
-		for key, value in rowentry.items():
-			if Prefs['Autosize_Row']:
-				writer.write(row, fieldnames.index(key), value, wrap)				
-			else:
-				writer.write(row, fieldnames.index(key), value)
-			# Add lenght of field for later use with optimal column width, if needed
-			if Prefs['Autosize_Column']:
-				if columnwidth[key] < len(str(value)):
-					columnwidth[key] = len(str(value))
-			col += 1
-		row += 1	
+	try:
+		if extension == '.csv':
+			writer.writerow(rowentry)
+		elif extension == '.xlsx':
+			col = 0
+			for key, value in rowentry.items():
+				if Prefs['Autosize_Row']:
+					writer.write(row, fieldnames.index(key), value, wrap)				
+				else:
+					writer.write(row, fieldnames.index(key), value)
+				# Add lenght of field for later use with optimal column width, if needed
+				if Prefs['Autosize_Column']:
+					if columnwidth[key] < len(str(value)):
+						columnwidth[key] = len(str(value))
+				col += 1
+			row += 1	
+	except Exception, e:
+		Log.Exception('Exception happened in WriteRow was %s' %(str(e)))
+	try:
+		if muFile != '':	
+			if Prefs['mu_Level'] == 'Enhanced':
+				try:
+					try:
+						# Get duration as seconds
+						h, m, s = rowentry['Duration'].split(':')
+						seconds = int(h) * 3600 + int(m) * 60 + int(s)
+					except Exception, e:
+						# No duration found (Pictures) or invalid
+						seconds = -1
+						pass
+					# Audio playlist?
+					if playListType == 'audio':
+						try:
+							if rowentry['Original Title'] == consts.DEFAULT:
+								line = '#EXTINF:' + str(seconds) + ',' + rowentry['Artist'].replace(' - ', ' ') + ' - ' + rowentry['Title'].replace(' - ', ' ')
+							else:
+								line = '#EXTINF:' + str(seconds) + ',' + rowentry['Original Title'].replace(' - ', ' ') + ' - ' + rowentry['Title'].replace(' - ', ' ')
+						except Exception, e:
+							Log.Exception('Unknown error in WriteRow for .m3u8 was %s' %(str(e)))					
+					elif playListType == 'video':
+						try:
+							entryType =  rowentry['Type']
+							if entryType == 'movie':
+								# Movie
+								line = '#EXTINF:' + str(seconds) + ',' + rowentry['Studio'] + ' - ' + rowentry['Title']
+							else:
+								# Show
+								line = '#EXTINF:' + str(seconds) + ',' + rowentry['TV-Show'] + ' - ' + rowentry['Title']
+						except Exception, e:
+							Log.Exception('Exception happened when digesting the line for Playlist was %s' %(str(e)))
+							pass
+					else:
+						try:
+							line = '#EXTINF:' + str(seconds) + ',' + rowentry['Title'].replace(' - ', ' ')
+						except Exception, e:
+							Log.Exception('Exception in WriteRow during generating line was: %s' %(str(e)))							
+				except Exception, e:
+					Log.Exception('Exception in WriteRow for PlayLists was: %s' %(str(e)))					
+				# Write Enhanced Info
+				writer3muFile.write(unicode(line) + '\n')
+			# Write FileName
+			writer3muFile.write(unicode(rowentry['File Name']) + '\n')
+			# Write special comment, that maybe can be used for import later
+			info = {}
+			info['type'] = rowentry['Type']
+			info['id'] = rowentry['Media ID']
+			strInfo = '#' + str(info)
+			writer3muFile.write(unicode(strInfo) + '\n')
+	except Exception, e:
+		Log.Exception('Exception writing 3mu entry was %s' %(str(e)))
+		pass
+
 	if doPosters:
 		posterUrl = 'http://127.0.0.1:32400/photo/:/transcode?width=' + str(Prefs['Poster_Width']) + '&height=' + str(Prefs['Poster_Hight']) + '&minSize=1&url=' + String.Quote(rowentry['Poster url'])
 		try:
@@ -162,8 +233,10 @@ def writerow(rowentry):
 
 ''' Close file again '''
 def closefile():
+	global targetfile
+	global writer3muFile
 	if extension == '.csv':
-		targetfile.close
+		targetfile.close()
 	elif extension == '.xlsx':
 		# Add autofilter
 		writer.autofilter(0, 0, row, maxCol-1)
@@ -172,6 +245,8 @@ def closefile():
 		# lock the header row
 		writer.freeze_panes(1, 0)
 		targetfile.close()
+	if muFile != '':
+		writer3muFile.close()
 
 ''' Keep track of column hight '''
 def setOptimalColWidth():
