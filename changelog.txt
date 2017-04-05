@@ -1,4 +1,4 @@
-v1.0.2.0:
+v1.0.2.1:
 	- Playlists:
 		- Moved duration and filename to export level Simple
 		- Added posibillity to export playlists as .m3u8 files
