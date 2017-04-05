@@ -3,6 +3,7 @@ v1.0.2.0:
 		- Moved duration and filename to export level Simple
 		- Added posibillity to export playlists as .m3u8 files
 		- Added "original title" as a simple field
+		- Fixed #21: This channel is not responding." when trying to export from playlists
 	- General:
 		- Fixed #20: Export file is zero bytes 
 

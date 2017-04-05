@@ -64,6 +64,8 @@ def createFile(sectionKey, sectionType, title):
 			writer3muFile = codecs.open(muFile,'w', encoding='utf8')
 			if Prefs['mu_Level'] == 'Enhanced':
 				writer3muFile.write(unicode('#EXTM3U') + '\n')
+				writer3muFile.write(unicode('#Written by ExportTools for Plex') + '\n')
+				writer3muFile.write(unicode('#Playlist name: ' + newtitle) + '\n')
 	else:
 		if Prefs['Auto_Path']:
 			# Need to grap the first location for the section
@@ -186,32 +188,35 @@ def writerow(rowentry):
 								line = '#EXTINF:' + str(seconds) + ',' + rowentry['Original Title'].replace(' - ', ' ') + ' - ' + rowentry['Title'].replace(' - ', ' ')
 						except Exception, e:
 							Log.Exception('Unknown error in WriteRow for .m3u8 was %s' %(str(e)))					
+					elif playListType == 'video':
 						try:
-							if playListType == 'video':
-								try:
-									entryType =  rowentry['Type']
-									if entryType == 'movie':
-										# Movie
-										line = '#EXTINF:' + str(seconds) + ',' + rowentry['Studio'] + ' - ' + rowentry['Title']
-									else:
-										# Show
-										line = '#EXTINF:' + str(seconds) + ',' + rowentry['TV-Show'] + ' - ' + rowentry['Title']
-								except Exception, e:
-									Log.Exception('Exception happened when digesting the line for Playlist was %s' %(str(e)))
-									pass
+							entryType =  rowentry['Type']
+							if entryType == 'movie':
+								# Movie
+								line = '#EXTINF:' + str(seconds) + ',' + rowentry['Studio'] + ' - ' + rowentry['Title']
 							else:
-								try:
-									line = '#EXTINF:' + str(seconds) + ',' + rowentry['Title'].replace(' - ', ' ')
-								except Exception, e:
-									Log.Exception('Exception in WriteRow during generating line was: %s' %(str(e)))							
+								# Show
+								line = '#EXTINF:' + str(seconds) + ',' + rowentry['TV-Show'] + ' - ' + rowentry['Title']
 						except Exception, e:
-							Log.Exception('Exception in WriteRow during generating line was: %s' %(str(e)))
+							Log.Exception('Exception happened when digesting the line for Playlist was %s' %(str(e)))
+							pass
+					else:
+						try:
+							line = '#EXTINF:' + str(seconds) + ',' + rowentry['Title'].replace(' - ', ' ')
+						except Exception, e:
+							Log.Exception('Exception in WriteRow during generating line was: %s' %(str(e)))							
 				except Exception, e:
 					Log.Exception('Exception in WriteRow for PlayLists was: %s' %(str(e)))					
 				# Write Enhanced Info
 				writer3muFile.write(unicode(line) + '\n')
 			# Write FileName
 			writer3muFile.write(unicode(rowentry['File Name']) + '\n')
+			# Write special comment, that maybe can be used for import later
+			info = {}
+			info['type'] = rowentry['Type']
+			info['id'] = rowentry['Media ID']
+			strInfo = '#' + str(info)
+			writer3muFile.write(unicode(strInfo) + '\n')
 	except Exception, e:
 		Log.Exception('Exception writing 3mu entry was %s' %(str(e)))
 		pass

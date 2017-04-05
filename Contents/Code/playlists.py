@@ -13,7 +13,8 @@ def getPlayListHeader(listtype, level):
 		# Video list Simple
 		fieldnames = ('Playlist ItemID',
 				'Media ID',
-				'Type', 
+				'Type',
+				'Studio',
 				'TV-Show',
 				'Title',				
 				'Rating',
@@ -25,7 +26,6 @@ def getPlayListHeader(listtype, level):
 		# Video Basic fields
 		if (level in ['Basic','Extended','Extreme', 'Extreme 2', 'Extreme 3']):
 			fieldnames = fieldnames + (
-			'Studio',
 			'Content Rating',
 			'Tagline',
 			'Originally Available At',
@@ -112,6 +112,12 @@ def getPlayListSimpleVideo(playListItem, myRow):
 	myRow['Summary'] = misc.GetRegInfo(playListItem, 'summary', 'N/A')
 	# Get year
 	myRow['Year'] = misc.GetRegInfo(playListItem, 'year', 'N/A')
+	# Get studio
+	myRow['Studio'] = misc.GetRegInfo(playListItem, 'studio', 'N/A')
+	# Get Duration
+	myRow['Duration'] = misc.ConvertTimeStamp(misc.GetRegInfo(playListItem, 'duration', '0')).encode('utf8')
+	# Grab the FileName(s)
+	myRow['File Name'] = getFileNamesFromObject(playListItem)
 	return myRow
 
 ####################################################################################################
@@ -158,6 +164,8 @@ def getPlayListSimplePhoto(playListItem, myRow):
 	myRow['Summary'] = misc.GetRegInfo(playListItem, 'summary', 'N/A')
 	# Get year
 	myRow['Year'] = misc.GetRegInfo(playListItem, 'year', 'N/A')
+	# Grab the FileName(s)
+	myRow['File Name'] = getFileNamesFromObject(playListItem)
 	return myRow
 
 ####################################################################################################
@@ -178,8 +186,6 @@ def getPlayListBasicVideo(playListItem, myRow):
 	myRow['Added At'] = misc.ConvertDateStamp(misc.GetRegInfo(playListItem, 'addedAt', '0')).encode('utf8') + ' ' + misc.ConvertTimeStamp(misc.GetRegInfo(playListItem, 'addedAt', '0')).encode('utf8')
 	# Get Updated At
 	myRow['Updated At'] = misc.ConvertDateStamp(misc.GetRegInfo(playListItem, 'updatedAt', '0')).encode('utf8') + ' ' + misc.ConvertTimeStamp(misc.GetRegInfo(playListItem, 'updatedAt', '0')).encode('utf8')
-	# Grab the FileName(s)
-	myRow['File Name'] = getFileNamesFromObject(playListItem)
 	return myRow
 
 ####################################################################################################
@@ -192,6 +198,8 @@ def getPlayListBasicAudio(playListItem, myRow):
 	myRow['Added At'] = misc.ConvertDateStamp(misc.GetRegInfo(playListItem, 'addedAt', '0')).encode('utf8') + ' ' + misc.ConvertTimeStamp(misc.GetRegInfo(playListItem, 'addedAt', '0')).encode('utf8')
 	# Get Updated At
 	myRow['Updated At'] = misc.ConvertDateStamp(misc.GetRegInfo(playListItem, 'updatedAt', '0')).encode('utf8') + ' ' + misc.ConvertTimeStamp(misc.GetRegInfo(playListItem, 'updatedAt', '0')).encode('utf8')
+	# Grab the FileName(s)
+	myRow['File Name'] = getFileNamesFromObject(playListItem)
 	return myRow
 
 ####################################################################################################
@@ -204,8 +212,6 @@ def getPlayListBasicPhoto(playListItem, myRow):
 	myRow['Added At'] = misc.ConvertDateStamp(misc.GetRegInfo(playListItem, 'addedAt', '0')).encode('utf8') + ' ' + misc.ConvertTimeStamp(misc.GetRegInfo(playListItem, 'addedAt', '0')).encode('utf8')
 	# Get Updated At
 	myRow['Updated At'] = misc.ConvertDateStamp(misc.GetRegInfo(playListItem, 'updatedAt', '0')).encode('utf8') + ' ' + misc.ConvertTimeStamp(misc.GetRegInfo(playListItem, 'updatedAt', '0')).encode('utf8')
-	# Grab the FileName(s)
-	myRow['File Name'] = getFileNamesFromObject(playListItem)
 	return myRow
 
 ####################################################################################################
