@@ -54,7 +54,7 @@ def genExtParam(sectionType = ''):
 			if Prefs['Movie_Level'] in ["Level 3", "Level 4", "Level 5", "Level 6", "Special Level 1", "Special Level 2", "Level 666"]:
 				EXTENDEDPARAMS += '&checkFiles=1'
 		if Prefs['Movie_Level'] in ["Level 5", "Level 6", "Special Level 1", "Special Level 2", "Level 666"]:
-			EXTENDEDPARAMS += '&includeBandwidth=1'
+			EXTENDEDPARAMS += '&includeBandwidths=1'
 		if Prefs['Movie_Level'] in ["Level 3", "Level 4", "Level 5", "Level 6", "Special Level 1", "Special Level 2", "Level 666"]:
 			EXTENDEDPARAMS += '&includeExtras=1'
 		if Prefs['Movie_Level'] in ["Level 3", "Level 4", "Level 5", "Level 6", "Special Level 1", "Special Level 2", "Level 666"]:
@@ -72,7 +72,7 @@ def genExtParam(sectionType = ''):
 		if Prefs['TV_Level'] in ["Level 4", "Level 5", "Level 6", "Level 666"]:
 			EXTENDEDPARAMS += '&includeExtras=1'
 		if Prefs['TV_Level'] in ["Level 4", "Level 5", "Level 6", "Level 666"]:
-			EXTENDEDPARAMS += '&includeBandwidth=1'
+			EXTENDEDPARAMS += '&includeBandwidths=1'
 	# Playlists
 	elif sectionType == "playlists":
 		pass

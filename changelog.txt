@@ -1,3 +1,9 @@
+v1.0.2.2:
+	-	Movies:
+		- Fix #24: columns PartDeepAnalysisVersion and all RequiredBandwidths are empty
+	-	Shows:
+		- Fix #24: columns PartDeepAnalysisVersion and all RequiredBandwidths are empty
+		
 v1.0.2.1:
 	- Playlists:
 		- Moved duration and filename to export level Simple
