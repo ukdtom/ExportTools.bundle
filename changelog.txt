@@ -1,3 +1,8 @@
+v1.0.2.3:
+	- Shows
+		- Fix #29: Add viewcount to episodes
+		- Fix #30: Add labels to "TV-Show 3 Only" level
+
 v1.0.2.2:
 	-	Movies:
 		- Fix #24: columns PartDeepAnalysisVersion and all RequiredBandwidths are empty

@@ -137,10 +137,10 @@ def getShowOnly(myMedia, myRow, level):
 	if prefsLevel in ['Show Only 3']:
 		directURL = misc.GetLoopBack() + '/library/metadata/' + myRow['Media ID']
 		directMedia = XML.ElementFromURL(directURL, timeout=float(consts.PMSTIMEOUT))
-		for key, value in tvfields.Show_3:	
+		for key, value in tvfields.Show_3:			
 			if key == 'MetaDB Link':
-				myRow[key] = misc.metaDBLink(str(directMedia.xpath('//Directory/@guid')))
+				myRow[key] = misc.metaDBLink(str(directMedia.xpath('//Directory/@guid')))			
 			else:	
-				myRow[key] =  misc.GetArrayAsString(directMedia, value, default = consts.DEFAULT)
+				myRow[key] = misc.GetArrayAsString(directMedia, value, default = consts.DEFAULT)
 	return myRow
 
