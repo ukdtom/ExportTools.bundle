@@ -675,18 +675,21 @@ def scanPhotoDB(myMediaURL, outFile):
 @route(PREFIX + '/getPhotoItems')
 def getPhotoItems(medias, bExtraInfo):
 	global bScanStatusCount
-	# Start by grapping pictures here
-	et = medias.xpath('.//Photo')
-	for element in et:
-		myRow = {}
-		myRow = photo.getInfo(element, myRow)		
-		bScanStatusCount += 1		
-		output.writerow(myRow)	
-	# Elements that are directories
-	et = medias.xpath('.//Directory')
-	for element in et:
-		myExtendedInfoURL = genParam(misc.GetLoopBack() + element.get('key'))
-		# TODO: Make small steps here when req. photos
-		elements = XML.ElementFromURL(myExtendedInfoURL, timeout=float(PMSTIMEOUT))
-		getPhotoItems(elements, bExtraInfo)
-
+	try:
+		# Start by grapping pictures here
+		et = medias.xpath('.//Photo')
+		for element in et:
+			myRow = {}
+			myRow = photo.getInfo(element, myRow)		
+			bScanStatusCount += 1		
+			output.writerow(myRow)	
+		# Elements that are directories
+		et = medias.xpath('.//Directory')
+		for element in et:
+			myExtendedInfoURL = genParam(misc.GetLoopBack() + element.get('key'))
+			# TODO: Make small steps here when req. photos
+			elements = XML.ElementFromURL(myExtendedInfoURL, timeout=float(PMSTIMEOUT))
+			getPhotoItems(elements, bExtraInfo)
+	except Exception, e:
+		Log.Debug('Exception in getPhotoItems was %s' %(str(e)))
+		pass
