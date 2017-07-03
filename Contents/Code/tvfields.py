@@ -45,7 +45,8 @@ Level_2 = [
 		('Updated' , '@updatedAt'),
 		('Poster url' , '@thumb'),
 		('Collection', ''),
-		('Locked Fields', 'Field/@name')
+		('Locked Fields', 'Field/@name'),
+		('View Count' , '@viewCount')
 	]
 	
 Level_3 = [
