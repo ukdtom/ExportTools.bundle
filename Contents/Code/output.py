@@ -10,6 +10,7 @@ import misc
 import os, io
 import urllib2
 import codecs
+from consts import PMSTIMEOUT, NAME, DEFAULT
 
 import sys
 import encodings
@@ -36,7 +37,7 @@ def createFile(sectionKey, sectionType, title):
 	if sectionType == 'playlists':
 		myMediaURL = misc.GetLoopBack() + sectionKey
 		playListType = title
-		title = XML.ElementFromURL(myMediaURL, timeout=float(consts.PMSTIMEOUT)).get('title')
+		title = XML.ElementFromURL(myMediaURL, timeout=float(PMSTIMEOUT)).get('title')
 	else:
 		myMediaURL = misc.GetLoopBack() + '/library/sections/' + sectionKey + "/all"
 	Log.Debug("Path to medias in selection is %s" %(myMediaURL))
@@ -58,9 +59,9 @@ def createFile(sectionKey, sectionType, title):
 	# Remove invalid caracters, if on Windows......
 	newtitle = re.sub('[\/[:#*?"<>|]', '_', title).strip()
 	if sectionType == 'playlists':
-		outFile = os.path.join(Prefs['Export_Path'], consts.NAME, 'Playlist-' + newtitle + '-' + myLevel + '-' + timestr + extension)
+		outFile = os.path.join(Prefs['Export_Path'], NAME, 'Playlist-' + newtitle + '-' + myLevel + '-' + timestr + extension)
 		if Prefs['mu_Level'] != 'Disabled':
-			muFile = os.path.join(Prefs['Export_Path'], consts.NAME, 'Playlist-' + newtitle + '-' + Prefs['mu_Level'] + '-' + timestr + '.m3u8')
+			muFile = os.path.join(Prefs['Export_Path'], NAME, 'Playlist-' + newtitle + '-' + Prefs['mu_Level'] + '-' + timestr + '.m3u8')
 			writer3muFile = codecs.open(muFile,'w', encoding='utf8')
 			if Prefs['mu_Level'] == 'Enhanced':
 				writer3muFile.write(unicode('#EXTM3U') + '\n')
@@ -69,16 +70,16 @@ def createFile(sectionKey, sectionType, title):
 	else:
 		if Prefs['Auto_Path']:
 			# Need to grap the first location for the section
-			locations = XML.ElementFromURL('http://127.0.0.1:32400/library/sections/', timeout=float(consts.PMSTIMEOUT)).xpath('.//Directory[@key="' + sectionKey + '"]')[0]
+			locations = XML.ElementFromURL('http://127.0.0.1:32400/library/sections/', timeout=float(PMSTIMEOUT)).xpath('.//Directory[@key="' + sectionKey + '"]')[0]
 			location = locations[0].get('path')
-			outFile = os.path.join(location, consts.NAME, newtitle + '-' + myLevel + '-' + timestr + extension)
-			if not os.path.exists(os.path.join(location, consts.NAME)):
-				os.makedirs(os.path.join(location, consts.NAME))
-				Log.Debug('Auto Created directory named: %s' %(os.path.join(location, consts.NAME)))
+			outFile = os.path.join(location, NAME, newtitle + '-' + myLevel + '-' + timestr + extension)
+			if not os.path.exists(os.path.join(location, NAME)):
+				os.makedirs(os.path.join(location, NAME))
+				Log.Debug('Auto Created directory named: %s' %(os.path.join(location, NAME)))
 			else:
-				Log.Debug('Auto directory named: %s already exists' %(os.path.join(location, consts.NAME)))
+				Log.Debug('Auto directory named: %s already exists' %(os.path.join(location, NAME)))
 		else:
-			outFile = os.path.join(Prefs['Export_Path'], consts.NAME, newtitle + '-' + myLevel + '-' + timestr + extension)
+			outFile = os.path.join(Prefs['Export_Path'], NAME, newtitle + '-' + myLevel + '-' + timestr + extension)
 	# Add what we got to the return array
 	retVal.append(outFile)
 	retVal.append(myMediaURL)
@@ -182,7 +183,7 @@ def writerow(rowentry):
 					# Audio playlist?
 					if playListType == 'audio':
 						try:
-							if rowentry['Original Title'] == consts.DEFAULT:
+							if rowentry['Original Title'] == DEFAULT:
 								line = '#EXTINF:' + str(seconds) + ',' + rowentry['Artist'].replace(' - ', ' ') + ' - ' + rowentry['Title'].replace(' - ', ' ')
 							else:
 								line = '#EXTINF:' + str(seconds) + ',' + rowentry['Original Title'].replace(' - ', ' ') + ' - ' + rowentry['Title'].replace(' - ', ' ')
