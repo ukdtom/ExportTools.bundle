@@ -1,3 +1,7 @@
+v1.0.2.4:
+	- Movies
+		- Fix #33: Movies SLevel3
+		  
 v1.0.2.3:
 	- Shows
 		- Fix #29: Add viewcount to episodes
