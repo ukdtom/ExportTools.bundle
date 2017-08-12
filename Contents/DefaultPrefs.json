@@ -76,7 +76,7 @@
 		"id": "Movie_Level",
 		"label": "Movie Export Level.......",
 		"type": "enum",
-		"values" : ["Level 1","Level 2","Level 3", "Level 4", "Level 5", "Level 6", "Special Level 1", "Special Level 2", "Level 666"],
+		"values" : ["Level 1","Level 2","Level 3", "Level 4", "Level 5", "Level 6", "Special Level 1", "Special Level 2", "Special Level 3", "Level 666"],
 		"default": "Level 2"
 	},
 	{
