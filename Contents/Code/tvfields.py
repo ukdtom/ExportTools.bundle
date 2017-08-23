@@ -136,7 +136,8 @@ Level_6 = [
 	('Subtitle Stream Format' , 'Media/Part/Stream[@streamType=3]/@format'),
 	('Subtitle Stream Title' , 'Media/Part/Stream[@streamType=3]/@title'),
 	('Subtitle Stream Selected' , 'Media/Part/Stream[@streamType=3]/@selected'),
-	('Subtitle Stream Required Bandwidths' , 'Media/Part/Stream[@streamType=3]/@requiredBandwidths')
+	('Subtitle Stream Required Bandwidths' , 'Media/Part/Stream[@streamType=3]/@requiredBandwidths'),
+	('Subtitle Header Compression' , 'Media/Part/Stream[@streamType=3]/@headerCompression')
 	]
 
 Level_7 = [	

@@ -1,3 +1,9 @@
+v1.0.2.3:
+	-	Movies:
+		- Fix #35: Add field Header Compression for subs
+	-	Shows:
+		- Fix #35: Add field Header Compression for subs
+
 v1.0.2.2:
 	-	Movies:
 		- Fix #24: columns PartDeepAnalysisVersion and all RequiredBandwidths are empty
