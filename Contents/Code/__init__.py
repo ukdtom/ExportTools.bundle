@@ -16,9 +16,12 @@ import time
 import io
 import csv
 import re
+import locale
 import movies, tvseries, audio, photo
-import consts, misc, playlists
+import misc, playlists
 import moviefields, audiofields, tvfields, photofields
+from consts import NAME, VERSION, PREFIX, ICON, ART, PLAYLIST, CONTAINERSIZEMOVIES, PMSTIMEOUT, CONTAINERSIZETV, CONTAINERSIZEEPISODES, CONTAINERSIZEPHOTO, CONTAINERSIZEAUDIO
+
 
 import output
 
@@ -32,7 +35,7 @@ EXPORTPATH = ''				# Path to export file
 ####################################################################################################
 # Generate params to WebCalls, based on url
 ####################################################################################################
-@route(consts.PREFIX + '/genParam')
+@route(PREFIX + '/genParam')
 def genParam(url):
 	if EXTENDEDPARAMS != '':
 		if '?' in url:
@@ -44,7 +47,7 @@ def genParam(url):
 ####################################################################################################
 # Generate extended params to WebCalls, based on section type and level
 ####################################################################################################
-@route(consts.PREFIX + '/genExtParam')
+@route(PREFIX + '/genExtParam')
 def genExtParam(sectionType = ''):
 	global EXTENDEDPARAMS
 	EXTENDEDPARAMS = ''
@@ -89,42 +92,42 @@ def genExtParam(sectionType = ''):
 def Start():
 	global DEBUGMODE
 	# Switch to debug mode if needed
-	debugFile = Core.storage.join_path(Core.app_support_path, Core.config.bundles_dir_name, consts.NAME + '.bundle', 'debug')
+	debugFile = Core.storage.join_path(Core.app_support_path, Core.config.bundles_dir_name, NAME + '.bundle', 'debug')
 	DEBUGMODE = os.path.isfile(debugFile)
 	if DEBUGMODE:
-		VERSION = consts.VERSION + ' ****** WARNING Debug mode on *********'
-		print("********  Started %s on %s  **********" %(consts.NAME  + ' ' + VERSION, Platform.OS))
+		version = VERSION + ' ****** WARNING Debug mode on *********'
+		print("********  Started %s on %s at %s with locale set to %s **********" %(NAME  + ' V' + version, Platform.OS, time.strftime("%Y-%m-%d %H:%M"), locale.getdefaultlocale()))
 	else:
-		VERSION = consts.VERSION
-	Log.Debug("*******  Started %s on %s  ***********" %(consts.NAME  + VERSION, Platform.OS))
+		version = VERSION
+	Log.Debug("*******  Started %s on %s at %s with locale set to %s ***********" %(NAME + ' V' + version, Platform.OS, time.strftime("%Y-%m-%d %H:%M"), locale.getdefaultlocale()))
 	Plugin.AddViewGroup('List', viewMode='List', mediaType='items')
 	Plugin.AddViewGroup("Details", viewMode="InfoList", mediaType="items")
-	ObjectContainer.art = R(consts.ART)
-	ObjectContainer.title1 = consts.NAME  + consts.VERSION
-	DirectoryObject.thumb = R(consts.ICON)
+	ObjectContainer.art = R(ART)
+	ObjectContainer.title1 = NAME  + VERSION
+	DirectoryObject.thumb = R(ICON)
 	HTTP.CacheTime = 0
 	Log.Debug('Misc module is version: %s' %misc.getVersion())
 
 ####################################################################################################
 # Main menu
 ####################################################################################################
-@handler(consts.PREFIX, consts.NAME, thumb=consts.ICON, art=consts.ART)
-@route(consts.PREFIX + '/MainMenu')
+@handler(PREFIX, NAME, thumb=ICON, art=ART)
+@route(PREFIX + '/MainMenu')
 def MainMenu(random=0):
 	Log.Debug("**********  Starting MainMenu  **********")
 	global sectiontype
-	title = consts.NAME  + consts.VERSION
-	oc = ObjectContainer(title1=title, no_cache=True, no_history=True, art=R(consts.ART))
+	title = NAME  + VERSION
+	oc = ObjectContainer(title1=title, no_cache=True, no_history=True, art=R(ART))
 	oc.view_group = 'List'
 	try:
 		if ValidateExportPath():
 			title = 'playlists'
 			key = '-1'
-			thumb = R(consts.PLAYLIST)
+			thumb = R(PLAYLIST)
 			sectiontype = title
 			oc.add(DirectoryObject(key=Callback(selectPList), thumb=thumb, title='Export from "' + title + '"', summary='Export list from "' + title + '"'))
 			Log.Debug('Getting section List from: ' + misc.GetLoopBack() + '/library/sections')
-			sections = XML.ElementFromURL(misc.GetLoopBack() + '/library/sections', timeout=float(consts.PMSTIMEOUT)).xpath('//Directory')
+			sections = XML.ElementFromURL(misc.GetLoopBack() + '/library/sections', timeout=float(PMSTIMEOUT)).xpath('//Directory')
 			for section in sections:
 				sectiontype = section.get('type')
 				if sectiontype != "photook": # ToDo: Remove artist when code is in place for it.
@@ -138,14 +141,14 @@ def MainMenu(random=0):
 	except:
 		Log.Critical("Exception happened in MainMenu")
 		raise
-	oc.add(PrefsObject(title='Preferences', thumb=R(consts.ICON)))
+	oc.add(PrefsObject(title='Preferences', thumb=R(ICON)))
 	Log.Debug("**********  Ending MainMenu  **********")
 	return oc
 
 ####################################################################################################
 # Validate Export Path
 ####################################################################################################
-@route(consts.PREFIX + '/ValidateExportPath')
+@route(PREFIX + '/ValidateExportPath')
 def ValidateExportPath():
 	Log.Debug('Entering ValidateExportPath')
 	if Prefs['Auto_Path']:
@@ -157,9 +160,9 @@ def ValidateExportPath():
 		#Let's see if we can add out subdirectory below this
 		if os.path.exists(myPath):
 			Log.Debug('Master entered a path that already existed as: %s' %(myPath))
-			if not os.path.exists(os.path.join(myPath, consts.NAME)):
-				os.makedirs(os.path.join(myPath, consts.NAME))
-				Log.Debug('Created directory named: %s' %(os.path.join(myPath, consts.NAME)))
+			if not os.path.exists(os.path.join(myPath, NAME)):
+				os.makedirs(os.path.join(myPath, NAME))
+				Log.Debug('Created directory named: %s' %(os.path.join(myPath, NAME)))
 				return True
 			else:
 				Log.Debug('Path verified as already present')
@@ -174,7 +177,7 @@ def ValidateExportPath():
 ####################################################################################################
 # Called by the framework every time a user changes the prefs
 ####################################################################################################
-@route(consts.PREFIX + '/ValidatePrefs')
+@route(PREFIX + '/ValidatePrefs')
 def ValidatePrefs():
 	return
 
@@ -182,7 +185,7 @@ def ValidatePrefs():
 # Export Complete.
 ####################################################################################################
 @indirect
-@route(consts.PREFIX + '/complete')
+@route(PREFIX + '/complete')
 def complete(title=''):
 	global bScanStatus
 	Log.Debug("*******  All done, tell my Master  ***********")
@@ -198,7 +201,7 @@ def complete(title=''):
 ####################################################################################################
 # Cancel scanning
 ####################################################################################################
-@route(consts.PREFIX + '/cancelScan')
+@route(PREFIX + '/cancelScan')
 def cancelScan():
 	global bScanStatus
 	bScanStatus = 3
@@ -212,7 +215,7 @@ def cancelScan():
 ####################################################################################################
 # Start the scanner in a background thread and provide status while running
 ####################################################################################################
-@route(consts.PREFIX + '/backgroundScan')
+@route(PREFIX + '/backgroundScan')
 def backgroundScan(title='', key='', sectiontype='', random=0, statusCheck=0):
 	Log.Debug("******* Starting backgroundScan *********")
 	# Current status of the Background Scanner:
@@ -286,14 +289,14 @@ def backgroundScan(title='', key='', sectiontype='', random=0, statusCheck=0):
 			oc2 = ObjectContainer(title1="Internal Error Detected. Please check the logs",no_history=True, view_group = 'List')
 			oc2.add(DirectoryObject(key=Callback(MainMenu, random=time.clock()), title="An internal error has occurred.", summary=summary))
 			oc2.add(DirectoryObject(key=Callback(MainMenu, random=time.clock()), title="*** Please submit logs. ***", summary=summary))
-			consts.bScanStatus = 0
-		elif consts.bScanStatus == 401:
+			bScanStatus = 0
+		elif bScanStatus == 401:
 			oc2 = ObjectContainer(title1="ERROR", no_history=True)
 			# Error condition set by scanner
 			summary = "When running in like Home mode, you must enable authentication in the preferences"
 			oc2 = ObjectContainer(title1=summary,no_history=True)
 			oc2.add(DirectoryObject(key=Callback(MainMenu, random=time.clock()), title="Authentication error.", summary=summary))			
-			consts.bScanStatus = 0
+			bScanStatus = 0
 		else:
 			# Unknown status. Should not happen.
 			summary = "Something went horribly wrong. The scanner returned an unknown status."
@@ -309,7 +312,7 @@ def backgroundScan(title='', key='', sectiontype='', random=0, statusCheck=0):
 ####################################################################################################
 # Background scanner thread.
 ####################################################################################################
-@route(consts.PREFIX + '/backgroundScanThread')
+@route(PREFIX + '/backgroundScanThread')
 def backgroundScanThread(title, key, sectiontype):
 	Log.Debug("*******  Starting backgroundScanThread  ***********")
 	global bScanStatus
@@ -353,7 +356,7 @@ def backgroundScanThread(title, key, sectiontype):
 ####################################################################################################
 # This function will scan a movie section.
 ####################################################################################################
-@route(consts.PREFIX + '/scanMovieDB')
+@route(PREFIX + '/scanMovieDB')
 def scanMovieDB(myMediaURL, outFile):
 	Log.Debug("******* Starting scanMovieDB with an URL of %s ***********" %(myMediaURL))
 	Log.Debug('Movie Export level is %s' %(Prefs['Movie_Level']))
@@ -372,9 +375,9 @@ def scanMovieDB(myMediaURL, outFile):
 			bExtraInfo = True	
 		while True:
 			Log.Debug("Walking medias")
-			fetchURL = myMediaURL + '?X-Plex-Container-Start=' + str(iCurrent) + '&X-Plex-Container-Size=' + str(consts.CONTAINERSIZEMOVIES)	
+			fetchURL = myMediaURL + '?X-Plex-Container-Start=' + str(iCurrent) + '&X-Plex-Container-Size=' + str(CONTAINERSIZEMOVIES)	
 			iCount = bScanStatusCount
-			partMedias = XML.ElementFromURL(fetchURL, timeout=float(consts.PMSTIMEOUT))
+			partMedias = XML.ElementFromURL(fetchURL, timeout=float(PMSTIMEOUT))
 			if bScanStatusCount == 0:
 				bScanStatusCountOf = partMedias.get('totalSize')
 				Log.Debug('Amount of items in this section is %s' %bScanStatusCountOf)
@@ -386,7 +389,7 @@ def scanMovieDB(myMediaURL, outFile):
 				# Was extra info needed here?
 				if bExtraInfo:
 					myExtendedInfoURL	= genParam(misc.GetLoopBack() + '/library/metadata/' + misc.GetRegInfo(media, 'ratingKey'))
-					media = XML.ElementFromURL(myExtendedInfoURL, timeout=float(consts.PMSTIMEOUT)).xpath('//Video')[0]
+					media = XML.ElementFromURL(myExtendedInfoURL, timeout=float(PMSTIMEOUT)).xpath('//Video')[0]
 				# Export the info			
 				myRow = movies.getMovieInfo(media, myRow)
 				output.writerow(myRow)
@@ -408,7 +411,7 @@ def scanMovieDB(myMediaURL, outFile):
 ####################################################################################################
 # This function will scan a TV-Show section.
 ####################################################################################################
-@route(consts.PREFIX + '/scanShowDB')
+@route(PREFIX + '/scanShowDB')
 def scanShowDB(myMediaURL, outFile):
 	Log.Debug("******* Starting scanShowDB with an URL of %s ***********" %(myMediaURL))
 	global bScanStatusCount
@@ -430,8 +433,8 @@ def scanShowDB(myMediaURL, outFile):
 			if 'Show Only' in Prefs['TV_Level']:
 				fetchURL = myMediaURL + '?X-Plex-Container-Start=' + str(iCount) + '&X-Plex-Container-Size=1'
 			else:			
-				fetchURL = myMediaURL + '?X-Plex-Container-Start=' + str(iCount) + '&X-Plex-Container-Size=' + str(consts.CONTAINERSIZETV)			
-			partMedias = XML.ElementFromURL(fetchURL, timeout=float(consts.PMSTIMEOUT))
+				fetchURL = myMediaURL + '?X-Plex-Container-Start=' + str(iCount) + '&X-Plex-Container-Size=' + str(CONTAINERSIZETV)			
+			partMedias = XML.ElementFromURL(fetchURL, timeout=float(PMSTIMEOUT))
 			if bScanStatusCount == 0:
 				bScanStatusCountOf = partMedias.get('totalSize')
 				Log.Debug('Amount of items in this section is %s' %bScanStatusCountOf)
@@ -446,7 +449,7 @@ def scanShowDB(myMediaURL, outFile):
 					myRow = {}
 					# Export the info			
 					myRow = tvseries.getShowOnly(TVShow, myRow, Prefs['TV_Level'])
-#					iCount += consts.CONTAINERSIZETV - 1
+#					iCount += CONTAINERSIZETV - 1
 					try:
 						output.writerow(myRow)
 					except Exception, e:
@@ -455,7 +458,7 @@ def scanShowDB(myMediaURL, outFile):
 				else:
 					if Prefs['TV_Level'] in ['Level 2','Level 3', 'Level 4', 'Level 5', 'Level 6', 'Level 7', 'Level 8', 'Level 666']:
 						myURL = misc.GetLoopBack() + '/library/metadata/' + ratingKey
-						tvSeriesInfo = XML.ElementFromURL(myURL, timeout=float(consts.PMSTIMEOUT))
+						tvSeriesInfo = XML.ElementFromURL(myURL, timeout=float(PMSTIMEOUT))
 						# Getting stuff from the main TV-Show page
 						# Grab collections
 						serieInfo = tvSeriesInfo.xpath('//Directory/Collection')
@@ -478,28 +481,28 @@ def scanShowDB(myMediaURL, outFile):
 						if myField == '':
 							myField = 'N/A'
 					# Get size of TV-Show
-					episodeTotalSize = XML.ElementFromURL(misc.GetLoopBack() + '/library/metadata/' + ratingKey + '/allLeaves?X-Plex-Container-Start=0&X-Plex-Container-Size=0', timeout=float(consts.PMSTIMEOUT)).xpath('@totalSize')[0]
+					episodeTotalSize = XML.ElementFromURL(misc.GetLoopBack() + '/library/metadata/' + ratingKey + '/allLeaves?X-Plex-Container-Start=0&X-Plex-Container-Size=0', timeout=float(PMSTIMEOUT)).xpath('@totalSize')[0]
 					Log.Debug('Show: %s has %s episodes' %(title, episodeTotalSize))
 					episodeCounter = 0
 					baseURL = misc.GetLoopBack() + '/library/metadata/' + ratingKey + '/allLeaves'
 					while True:
-						myURL = baseURL + '?X-Plex-Container-Start=' + str(episodeCounter) + '&X-Plex-Container-Size=' + str(consts.CONTAINERSIZEEPISODES)
+						myURL = baseURL + '?X-Plex-Container-Start=' + str(episodeCounter) + '&X-Plex-Container-Size=' + str(CONTAINERSIZEEPISODES)
 						Log.Debug('Show %s of %s with a RatingKey of %s at myURL: %s with a title of "%s" episode %s of %s' %(iCount, bScanStatusCountOf, ratingKey, myURL, title, episodeCounter, episodeTotalSize))
-						MainEpisodes = XML.ElementFromURL(myURL, timeout=float(consts.PMSTIMEOUT))
+						MainEpisodes = XML.ElementFromURL(myURL, timeout=float(PMSTIMEOUT))
 						Episodes = MainEpisodes.xpath('//Video')
 						for Episode in Episodes:
 							myRow = {}	
 							# Was extra info needed here?
 							if bExtraInfo:
 								myExtendedInfoURL = genParam(misc.GetLoopBack() + '/library/metadata/' + misc.GetRegInfo(Episode, 'ratingKey'))
-								Episode = XML.ElementFromURL(myExtendedInfoURL, timeout=float(consts.PMSTIMEOUT)).xpath('//Video')[0]
+								Episode = XML.ElementFromURL(myExtendedInfoURL, timeout=float(PMSTIMEOUT)).xpath('//Video')[0]
 							# Export the info			
 							myRow = tvseries.getTvInfo(Episode, myRow)
 							if Prefs['TV_Level'] in ['Level 2','Level 3', 'Level 4', 'Level 5', 'Level 6', 'Level 7', 'Level 8', 'Level 666']:
 								myRow['Collection'] = myCol
 								myRow['Locked Fields'] = myField									
 							output.writerow(myRow)								
-						episodeCounter += consts.CONTAINERSIZEEPISODES
+						episodeCounter += CONTAINERSIZEEPISODES
 						if episodeCounter > int(episodeTotalSize):
 							break
 			# Got to the end of the line?		
@@ -513,7 +516,7 @@ def scanShowDB(myMediaURL, outFile):
 ####################################################################################################
 # This function will show a menu with playlists
 ####################################################################################################
-@route(consts.PREFIX + '/selectPList')
+@route(PREFIX + '/selectPList')
 def selectPList():
 	Log.Debug("User selected to export a playlist")
 	# Abort if set to auto path
@@ -525,7 +528,7 @@ def selectPList():
 		return oc
 	# Else build up a menu of the playlists
 	oc = ObjectContainer(title1='Select Playlist to export', no_cache=True)
-	playlists = XML.ElementFromURL(misc.GetLoopBack() + '/playlists/all', timeout=float(consts.PMSTIMEOUT)).xpath('//Playlist')
+	playlists = XML.ElementFromURL(misc.GetLoopBack() + '/playlists/all', timeout=float(PMSTIMEOUT)).xpath('//Playlist')
 	for playlist in playlists:
 		title = playlist.get('title')
 		try:
@@ -543,7 +546,7 @@ def selectPList():
 ####################################################################################################
 # Here we go for the actual playlist
 ####################################################################################################
-@route(consts.PREFIX + '/getPListContents')
+@route(PREFIX + '/getPListContents')
 #def scanPList(key, playListType, outFile):
 def scanPList(key, outFile):
 	Log.Debug("******* Starting scanPList with an URL of: %s" %(key))
@@ -553,18 +556,18 @@ def scanPList(key, outFile):
 	bScanStatusCount = 0
 	try:
 		# Get playlist type once more
-		playListType = XML.ElementFromURL(key + '?X-Plex-Container-Start=0&X-Plex-Container-Size=0', timeout=float(consts.PMSTIMEOUT)).get('playlistType')
+		playListType = XML.ElementFromURL(key + '?X-Plex-Container-Start=0&X-Plex-Container-Size=0', timeout=float(PMSTIMEOUT)).get('playlistType')
 		Log.Debug('Writing headers for Playlist Export')
 		output.createHeader(outFile, 'playlist', playListType)
 		iCount = bScanStatusCount
 		Log.Debug('Starting to fetch the list of items in this section')
 		myRow = {}
 		if playListType == 'video':
-			playListItems = XML.ElementFromURL(key, timeout=float(consts.PMSTIMEOUT)).xpath('//Video')
+			playListItems = XML.ElementFromURL(key, timeout=float(PMSTIMEOUT)).xpath('//Video')
 		elif playListType == 'audio':
-			playListItems = XML.ElementFromURL(key, timeout=float(consts.PMSTIMEOUT)).xpath('//Track')
+			playListItems = XML.ElementFromURL(key, timeout=float(PMSTIMEOUT)).xpath('//Track')
 		elif playListType == 'photo':
-			playListItems = XML.ElementFromURL(key, timeout=float(consts.PMSTIMEOUT)).xpath('//Photo')
+			playListItems = XML.ElementFromURL(key, timeout=float(PMSTIMEOUT)).xpath('//Photo')
 		for playListItem in playListItems:
 			playlists.getPlayListInfo(playListItem, myRow, playListType)			
 			output.writerow(myRow)
@@ -582,7 +585,7 @@ def scanPList(key, outFile):
 ####################################################################################################
 # This function will scan a Music section.
 ####################################################################################################
-@route(consts.PREFIX + '/scanArtistDB')
+@route(PREFIX + '/scanArtistDB')
 def scanArtistDB(myMediaURL, outFile):
 	Log.Debug("******* Starting scanArtistDB with an URL of %s ***********" %(myMediaURL))
 	global bScanStatusCount
@@ -598,14 +601,14 @@ def scanArtistDB(myMediaURL, outFile):
 			bExtraInfo = True
 		Log.Debug('Starting to fetch the list of items in this section')
 		fetchURL = myMediaURL + '?type=10&X-Plex-Container-Start=' + str(bScanStatusCount) + '&X-Plex-Container-Size=0'
-		medias = XML.ElementFromURL(fetchURL, timeout=float(consts.PMSTIMEOUT))
+		medias = XML.ElementFromURL(fetchURL, timeout=float(PMSTIMEOUT))
 		if bScanStatusCount == 0:
 			bScanStatusCountOf = medias.get('totalSize')
 			Log.Debug('Amount of items in this section is %s' %bScanStatusCountOf)
 		Log.Debug("Walking medias")
 		while True:
-			fetchURL = myMediaURL + '?type=10&sort=artist.titleSort,album.titleSort:asc&X-Plex-Container-Start=' + str(bScanStatusCount) + '&X-Plex-Container-Size=' + str(consts.CONTAINERSIZEAUDIO)	
-			medias = XML.ElementFromURL(fetchURL, timeout=float(consts.PMSTIMEOUT))
+			fetchURL = myMediaURL + '?type=10&sort=artist.titleSort,album.titleSort:asc&X-Plex-Container-Start=' + str(bScanStatusCount) + '&X-Plex-Container-Size=' + str(CONTAINERSIZEAUDIO)	
+			medias = XML.ElementFromURL(fetchURL, timeout=float(PMSTIMEOUT))
 			if medias.get('size') == '0':
 				break
 			# HERE WE DO STUFF
@@ -617,7 +620,7 @@ def scanArtistDB(myMediaURL, outFile):
 				# Was extra info needed here?
 				if bExtraInfo:
 					myExtendedInfoURL = genParam(misc.GetLoopBack() + '/library/metadata/' + misc.GetRegInfo(track, 'ratingKey'))
-					track = XML.ElementFromURL(myExtendedInfoURL, timeout=float(consts.PMSTIMEOUT)).xpath('//Track')[0]
+					track = XML.ElementFromURL(myExtendedInfoURL, timeout=float(PMSTIMEOUT)).xpath('//Track')[0]
 				audio.getAudioInfo(track, myRow)
 				output.writerow(myRow)
 		output.closefile()
@@ -630,7 +633,7 @@ def scanArtistDB(myMediaURL, outFile):
 ####################################################################################################
 # This function will scan a Photo section.
 ####################################################################################################
-@route(consts.PREFIX + '/scanPhotoDB')
+@route(PREFIX + '/scanPhotoDB')
 def scanPhotoDB(myMediaURL, outFile):
 	Log.Debug("******* Starting scanPhotoDB with an URL of %s ***********" %(myMediaURL))
 	global bScanStatusCount
@@ -648,16 +651,16 @@ def scanPhotoDB(myMediaURL, outFile):
 			bExtraInfo = True
 		Log.Debug('Starting to fetch the list of items in this section')
 		fetchURL = myMediaURL + '?type=10&X-Plex-Container-Start=' + str(iLocalCounter) + '&X-Plex-Container-Size=0'
-		medias = XML.ElementFromURL(fetchURL, timeout=float(consts.PMSTIMEOUT))
+		medias = XML.ElementFromURL(fetchURL, timeout=float(PMSTIMEOUT))
 		bScanStatusCountOf = 'N/A'
 		Log.Debug("Walking medias")
 		while True:
-			fetchURL = myMediaURL + '?X-Plex-Container-Start=' + str(iLocalCounter) + '&X-Plex-Container-Size=' + str(consts.CONTAINERSIZEPHOTO)	
-			medias = XML.ElementFromURL(fetchURL, timeout=float(consts.PMSTIMEOUT))
+			fetchURL = myMediaURL + '?X-Plex-Container-Start=' + str(iLocalCounter) + '&X-Plex-Container-Size=' + str(CONTAINERSIZEPHOTO)	
+			medias = XML.ElementFromURL(fetchURL, timeout=float(PMSTIMEOUT))
 			if medias.get('size') == '0':
 				break
 			getPhotoItems(medias, bExtraInfo)
-			iLocalCounter += int(consts.CONTAINERSIZEPHOTO)	
+			iLocalCounter += int(CONTAINERSIZEPHOTO)	
 		output.closefile()
 	except:
 		Log.Critical("Detected an exception in scanPhotoDB")
@@ -669,21 +672,24 @@ def scanPhotoDB(myMediaURL, outFile):
 ####################################################################################################
 # This function will walk directories in a photo section
 ####################################################################################################
-@route(consts.PREFIX + '/getPhotoItems')
+@route(PREFIX + '/getPhotoItems')
 def getPhotoItems(medias, bExtraInfo):
 	global bScanStatusCount
-	# Start by grapping pictures here
-	et = medias.xpath('.//Photo')
-	for element in et:
-		myRow = {}
-		myRow = photo.getInfo(element, myRow)		
-		bScanStatusCount += 1		
-		output.writerow(myRow)	
-	# Elements that are directories
-	et = medias.xpath('.//Directory')
-	for element in et:
-		myExtendedInfoURL = genParam(misc.GetLoopBack() + element.get('key'))
-		# TODO: Make small steps here when req. photos
-		elements = XML.ElementFromURL(myExtendedInfoURL, timeout=float(consts.PMSTIMEOUT))
-		getPhotoItems(elements, bExtraInfo)
-
+	try:
+		# Start by grapping pictures here
+		et = medias.xpath('.//Photo')
+		for element in et:
+			myRow = {}
+			myRow = photo.getInfo(element, myRow)		
+			bScanStatusCount += 1		
+			output.writerow(myRow)	
+		# Elements that are directories
+		et = medias.xpath('.//Directory')
+		for element in et:
+			myExtendedInfoURL = genParam(misc.GetLoopBack() + element.get('key'))
+			# TODO: Make small steps here when req. photos
+			elements = XML.ElementFromURL(myExtendedInfoURL, timeout=float(PMSTIMEOUT))
+			getPhotoItems(elements, bExtraInfo)
+	except Exception, e:
+		Log.Debug('Exception in getPhotoItems was %s' %(str(e)))
+		pass

@@ -192,7 +192,24 @@ SLevel_2 = [
 	]
 
 # Define rows and element name for Special level 3 (one call pr. movie)
-SLevel_3 = [
+SLevel_3 = [    
+	('Media ID' , '@ratingKey'),
+    ('Rating' , '@rating'),
+    ('Title' , '@title'),
+    ('Year' , '@year'),
+    ('Genres' , 'Genre/@tag'),
+    ('Country' , 'Country/@tag'),
+    ('Directors' , 'Director/@tag'),
+    ('Summary' , '@summary'),
+    ('Subtitle Languages' , 'Media/Part/Stream[@streamType=3]/@languageCode'),
+    ('Subtitle Codec' , 'Media/Part/Stream[@streamType=3]/@codec'),
+    ('Subtitle Forced' , 'Media/Part/Stream[@streamType=3]/@forced'),
+    ('Video Resolution' , 'Media/@videoResolution'),
+    ('Bitrate' , 'Media/@bitrate'),
+    ('Audio Codec' , 'Media/@audioCodec'),
+    ('Video Codec' , 'Media/@videoCodec'),
+    ('Container' , 'Media/@container'),
+    ('MetaDB Link' , '@guid')
 	]
 
 # Define rows and element name for Special level 4 (one call pr. movie)

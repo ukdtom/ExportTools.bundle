@@ -45,7 +45,8 @@ Level_2 = [
 		('Updated' , '@updatedAt'),
 		('Poster url' , '@thumb'),
 		('Collection', ''),
-		('Locked Fields', 'Field/@name')
+		('Locked Fields', 'Field/@name'),
+		('View Count' , '@viewCount')
 	]
 	
 Level_3 = [
@@ -172,13 +173,13 @@ Show_2 = [
 	('Directors' , '//Director/@tag'),
 	('Writers' , '//Writer/@tag'),
 	('Roles' , '//Role/@tag'),
-	('Genres' , '//Genre/@tag')
+	('Genres' , '//Genre/@tag')	
 	]
 
 # Define rows and element name for Show Only level 2 (two call for all shows....Note that this level only export on show level!)
-Show_3 = [
-	('Labels' , '//Label/@tag'),
+Show_3 = [	
 	('Location' , '//Location/@path'),
-	('MetaDB Link' , '@guid')
+	('MetaDB Link' , '@guid'),
+	('Labels' , '//Label/@tag')
 	]
 

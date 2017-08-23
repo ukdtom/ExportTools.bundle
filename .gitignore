@@ -63,4 +63,7 @@ pip-log.txt
 debug
 .vscode
 
-
+#############
+## VSCode
+#############
+.vscode

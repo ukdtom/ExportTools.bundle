@@ -1,8 +1,18 @@
-v1.0.2.3:
+
+v1.0.2.5:
 	-	Movies:
 		- Fix #35: Add field Header Compression for subs
 	-	Shows:
 		- Fix #35: Add field Header Compression for subs
+
+v1.0.2.4:
+	- Movies
+		- Fix #33: Movies SLevel3
+		  
+v1.0.2.3:
+	- Shows
+		- Fix #29: Add viewcount to episodes
+		- Fix #30: Add labels to "TV-Show 3 Only" level
 
 v1.0.2.2:
 	-	Movies:
