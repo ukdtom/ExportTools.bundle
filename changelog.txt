@@ -1,3 +1,11 @@
+
+v1.0.2.5:
+	-	Movies:
+		- Fix #35: Add field Header Compression for subs
+        - Fix #36: Make "Original Title" and "Sort Title" as "Title", if set so in the prefs (Default)
+	-	Shows:
+		- Fix #35: Add field Header Compression for subs
+
 v1.0.2.4:
 	- Movies
 		- Fix #33: Movies SLevel3
