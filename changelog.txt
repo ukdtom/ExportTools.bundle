@@ -1,3 +1,6 @@
+v1.0.2.6:
+	- Audio
+		Added User ratings to export level 2. Thanks to Aethaeran
 
 v1.0.2.5:
 	-	Movies:
