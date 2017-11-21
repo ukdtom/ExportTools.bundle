@@ -31,6 +31,7 @@ Level_1 = [
 
 Level_2 = [
 	('Rating Count' , '@ratingCount'),
+	('User Rating' , '@userRating'),
 	('Track No' , '@index'),
 	('Year' , '@year'),
 	('Duration' , '@duration'),
