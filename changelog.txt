@@ -1,4 +1,9 @@
-
+V1.0.2.6:
+    -   Audio:
+        - Fix #45: Audio, and fields
+    -   Global:
+        - Fix #43: When starting a scan, log all settings selected
+        
 v1.0.2.5:
 	-	Movies:
 		- Fix #35: Add field Header Compression for subs
