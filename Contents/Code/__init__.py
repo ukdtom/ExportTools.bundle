@@ -314,44 +314,45 @@ def backgroundScan(title='', key='', sectiontype='', random=0, statusCheck=0):
 ####################################################################################################
 @route(PREFIX + '/backgroundScanThread')
 def backgroundScanThread(title, key, sectiontype):
-	Log.Debug("*******  Starting backgroundScanThread  ***********")
-	global bScanStatus
-	global bScanStatusCount
-	global bScanStatusCountOf	
-	global EXPORTPATH
-	try:
-		bScanStatus = 1
-		Log.Debug("Section type is %s" %(sectiontype))
-		# Generate parameters
-		genExtParam(sectiontype)
-		# Create the output file
-		[outFile, myMediaURL] = output.createFile(key, sectiontype, title)	
-		EXPORTPATH = outFile
-		Log.Debug('Output file is named %s' %(outFile))
-		# Scan the database based on the type of section
-		if sectiontype == "movie":
-			scanMovieDB(myMediaURL, outFile)
-		elif sectiontype == "artist":
-			scanArtistDB(myMediaURL, outFile)
-		elif sectiontype == "show":
-			scanShowDB(myMediaURL, outFile)
-		elif sectiontype == "playlists":
-			scanPList(myMediaURL, outFile)
-		elif sectiontype == "photo":
-			scanPhotoDB(myMediaURL, outFile)
-		else:
-			Log.Debug("Error: unknown section type: %s" %(sectiontype))
-			bScanStatus = 91
-		# Stop scanner on error
-		if bScanStatus >= 90: return
-		Log.Debug("*******  Ending backgroundScanThread  ***********")
-		bScanStatus = 2
-		return
-	except:
-		Log.Exception("Exception happened in backgroundScanThread")
-		bScanStatus = 99
-		raise
-	Log.Debug("*******  Ending backgroundScanThread  ***********")
+    Log.Debug("*******  Starting backgroundScanThread  ***********")
+    logSettings()
+    global bScanStatus
+    global bScanStatusCount
+    global bScanStatusCountOf	
+    global EXPORTPATH
+    try:
+        bScanStatus = 1
+        Log.Debug("Section type is %s" %(sectiontype))
+        # Generate parameters
+        genExtParam(sectiontype)
+        # Create the output file
+        [outFile, myMediaURL] = output.createFile(key, sectiontype, title)	
+        EXPORTPATH = outFile
+        Log.Debug('Output file is named %s' %(outFile))
+        # Scan the database based on the type of section
+        if sectiontype == "movie":
+            scanMovieDB(myMediaURL, outFile)
+        elif sectiontype == "artist":
+            scanArtistDB(myMediaURL, outFile)
+        elif sectiontype == "show":
+            scanShowDB(myMediaURL, outFile)
+        elif sectiontype == "playlists":
+            scanPList(myMediaURL, outFile)
+        elif sectiontype == "photo":
+            scanPhotoDB(myMediaURL, outFile)
+        else:
+            Log.Debug("Error: unknown section type: %s" %(sectiontype))
+            bScanStatus = 91
+        # Stop scanner on error
+        if bScanStatus >= 90: return
+        Log.Debug("*******  Ending backgroundScanThread  ***********")
+        bScanStatus = 2
+        return
+    except Exception, e:
+        Log.Exception("Exception happened in backgroundScanThread was %s" %str(e))
+        bScanStatus = 99
+        raise
+        Log.Debug("*******  Ending backgroundScanThread  ***********")
 
 ####################################################################################################
 # This function will scan a movie section.
@@ -693,3 +694,37 @@ def getPhotoItems(medias, bExtraInfo):
 	except Exception, e:
 		Log.Debug('Exception in getPhotoItems was %s' %(str(e)))
 		pass
+
+@route(PREFIX + '/logSettings')
+def logSettings():
+    """ Here we dump current settings to the log file """    
+    itemsPrefs = [ 
+        'Output_Format', 
+        'Autosize_Column',
+        'Autosize_Row',
+        'Export_Posters',
+        'Poster_Hight',
+        'Poster_Width',
+        'Export_Path',
+        'Auto_Path',
+        'Delimiter',
+        'Line_Wrap',
+        'Line_Length',
+        'Seperator',
+        'Sort_title',
+        'Original_Title',
+        'Movie_Level',
+        'TV_Level',
+        'Artist_Level',
+        'Photo_Level',
+        'PlayList_Level',
+        'mu_Level',
+        'Check_Files']
+    Log.Info('**************** Settings ****************')
+    for item in itemsPrefs:
+        Log.Info('Setting %s set to: %s' %(item, str(Prefs[item])))
+    Log.Info('************* Settings ended *************')        
+
+
+
+        
