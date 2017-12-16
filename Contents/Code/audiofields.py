@@ -40,7 +40,6 @@ Level_2 = [
 ]
 
 Level_3 = [
-    ('Media ID', 'Media/@id'),
     ('Bitrate', 'Media/@bitrate'),
     ('Audio Channels', 'Media/@audioChannels'),
     ('Audio Codec', 'Media/@audioCodec'),

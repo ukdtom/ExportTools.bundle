@@ -587,48 +587,48 @@ def scanPList(key, outFile):
 ####################################################################################################
 @route(PREFIX + '/scanArtistDB')
 def scanArtistDB(myMediaURL, outFile):
-	Log.Debug("******* Starting scanArtistDB with an URL of %s ***********" %(myMediaURL))
-	global bScanStatusCount
-	global bScanStatusCountOf
-	global bScanStatus
-	bScanStatusCount = 0
-	try:
-		Log.Debug('Writing headers for Audio Export')
-		output.createHeader(outFile, 'audio')
-		if Prefs['Artist_Level'] in audiofields.singleCall:
-			bExtraInfo = False
-		else:
-			bExtraInfo = True
-		Log.Debug('Starting to fetch the list of items in this section')
-		fetchURL = myMediaURL + '?type=10&X-Plex-Container-Start=' + str(bScanStatusCount) + '&X-Plex-Container-Size=0'
-		medias = XML.ElementFromURL(fetchURL, timeout=float(PMSTIMEOUT))
-		if bScanStatusCount == 0:
-			bScanStatusCountOf = medias.get('totalSize')
-			Log.Debug('Amount of items in this section is %s' %bScanStatusCountOf)
-		Log.Debug("Walking medias")
-		while True:
-			fetchURL = myMediaURL + '?type=10&sort=artist.titleSort,album.titleSort:asc&X-Plex-Container-Start=' + str(bScanStatusCount) + '&X-Plex-Container-Size=' + str(CONTAINERSIZEAUDIO)	
-			medias = XML.ElementFromURL(fetchURL, timeout=float(PMSTIMEOUT))
-			if medias.get('size') == '0':
-				break
-			# HERE WE DO STUFF
-			tracks = medias.xpath('.//Track')
-			for track in tracks:
-				bScanStatusCount += 1
-				# Get the Audio Info
-				myRow = {}
-				# Was extra info needed here?
-				if bExtraInfo:
-					myExtendedInfoURL = genParam(misc.GetLoopBack() + '/library/metadata/' + misc.GetRegInfo(track, 'ratingKey'))
-					track = XML.ElementFromURL(myExtendedInfoURL, timeout=float(PMSTIMEOUT)).xpath('//Track')[0]
-				audio.getAudioInfo(track, myRow)
-				output.writerow(myRow)
-		output.closefile()
-	except:
-		Log.Critical("Detected an exception in scanArtistDB")
-		bScanStatus = 99
-		raise # Dumps the error so you can see what the problem is
-	Log.Debug("******* Ending scanArtistDB ***********")
+    Log.Debug("******* Starting scanArtistDB with an URL of %s ***********" %(myMediaURL))
+    global bScanStatusCount
+    global bScanStatusCountOf
+    global bScanStatus
+    bScanStatusCount = 0
+    try:
+        Log.Debug('Writing headers for Audio Export')
+        output.createHeader(outFile, 'audio')
+        if Prefs['Artist_Level'] in audiofields.singleCall:
+            bExtraInfo = False
+        else:
+            bExtraInfo = True
+        Log.Debug('Starting to fetch the list of items in this section')
+        fetchURL = myMediaURL + '?type=10&X-Plex-Container-Start=' + str(bScanStatusCount) + '&X-Plex-Container-Size=0'
+        medias = XML.ElementFromURL(fetchURL, timeout=float(PMSTIMEOUT))
+        if bScanStatusCount == 0:
+            bScanStatusCountOf = medias.get('totalSize')
+            Log.Debug('Amount of items in this section is %s' %bScanStatusCountOf)
+        Log.Debug("Walking medias")
+        while True:
+            fetchURL = myMediaURL + '?type=10&sort=artist.titleSort,album.titleSort:asc&X-Plex-Container-Start=' + str(bScanStatusCount) + '&X-Plex-Container-Size=' + str(CONTAINERSIZEAUDIO)	
+            medias = XML.ElementFromURL(fetchURL, timeout=float(PMSTIMEOUT))
+            if medias.get('size') == '0':
+                break
+            # HERE WE DO STUFF
+            tracks = medias.xpath('.//Track')
+            for track in tracks:
+                bScanStatusCount += 1
+                # Get the Audio Info
+                myRow = {}
+                # Was extra info needed here?
+                if bExtraInfo:
+                    myExtendedInfoURL = genParam(misc.GetLoopBack() + '/library/metadata/' + misc.GetRegInfo(track, 'ratingKey'))
+                    track = XML.ElementFromURL(myExtendedInfoURL, timeout=float(PMSTIMEOUT)).xpath('//Track')[0]
+                audio.getAudioInfo(track, myRow)
+                output.writerow(myRow)
+        output.closefile()
+    except Exception, e:
+        Log.Exception("Detected an exception in scanArtistDB as: %s" %str(e))
+        bScanStatus = 99
+        raise # Dumps the error so you can see what the problem is
+    Log.Debug("******* Ending scanArtistDB ***********")
 
 ####################################################################################################
 # This function will scan a Photo section.
