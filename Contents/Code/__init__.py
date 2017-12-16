@@ -314,44 +314,45 @@ def backgroundScan(title='', key='', sectiontype='', random=0, statusCheck=0):
 ####################################################################################################
 @route(PREFIX + '/backgroundScanThread')
 def backgroundScanThread(title, key, sectiontype):
-	Log.Debug("*******  Starting backgroundScanThread  ***********")
-	global bScanStatus
-	global bScanStatusCount
-	global bScanStatusCountOf	
-	global EXPORTPATH
-	try:
-		bScanStatus = 1
-		Log.Debug("Section type is %s" %(sectiontype))
-		# Generate parameters
-		genExtParam(sectiontype)
-		# Create the output file
-		[outFile, myMediaURL] = output.createFile(key, sectiontype, title)	
-		EXPORTPATH = outFile
-		Log.Debug('Output file is named %s' %(outFile))
-		# Scan the database based on the type of section
-		if sectiontype == "movie":
-			scanMovieDB(myMediaURL, outFile)
-		elif sectiontype == "artist":
-			scanArtistDB(myMediaURL, outFile)
-		elif sectiontype == "show":
-			scanShowDB(myMediaURL, outFile)
-		elif sectiontype == "playlists":
-			scanPList(myMediaURL, outFile)
-		elif sectiontype == "photo":
-			scanPhotoDB(myMediaURL, outFile)
-		else:
-			Log.Debug("Error: unknown section type: %s" %(sectiontype))
-			bScanStatus = 91
-		# Stop scanner on error
-		if bScanStatus >= 90: return
-		Log.Debug("*******  Ending backgroundScanThread  ***********")
-		bScanStatus = 2
-		return
-	except:
-		Log.Exception("Exception happened in backgroundScanThread")
-		bScanStatus = 99
-		raise
-	Log.Debug("*******  Ending backgroundScanThread  ***********")
+    Log.Debug("*******  Starting backgroundScanThread  ***********")
+    logSettings()
+    global bScanStatus
+    global bScanStatusCount
+    global bScanStatusCountOf	
+    global EXPORTPATH
+    try:
+        bScanStatus = 1
+        Log.Debug("Section type is %s" %(sectiontype))
+        # Generate parameters
+        genExtParam(sectiontype)
+        # Create the output file
+        [outFile, myMediaURL] = output.createFile(key, sectiontype, title)	
+        EXPORTPATH = outFile
+        Log.Debug('Output file is named %s' %(outFile))
+        # Scan the database based on the type of section
+        if sectiontype == "movie":
+            scanMovieDB(myMediaURL, outFile)
+        elif sectiontype == "artist":
+            scanArtistDB(myMediaURL, outFile)
+        elif sectiontype == "show":
+            scanShowDB(myMediaURL, outFile)
+        elif sectiontype == "playlists":
+            scanPList(myMediaURL, outFile)
+        elif sectiontype == "photo":
+            scanPhotoDB(myMediaURL, outFile)
+        else:
+            Log.Debug("Error: unknown section type: %s" %(sectiontype))
+            bScanStatus = 91
+        # Stop scanner on error
+        if bScanStatus >= 90: return
+        Log.Debug("*******  Ending backgroundScanThread  ***********")
+        bScanStatus = 2
+        return
+    except Exception, e:
+        Log.Exception("Exception happened in backgroundScanThread was %s" %str(e))
+        bScanStatus = 99
+        raise
+        Log.Debug("*******  Ending backgroundScanThread  ***********")
 
 ####################################################################################################
 # This function will scan a movie section.
@@ -413,105 +414,104 @@ def scanMovieDB(myMediaURL, outFile):
 ####################################################################################################
 @route(PREFIX + '/scanShowDB')
 def scanShowDB(myMediaURL, outFile):
-	Log.Debug("******* Starting scanShowDB with an URL of %s ***********" %(myMediaURL))
-	global bScanStatusCount
-	global bScanStatusCountOf
-	global bScanStatus
-	bScanStatusCount = 0
-	bScanStatusCountOf = 0	
-	try:
-		Log.Debug("About to open file %s" %(outFile))
-		output.createHeader(outFile, 'tvseries')
-		if Prefs['TV_Level'] in tvfields.singleCall:
-			bExtraInfo = False
-		else:
-			bExtraInfo = True	
-		Log.Debug('Starting to fetch the list of items in this section')
-		while True:
-			Log.Debug("Walking medias")
-			iCount = bScanStatusCount
-			if 'Show Only' in Prefs['TV_Level']:
-				fetchURL = myMediaURL + '?X-Plex-Container-Start=' + str(iCount) + '&X-Plex-Container-Size=1'
-			else:			
-				fetchURL = myMediaURL + '?X-Plex-Container-Start=' + str(iCount) + '&X-Plex-Container-Size=' + str(CONTAINERSIZETV)			
-			partMedias = XML.ElementFromURL(fetchURL, timeout=float(PMSTIMEOUT))
-			if bScanStatusCount == 0:
-				bScanStatusCountOf = partMedias.get('totalSize')
-				Log.Debug('Amount of items in this section is %s' %bScanStatusCountOf)
-			# HERE WE DO STUFF
-			Log.Debug("Retrieved part of medias okay [%s of %s]" %(str(iCount), str(bScanStatusCountOf)))
-			for TVShow in partMedias:
-				bScanStatusCount += 1
-				iCount += 1
-				ratingKey = TVShow.get("ratingKey")
-				title = TVShow.get("title")
-				if 'Show Only' in Prefs['TV_Level']:
-					myRow = {}
-					# Export the info			
-					myRow = tvseries.getShowOnly(TVShow, myRow, Prefs['TV_Level'])
-#					iCount += CONTAINERSIZETV - 1
-					try:
-						output.writerow(myRow)
-					except Exception, e:
-						Log.Exception('Exception happend in ScanShowDB: ' + str(e))
-					continue					
-				else:
-					if Prefs['TV_Level'] in ['Level 2','Level 3', 'Level 4', 'Level 5', 'Level 6', 'Level 7', 'Level 8', 'Level 666']:
-						myURL = misc.GetLoopBack() + '/library/metadata/' + ratingKey
-						tvSeriesInfo = XML.ElementFromURL(myURL, timeout=float(PMSTIMEOUT))
-						# Getting stuff from the main TV-Show page
-						# Grab collections
-						serieInfo = tvSeriesInfo.xpath('//Directory/Collection')
-						myCol = ''
-						for collection in serieInfo:
-							if myCol == '':
-								myCol = collection.get('tag')
-							else:
-								myCol = myCol + Prefs['Seperator'] + collection.get('tag')
-						if myCol == '':
-							myCol = 'N/A'
-						# Grab locked fields
-						serieInfo = tvSeriesInfo.xpath('//Directory/Field')
-						myField = ''
-						for Field in serieInfo:
-							if myField == '':
-								myField = Field.get('name')
-							else:
-								myField = myField + Prefs['Seperator'] + Field.get('name')
-						if myField == '':
-							myField = 'N/A'
-					# Get size of TV-Show
-					episodeTotalSize = XML.ElementFromURL(misc.GetLoopBack() + '/library/metadata/' + ratingKey + '/allLeaves?X-Plex-Container-Start=0&X-Plex-Container-Size=0', timeout=float(PMSTIMEOUT)).xpath('@totalSize')[0]
-					Log.Debug('Show: %s has %s episodes' %(title, episodeTotalSize))
-					episodeCounter = 0
-					baseURL = misc.GetLoopBack() + '/library/metadata/' + ratingKey + '/allLeaves'
-					while True:
-						myURL = baseURL + '?X-Plex-Container-Start=' + str(episodeCounter) + '&X-Plex-Container-Size=' + str(CONTAINERSIZEEPISODES)
-						Log.Debug('Show %s of %s with a RatingKey of %s at myURL: %s with a title of "%s" episode %s of %s' %(iCount, bScanStatusCountOf, ratingKey, myURL, title, episodeCounter, episodeTotalSize))
-						MainEpisodes = XML.ElementFromURL(myURL, timeout=float(PMSTIMEOUT))
-						Episodes = MainEpisodes.xpath('//Video')
-						for Episode in Episodes:
-							myRow = {}	
-							# Was extra info needed here?
-							if bExtraInfo:
-								myExtendedInfoURL = genParam(misc.GetLoopBack() + '/library/metadata/' + misc.GetRegInfo(Episode, 'ratingKey'))
-								Episode = XML.ElementFromURL(myExtendedInfoURL, timeout=float(PMSTIMEOUT)).xpath('//Video')[0]
-							# Export the info			
-							myRow = tvseries.getTvInfo(Episode, myRow)
-							if Prefs['TV_Level'] in ['Level 2','Level 3', 'Level 4', 'Level 5', 'Level 6', 'Level 7', 'Level 8', 'Level 666']:
-								myRow['Collection'] = myCol
-								myRow['Locked Fields'] = myField									
-							output.writerow(myRow)								
-						episodeCounter += CONTAINERSIZEEPISODES
-						if episodeCounter > int(episodeTotalSize):
-							break
-			# Got to the end of the line?		
-			if int(partMedias.get('size')) == 0:
-				break
-		output.closefile()
-	except ValueError as err:
-		Log.Exception('Exception happend as %s' %err.args)		
-	Log.Debug("******* Ending scanShowDB ***********")
+    Log.Debug("******* Starting scanShowDB with an URL of %s ***********" %(myMediaURL))
+    global bScanStatusCount
+    global bScanStatusCountOf
+    global bScanStatus
+    bScanStatusCount = 0
+    bScanStatusCountOf = 0	
+    try:
+        Log.Debug("About to open file %s" %(outFile))
+        output.createHeader(outFile, 'tvseries')
+        if Prefs['TV_Level'] in tvfields.singleCall:
+            bExtraInfo = False
+        else:
+            bExtraInfo = True	
+        Log.Debug('Starting to fetch the list of items in this section')
+        while True:
+            Log.Debug("Walking medias")
+            iCount = bScanStatusCount
+            if 'Show Only' in Prefs['TV_Level']:
+                fetchURL = myMediaURL + '?X-Plex-Container-Start=' + str(iCount) + '&X-Plex-Container-Size=1'
+            else:			
+                fetchURL = myMediaURL + '?X-Plex-Container-Start=' + str(iCount) + '&X-Plex-Container-Size=' + str(CONTAINERSIZETV)			
+            partMedias = XML.ElementFromURL(fetchURL, timeout=float(PMSTIMEOUT))
+            if bScanStatusCount == 0:
+                bScanStatusCountOf = partMedias.get('totalSize')
+                Log.Debug('Amount of items in this section is %s' %bScanStatusCountOf)
+            # HERE WE DO STUFF
+            Log.Debug("Retrieved part of medias okay [%s of %s]" %(str(iCount), str(bScanStatusCountOf)))
+            for TVShow in partMedias:
+                bScanStatusCount += 1
+                iCount += 1
+                ratingKey = TVShow.get("ratingKey")
+                title = TVShow.get("title")
+                if 'Show Only' in Prefs['TV_Level']:                    
+                    myRow = {}
+                    # Export the info                    
+                    myRow = tvseries.getShowOnly(TVShow, myRow, Prefs['TV_Level'])
+                    try:
+                        output.writerow(myRow)
+                    except Exception, e:
+                        Log.Exception('Exception happend in ScanShowDB: %s' %str(e))
+                    continue					
+                else:
+                    if Prefs['TV_Level'] in ['Level 2','Level 3', 'Level 4', 'Level 5', 'Level 6', 'Level 7', 'Level 8', 'Level 666']:
+                        myURL = misc.GetLoopBack() + '/library/metadata/' + ratingKey
+                        tvSeriesInfo = XML.ElementFromURL(myURL, timeout=float(PMSTIMEOUT))
+                        # Getting stuff from the main TV-Show page
+                        # Grab collections
+                        serieInfo = tvSeriesInfo.xpath('//Directory/Collection')
+                        myCol = ''
+                        for collection in serieInfo:
+                            if myCol == '':
+                                myCol = collection.get('tag')
+                            else:
+                                myCol = myCol + Prefs['Seperator'] + collection.get('tag')
+                        if myCol == '':
+                            myCol = 'N/A'
+                        # Grab locked fields
+                        serieInfo = tvSeriesInfo.xpath('//Directory/Field')
+                        myField = ''
+                        for Field in serieInfo:
+                            if myField == '':
+                                myField = Field.get('name')
+                            else:
+                                myField = myField + Prefs['Seperator'] + Field.get('name')
+                        if myField == '':
+                            myField = 'N/A'
+                    # Get size of TV-Show
+                    episodeTotalSize = XML.ElementFromURL(misc.GetLoopBack() + '/library/metadata/' + ratingKey + '/allLeaves?X-Plex-Container-Start=0&X-Plex-Container-Size=0', timeout=float(PMSTIMEOUT)).xpath('@totalSize')[0]
+                    Log.Debug('Show: %s has %s episodes' %(title, episodeTotalSize))
+                    episodeCounter = 0
+                    baseURL = misc.GetLoopBack() + '/library/metadata/' + ratingKey + '/allLeaves'
+                    while True:
+                        myURL = baseURL + '?X-Plex-Container-Start=' + str(episodeCounter) + '&X-Plex-Container-Size=' + str(CONTAINERSIZEEPISODES)
+                        Log.Debug('Show %s of %s with a RatingKey of %s at myURL: %s with a title of "%s" episode %s of %s' %(iCount, bScanStatusCountOf, ratingKey, myURL, title, episodeCounter, episodeTotalSize))
+                        MainEpisodes = XML.ElementFromURL(myURL, timeout=float(PMSTIMEOUT))
+                        Episodes = MainEpisodes.xpath('//Video')
+                        for Episode in Episodes:
+                            myRow = {}	
+                            # Was extra info needed here?
+                            if bExtraInfo:
+                                myExtendedInfoURL = genParam(misc.GetLoopBack() + '/library/metadata/' + misc.GetRegInfo(Episode, 'ratingKey'))
+                                Episode = XML.ElementFromURL(myExtendedInfoURL, timeout=float(PMSTIMEOUT)).xpath('//Video')[0]
+                            # Export the info			
+                            myRow = tvseries.getTvInfo(Episode, myRow)
+                            if Prefs['TV_Level'] in ['Level 2','Level 3', 'Level 4', 'Level 5', 'Level 6', 'Level 7', 'Level 8', 'Level 666']:
+                                myRow['Collection'] = myCol
+                                myRow['Locked Fields'] = myField									
+                            output.writerow(myRow)								
+                        episodeCounter += CONTAINERSIZEEPISODES
+                        if episodeCounter > int(episodeTotalSize):
+                            break
+            # Got to the end of the line?		
+            if int(partMedias.get('size')) == 0:
+                break
+        output.closefile()
+    except ValueError as err:
+        Log.Exception('Exception happend as %s' %err.args)		
+    Log.Debug("******* Ending scanShowDB ***********")
 
 ####################################################################################################
 # This function will show a menu with playlists
@@ -587,48 +587,48 @@ def scanPList(key, outFile):
 ####################################################################################################
 @route(PREFIX + '/scanArtistDB')
 def scanArtistDB(myMediaURL, outFile):
-	Log.Debug("******* Starting scanArtistDB with an URL of %s ***********" %(myMediaURL))
-	global bScanStatusCount
-	global bScanStatusCountOf
-	global bScanStatus
-	bScanStatusCount = 0
-	try:
-		Log.Debug('Writing headers for Audio Export')
-		output.createHeader(outFile, 'audio')
-		if Prefs['Artist_Level'] in audiofields.singleCall:
-			bExtraInfo = False
-		else:
-			bExtraInfo = True
-		Log.Debug('Starting to fetch the list of items in this section')
-		fetchURL = myMediaURL + '?type=10&X-Plex-Container-Start=' + str(bScanStatusCount) + '&X-Plex-Container-Size=0'
-		medias = XML.ElementFromURL(fetchURL, timeout=float(PMSTIMEOUT))
-		if bScanStatusCount == 0:
-			bScanStatusCountOf = medias.get('totalSize')
-			Log.Debug('Amount of items in this section is %s' %bScanStatusCountOf)
-		Log.Debug("Walking medias")
-		while True:
-			fetchURL = myMediaURL + '?type=10&sort=artist.titleSort,album.titleSort:asc&X-Plex-Container-Start=' + str(bScanStatusCount) + '&X-Plex-Container-Size=' + str(CONTAINERSIZEAUDIO)	
-			medias = XML.ElementFromURL(fetchURL, timeout=float(PMSTIMEOUT))
-			if medias.get('size') == '0':
-				break
-			# HERE WE DO STUFF
-			tracks = medias.xpath('.//Track')
-			for track in tracks:
-				bScanStatusCount += 1
-				# Get the Audio Info
-				myRow = {}
-				# Was extra info needed here?
-				if bExtraInfo:
-					myExtendedInfoURL = genParam(misc.GetLoopBack() + '/library/metadata/' + misc.GetRegInfo(track, 'ratingKey'))
-					track = XML.ElementFromURL(myExtendedInfoURL, timeout=float(PMSTIMEOUT)).xpath('//Track')[0]
-				audio.getAudioInfo(track, myRow)
-				output.writerow(myRow)
-		output.closefile()
-	except:
-		Log.Critical("Detected an exception in scanArtistDB")
-		bScanStatus = 99
-		raise # Dumps the error so you can see what the problem is
-	Log.Debug("******* Ending scanArtistDB ***********")
+    Log.Debug("******* Starting scanArtistDB with an URL of %s ***********" %(myMediaURL))
+    global bScanStatusCount
+    global bScanStatusCountOf
+    global bScanStatus
+    bScanStatusCount = 0
+    try:
+        Log.Debug('Writing headers for Audio Export')
+        output.createHeader(outFile, 'audio')
+        if Prefs['Artist_Level'] in audiofields.singleCall:
+            bExtraInfo = False
+        else:
+            bExtraInfo = True
+        Log.Debug('Starting to fetch the list of items in this section')
+        fetchURL = myMediaURL + '?type=10&X-Plex-Container-Start=' + str(bScanStatusCount) + '&X-Plex-Container-Size=0'
+        medias = XML.ElementFromURL(fetchURL, timeout=float(PMSTIMEOUT))
+        if bScanStatusCount == 0:
+            bScanStatusCountOf = medias.get('totalSize')
+            Log.Debug('Amount of items in this section is %s' %bScanStatusCountOf)
+        Log.Debug("Walking medias")
+        while True:
+            fetchURL = myMediaURL + '?type=10&sort=artist.titleSort,album.titleSort:asc&X-Plex-Container-Start=' + str(bScanStatusCount) + '&X-Plex-Container-Size=' + str(CONTAINERSIZEAUDIO)	
+            medias = XML.ElementFromURL(fetchURL, timeout=float(PMSTIMEOUT))
+            if medias.get('size') == '0':
+                break
+            # HERE WE DO STUFF
+            tracks = medias.xpath('.//Track')
+            for track in tracks:
+                bScanStatusCount += 1
+                # Get the Audio Info
+                myRow = {}
+                # Was extra info needed here?
+                if bExtraInfo:
+                    myExtendedInfoURL = genParam(misc.GetLoopBack() + '/library/metadata/' + misc.GetRegInfo(track, 'ratingKey'))
+                    track = XML.ElementFromURL(myExtendedInfoURL, timeout=float(PMSTIMEOUT)).xpath('//Track')[0]
+                audio.getAudioInfo(track, myRow)
+                output.writerow(myRow)
+        output.closefile()
+    except Exception, e:
+        Log.Exception("Detected an exception in scanArtistDB as: %s" %str(e))
+        bScanStatus = 99
+        raise # Dumps the error so you can see what the problem is
+    Log.Debug("******* Ending scanArtistDB ***********")
 
 ####################################################################################################
 # This function will scan a Photo section.
@@ -693,3 +693,37 @@ def getPhotoItems(medias, bExtraInfo):
 	except Exception, e:
 		Log.Debug('Exception in getPhotoItems was %s' %(str(e)))
 		pass
+
+@route(PREFIX + '/logSettings')
+def logSettings():
+    """ Here we dump current settings to the log file """    
+    itemsPrefs = [ 
+        'Output_Format', 
+        'Autosize_Column',
+        'Autosize_Row',
+        'Export_Posters',
+        'Poster_Hight',
+        'Poster_Width',
+        'Export_Path',
+        'Auto_Path',
+        'Delimiter',
+        'Line_Wrap',
+        'Line_Length',
+        'Seperator',
+        'Sort_title',
+        'Original_Title',
+        'Movie_Level',
+        'TV_Level',
+        'Artist_Level',
+        'Photo_Level',
+        'PlayList_Level',
+        'mu_Level',
+        'Check_Files']
+    Log.Info('**************** Settings ****************')
+    for item in itemsPrefs:
+        Log.Info('Setting %s set to: %s' %(item, str(Prefs[item])))
+    Log.Info('************* Settings ended *************')        
+
+
+
+        
