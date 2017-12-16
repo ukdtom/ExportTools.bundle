@@ -303,7 +303,6 @@ def getItemInfo(et, myRow, fieldList):
                # Special deal for Original Title
                 elif key == 'Original Title':
                     if Prefs['Original_Title']:
-                        print 'Ged'
                         if consts.DEFAULT == GetRegInfo2(et, value, consts.DEFAULT, key=key):
                             element = GetRegInfo2(
                                 et, '@title', consts.DEFAULT, key='Title')

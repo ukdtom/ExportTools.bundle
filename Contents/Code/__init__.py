@@ -414,105 +414,104 @@ def scanMovieDB(myMediaURL, outFile):
 ####################################################################################################
 @route(PREFIX + '/scanShowDB')
 def scanShowDB(myMediaURL, outFile):
-	Log.Debug("******* Starting scanShowDB with an URL of %s ***********" %(myMediaURL))
-	global bScanStatusCount
-	global bScanStatusCountOf
-	global bScanStatus
-	bScanStatusCount = 0
-	bScanStatusCountOf = 0	
-	try:
-		Log.Debug("About to open file %s" %(outFile))
-		output.createHeader(outFile, 'tvseries')
-		if Prefs['TV_Level'] in tvfields.singleCall:
-			bExtraInfo = False
-		else:
-			bExtraInfo = True	
-		Log.Debug('Starting to fetch the list of items in this section')
-		while True:
-			Log.Debug("Walking medias")
-			iCount = bScanStatusCount
-			if 'Show Only' in Prefs['TV_Level']:
-				fetchURL = myMediaURL + '?X-Plex-Container-Start=' + str(iCount) + '&X-Plex-Container-Size=1'
-			else:			
-				fetchURL = myMediaURL + '?X-Plex-Container-Start=' + str(iCount) + '&X-Plex-Container-Size=' + str(CONTAINERSIZETV)			
-			partMedias = XML.ElementFromURL(fetchURL, timeout=float(PMSTIMEOUT))
-			if bScanStatusCount == 0:
-				bScanStatusCountOf = partMedias.get('totalSize')
-				Log.Debug('Amount of items in this section is %s' %bScanStatusCountOf)
-			# HERE WE DO STUFF
-			Log.Debug("Retrieved part of medias okay [%s of %s]" %(str(iCount), str(bScanStatusCountOf)))
-			for TVShow in partMedias:
-				bScanStatusCount += 1
-				iCount += 1
-				ratingKey = TVShow.get("ratingKey")
-				title = TVShow.get("title")
-				if 'Show Only' in Prefs['TV_Level']:
-					myRow = {}
-					# Export the info			
-					myRow = tvseries.getShowOnly(TVShow, myRow, Prefs['TV_Level'])
-#					iCount += CONTAINERSIZETV - 1
-					try:
-						output.writerow(myRow)
-					except Exception, e:
-						Log.Exception('Exception happend in ScanShowDB: ' + str(e))
-					continue					
-				else:
-					if Prefs['TV_Level'] in ['Level 2','Level 3', 'Level 4', 'Level 5', 'Level 6', 'Level 7', 'Level 8', 'Level 666']:
-						myURL = misc.GetLoopBack() + '/library/metadata/' + ratingKey
-						tvSeriesInfo = XML.ElementFromURL(myURL, timeout=float(PMSTIMEOUT))
-						# Getting stuff from the main TV-Show page
-						# Grab collections
-						serieInfo = tvSeriesInfo.xpath('//Directory/Collection')
-						myCol = ''
-						for collection in serieInfo:
-							if myCol == '':
-								myCol = collection.get('tag')
-							else:
-								myCol = myCol + Prefs['Seperator'] + collection.get('tag')
-						if myCol == '':
-							myCol = 'N/A'
-						# Grab locked fields
-						serieInfo = tvSeriesInfo.xpath('//Directory/Field')
-						myField = ''
-						for Field in serieInfo:
-							if myField == '':
-								myField = Field.get('name')
-							else:
-								myField = myField + Prefs['Seperator'] + Field.get('name')
-						if myField == '':
-							myField = 'N/A'
-					# Get size of TV-Show
-					episodeTotalSize = XML.ElementFromURL(misc.GetLoopBack() + '/library/metadata/' + ratingKey + '/allLeaves?X-Plex-Container-Start=0&X-Plex-Container-Size=0', timeout=float(PMSTIMEOUT)).xpath('@totalSize')[0]
-					Log.Debug('Show: %s has %s episodes' %(title, episodeTotalSize))
-					episodeCounter = 0
-					baseURL = misc.GetLoopBack() + '/library/metadata/' + ratingKey + '/allLeaves'
-					while True:
-						myURL = baseURL + '?X-Plex-Container-Start=' + str(episodeCounter) + '&X-Plex-Container-Size=' + str(CONTAINERSIZEEPISODES)
-						Log.Debug('Show %s of %s with a RatingKey of %s at myURL: %s with a title of "%s" episode %s of %s' %(iCount, bScanStatusCountOf, ratingKey, myURL, title, episodeCounter, episodeTotalSize))
-						MainEpisodes = XML.ElementFromURL(myURL, timeout=float(PMSTIMEOUT))
-						Episodes = MainEpisodes.xpath('//Video')
-						for Episode in Episodes:
-							myRow = {}	
-							# Was extra info needed here?
-							if bExtraInfo:
-								myExtendedInfoURL = genParam(misc.GetLoopBack() + '/library/metadata/' + misc.GetRegInfo(Episode, 'ratingKey'))
-								Episode = XML.ElementFromURL(myExtendedInfoURL, timeout=float(PMSTIMEOUT)).xpath('//Video')[0]
-							# Export the info			
-							myRow = tvseries.getTvInfo(Episode, myRow)
-							if Prefs['TV_Level'] in ['Level 2','Level 3', 'Level 4', 'Level 5', 'Level 6', 'Level 7', 'Level 8', 'Level 666']:
-								myRow['Collection'] = myCol
-								myRow['Locked Fields'] = myField									
-							output.writerow(myRow)								
-						episodeCounter += CONTAINERSIZEEPISODES
-						if episodeCounter > int(episodeTotalSize):
-							break
-			# Got to the end of the line?		
-			if int(partMedias.get('size')) == 0:
-				break
-		output.closefile()
-	except ValueError as err:
-		Log.Exception('Exception happend as %s' %err.args)		
-	Log.Debug("******* Ending scanShowDB ***********")
+    Log.Debug("******* Starting scanShowDB with an URL of %s ***********" %(myMediaURL))
+    global bScanStatusCount
+    global bScanStatusCountOf
+    global bScanStatus
+    bScanStatusCount = 0
+    bScanStatusCountOf = 0	
+    try:
+        Log.Debug("About to open file %s" %(outFile))
+        output.createHeader(outFile, 'tvseries')
+        if Prefs['TV_Level'] in tvfields.singleCall:
+            bExtraInfo = False
+        else:
+            bExtraInfo = True	
+        Log.Debug('Starting to fetch the list of items in this section')
+        while True:
+            Log.Debug("Walking medias")
+            iCount = bScanStatusCount
+            if 'Show Only' in Prefs['TV_Level']:
+                fetchURL = myMediaURL + '?X-Plex-Container-Start=' + str(iCount) + '&X-Plex-Container-Size=1'
+            else:			
+                fetchURL = myMediaURL + '?X-Plex-Container-Start=' + str(iCount) + '&X-Plex-Container-Size=' + str(CONTAINERSIZETV)			
+            partMedias = XML.ElementFromURL(fetchURL, timeout=float(PMSTIMEOUT))
+            if bScanStatusCount == 0:
+                bScanStatusCountOf = partMedias.get('totalSize')
+                Log.Debug('Amount of items in this section is %s' %bScanStatusCountOf)
+            # HERE WE DO STUFF
+            Log.Debug("Retrieved part of medias okay [%s of %s]" %(str(iCount), str(bScanStatusCountOf)))
+            for TVShow in partMedias:
+                bScanStatusCount += 1
+                iCount += 1
+                ratingKey = TVShow.get("ratingKey")
+                title = TVShow.get("title")
+                if 'Show Only' in Prefs['TV_Level']:                    
+                    myRow = {}
+                    # Export the info                    
+                    myRow = tvseries.getShowOnly(TVShow, myRow, Prefs['TV_Level'])
+                    try:
+                        output.writerow(myRow)
+                    except Exception, e:
+                        Log.Exception('Exception happend in ScanShowDB: %s' %str(e))
+                    continue					
+                else:
+                    if Prefs['TV_Level'] in ['Level 2','Level 3', 'Level 4', 'Level 5', 'Level 6', 'Level 7', 'Level 8', 'Level 666']:
+                        myURL = misc.GetLoopBack() + '/library/metadata/' + ratingKey
+                        tvSeriesInfo = XML.ElementFromURL(myURL, timeout=float(PMSTIMEOUT))
+                        # Getting stuff from the main TV-Show page
+                        # Grab collections
+                        serieInfo = tvSeriesInfo.xpath('//Directory/Collection')
+                        myCol = ''
+                        for collection in serieInfo:
+                            if myCol == '':
+                                myCol = collection.get('tag')
+                            else:
+                                myCol = myCol + Prefs['Seperator'] + collection.get('tag')
+                        if myCol == '':
+                            myCol = 'N/A'
+                        # Grab locked fields
+                        serieInfo = tvSeriesInfo.xpath('//Directory/Field')
+                        myField = ''
+                        for Field in serieInfo:
+                            if myField == '':
+                                myField = Field.get('name')
+                            else:
+                                myField = myField + Prefs['Seperator'] + Field.get('name')
+                        if myField == '':
+                            myField = 'N/A'
+                    # Get size of TV-Show
+                    episodeTotalSize = XML.ElementFromURL(misc.GetLoopBack() + '/library/metadata/' + ratingKey + '/allLeaves?X-Plex-Container-Start=0&X-Plex-Container-Size=0', timeout=float(PMSTIMEOUT)).xpath('@totalSize')[0]
+                    Log.Debug('Show: %s has %s episodes' %(title, episodeTotalSize))
+                    episodeCounter = 0
+                    baseURL = misc.GetLoopBack() + '/library/metadata/' + ratingKey + '/allLeaves'
+                    while True:
+                        myURL = baseURL + '?X-Plex-Container-Start=' + str(episodeCounter) + '&X-Plex-Container-Size=' + str(CONTAINERSIZEEPISODES)
+                        Log.Debug('Show %s of %s with a RatingKey of %s at myURL: %s with a title of "%s" episode %s of %s' %(iCount, bScanStatusCountOf, ratingKey, myURL, title, episodeCounter, episodeTotalSize))
+                        MainEpisodes = XML.ElementFromURL(myURL, timeout=float(PMSTIMEOUT))
+                        Episodes = MainEpisodes.xpath('//Video')
+                        for Episode in Episodes:
+                            myRow = {}	
+                            # Was extra info needed here?
+                            if bExtraInfo:
+                                myExtendedInfoURL = genParam(misc.GetLoopBack() + '/library/metadata/' + misc.GetRegInfo(Episode, 'ratingKey'))
+                                Episode = XML.ElementFromURL(myExtendedInfoURL, timeout=float(PMSTIMEOUT)).xpath('//Video')[0]
+                            # Export the info			
+                            myRow = tvseries.getTvInfo(Episode, myRow)
+                            if Prefs['TV_Level'] in ['Level 2','Level 3', 'Level 4', 'Level 5', 'Level 6', 'Level 7', 'Level 8', 'Level 666']:
+                                myRow['Collection'] = myCol
+                                myRow['Locked Fields'] = myField									
+                            output.writerow(myRow)								
+                        episodeCounter += CONTAINERSIZEEPISODES
+                        if episodeCounter > int(episodeTotalSize):
+                            break
+            # Got to the end of the line?		
+            if int(partMedias.get('size')) == 0:
+                break
+        output.closefile()
+    except ValueError as err:
+        Log.Exception('Exception happend as %s' %err.args)		
+    Log.Debug("******* Ending scanShowDB ***********")
 
 ####################################################################################################
 # This function will show a menu with playlists
