@@ -162,7 +162,6 @@ def getShowOnly(myMedia, myRow, level):
                             Prefs['Seperator'] + collection.get('tag')
                 if myCol == '':
                     myCol = 'N/A'
-                print 'Ged Col', myCol
                 myRow[key] = myCol
             else:
                 myRow[key] = misc.GetArrayAsString(
