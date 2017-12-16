@@ -72,7 +72,13 @@ Level_5 = [
     ('Exists', 'Media/Part/@exists'),
     ('Lyrics Codec', 'Media/Part/Stream[@streamType=4]/@codec'),
     ('Lyrics Provider', 'Media/Part/Stream[@streamType=4]/@provider'),
-    ('Lyrics Timed', 'Media/Part/Stream[@streamType=4]/@timed')
+    ('Lyrics Timed', 'Media/Part/Stream[@streamType=4]/@timed'),
+    ('Album Gain', 'Media/Part/Stream[@streamType=2]/@albumGain'),
+    ('Album Peak', 'Media/Part/Stream[@streamType=2]/@albumPeak'),
+    ('Album Range', 'Media/Part/Stream[@streamType=2]/@albumRange'),
+    ('Loudness', 'Media/Part/Stream[@streamType=2]/@loudness'),
+    ('lra', 'Media/Part/Stream[@streamType=2]/@lra'),
+    ('Peak', 'Media/Part/Stream[@streamType=2]/@peak')
 ]
 
 Level_6 = [
