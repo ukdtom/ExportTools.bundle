@@ -200,7 +200,12 @@ def MainMenu(random=0):
                 thumb=thumb,
                 title='Export from "' + title + '"',
                 summary='Export list from "' + title + '"'))
-            Log.Debug('Getting section List from: ' + misc.GetLoopBack() + '/library/sections')
+            strLog = ''.join((
+                'Getting section List from: ',
+                misc.GetLoopBack(),
+                '/library/sections'
+            ))
+            Log.Debug(strLog)
             sections = XML.ElementFromURL(
                 misc.GetLoopBack() + '/library/sections',
                 timeout=float(PMSTIMEOUT)).xpath('//Directory')
@@ -211,10 +216,23 @@ def MainMenu(random=0):
                     title = section.get('title')
                     key = section.get('key')
                     thumb = misc.GetLoopBack() + section.get('thumb')
-                    Log.Debug('Title of section is %s with a key of %s' % (title, key))
-                    oc.add(DirectoryObject(key=Callback(backgroundScan, title=title, sectiontype=sectiontype, key=key, random=time.clock()), thumb=thumb, title='Export from "' + title + '"', summary='Export list from "' + title + '"'))
+                    Log.Debug(
+                        'Title of section is %s with a key of %s' % (
+                            title, key))
+                    oc.add(DirectoryObject(
+                        key=Callback(
+                            backgroundScan,
+                            title=title,
+                            sectiontype=sectiontype,
+                            key=key,
+                            random=time.clock()),
+                        thumb=thumb,
+                        title='Export from "' + title + '"',
+                        summary='Export list from "' + title + '"'))
         else:
-            oc.add(DirectoryObject(key=Callback(MainMenu, random=time.clock()), title="Select Preferences to set the export path"))
+            oc.add(DirectoryObject(
+                key=Callback(MainMenu, random=time.clock()),
+                title="Select Preferences to set the export path"))
     except:
         Log.Critical("Exception happened in MainMenu")
         raise
@@ -343,7 +361,9 @@ def backgroundScan(title='', key='', sectiontype='', random=0, statusCheck=0):
                     Log.Debug(
                         "******** Error in thread, stopping wait ********")
                     break
-        # Sometimes a scanStatus check will happen when a scan is running. Usually from something weird in the web client. This prevents the scan from restarting
+        # Sometimes a scanStatus check will happen when a scan is running.
+        # Usually from something weird in the web client.
+        # This prevents the scan from restarting
         elif bScanStatus == 0 and statusCheck:
             Log.Debug(
                 "backgroundScan statusCheck is set and no scan is running")
@@ -357,11 +377,20 @@ def backgroundScan(title='', key='', sectiontype='', random=0, statusCheck=0):
                         random=time.clock()),
                     title="Go to the Main Menu"))
             return oc2
-            # Summary to add to the status
-        summary = "The Plex Server will only wait a few seconds for us to work, so we run it in the background. This requires you to keep checking on the status until it is complete. \n\n"
+        # Summary to add to the status
+        summary = ''.join((
+            'The Plex Server will only wait a few seconds for us to ',
+            'work, so we run it in the background. This requires you ',
+            'to keep checking on the status until it is complete. \n\n'))
         if bScanStatus == 1:
             # Scanning Database
-            summary = summary + "The Database is being exported. \nExporting " + str(bScanStatusCount) + " of " + str(bScanStatusCountOf) + ". \nPlease wait a few seconds and check the status again."
+            summary = summary.join((
+                "The Database is being exported. \nExporting ",
+                str(bScanStatusCount),
+                " of ",
+                str(bScanStatusCountOf),
+                ". \nPlease wait a few seconds and check the status again."
+            ))
             oc2 = ObjectContainer(
                 title1="Exporting the Database " + str(bScanStatusCount) + " of " + str(bScanStatusCountOf) + ".", no_history=True)
             oc2.add(DirectoryObject(
@@ -412,22 +441,40 @@ def backgroundScan(title='', key='', sectiontype='', random=0, statusCheck=0):
         elif bScanStatus == 99:
             # Error condition set by scanner
             summary = "An internal error has occurred. Please check the logs"
-            oc2 = ObjectContainer(title1="Internal Error Detected. Please check the logs", no_history=True, view_group='List')
-            oc2.add(DirectoryObject(key=Callback(MainMenu, random=time.clock()), title="An internal error has occurred.", summary=summary))
-            oc2.add(DirectoryObject(key=Callback(MainMenu, random=time.clock()), title="*** Please submit logs. ***", summary=summary))
+            oc2 = ObjectContainer(
+                title1="Internal Error Detected. Please check the logs",
+                no_history=True,
+                view_group='List')
+            oc2.add(DirectoryObject(
+                key=Callback(MainMenu, random=time.clock()),
+                title="An internal error has occurred.",
+                summary=summary))
+            oc2.add(DirectoryObject(
+                key=Callback(MainMenu, random=time.clock()),
+                title="*** Please submit logs. ***",
+                summary=summary))
             bScanStatus = 0
         elif bScanStatus == 401:
             oc2 = ObjectContainer(title1="ERROR", no_history=True)
             # Error condition set by scanner
             summary = "When running in like Home mode, you must enable authentication in the preferences"
             oc2 = ObjectContainer(title1=summary, no_history=True)
-            oc2.add(DirectoryObject(key=Callback(MainMenu, random=time.clock()), title="Authentication error.", summary=summary))
+            oc2.add(DirectoryObject(
+                key=Callback(MainMenu, random=time.clock()),
+                title="Authentication error.",
+                summary=summary))
             bScanStatus = 0
         else:
             # Unknown status. Should not happen.
-            summary = "Something went horribly wrong. The scanner returned an unknown status."
+            summary = ''.join((
+                "Something went horribly wrong.",
+                " The scanner returned an unknown status."))
             oc2 = ObjectContainer(title1="Uh Oh!.", no_history=True)
-            oc2.add(DirectoryObject(key=Callback(MainMenu, random=time.clock()), title="*** Unknown status from scanner ***", summary=summary))
+            oc2.add(
+                DirectoryObject(
+                    key=Callback(MainMenu, random=time.clock()),
+                    title="*** Unknown status from scanner ***",
+                    summary=summary))
             bScanStatus = 0
     except:
         Log.Critical("Detected an exception in backgroundScan")
@@ -502,7 +549,12 @@ def scanMovieDB(myMediaURL, outFile):
             bExtraInfo = True
         while True:
             Log.Debug("Walking medias")
-            fetchURL = myMediaURL + '?X-Plex-Container-Start=' + str(iCurrent) + '&X-Plex-Container-Size=' + str(CONTAINERSIZEMOVIES)
+            fetchURL = ''.join((
+                myMediaURL,
+                '?X-Plex-Container-Start=',
+                str(iCurrent),
+                '&X-Plex-Container-Size=',
+                str(CONTAINERSIZEMOVIES)))
             iCount = bScanStatusCount
             partMedias = XML.ElementFromURL(
                 fetchURL,
@@ -650,7 +702,12 @@ def scanShowDB(myMediaURL, outFile):
                             myRow = {}
                             # Was extra info needed here?
                             if bExtraInfo:
-                                myExtendedInfoURL = genParam(misc.GetLoopBack() + '/library/metadata/' + misc.GetRegInfo(Episode, 'ratingKey'))
+                                strUrl = ''.join((
+                                    misc.GetLoopBack(),
+                                    '/library/metadata/',
+                                    misc.GetRegInfo(Episode, 'ratingKey')
+                                ))
+                                myExtendedInfoURL = genParam(strUrl)
                                 Episode = XML.ElementFromURL(
                                     myExtendedInfoURL,
                                     timeout=float(PMSTIMEOUT)).xpath('//Video')[0]
@@ -688,7 +745,10 @@ def selectPList():
     if Prefs['Auto_Path']:
         message = 'Playlists can not be exported when path is set to auto. You need to specify a manual path in the prefs'
         oc = ObjectContainer(title1='Error!. Playlists can not be exported when path is set to auto. You need to specify a manual path in the prefs', no_cache=True, message=message)
-        oc.add(DirectoryObject(key=Callback(MainMenu), title="Go to the Main Menu"))
+        oc.add(
+            DirectoryObject(
+                key=Callback(MainMenu),
+                title="Go to the Main Menu"))
         Log.Debug('Can not continue, since on AutoPath')
         return oc
     # Else build up a menu of the playlists
@@ -787,7 +847,8 @@ def scanArtistDB(myMediaURL, outFile):
         medias = XML.ElementFromURL(fetchURL, timeout=float(PMSTIMEOUT))
         if bScanStatusCount == 0:
             bScanStatusCountOf = medias.get('totalSize')
-            Log.Debug('Amount of items in this section is %s' % bScanStatusCountOf)
+            Log.Debug(
+                'Amount of items in this section is %s' % bScanStatusCountOf)
         Log.Debug("Walking medias")
         while True:
             fetchURL = myMediaURL + '?type=10&sort=artist.titleSort,album.titleSort:asc&X-Plex-Container-Start=' + str(bScanStatusCount) + '&X-Plex-Container-Size=' + str(CONTAINERSIZEAUDIO)
@@ -802,7 +863,8 @@ def scanArtistDB(myMediaURL, outFile):
                 myRow = {}
                 # Was extra info needed here?
                 if bExtraInfo:
-                    myExtendedInfoURL = genParam(misc.GetLoopBack() + '/library/metadata/' + misc.GetRegInfo(track, 'ratingKey'))
+                    myExtendedInfoURL = genParam(
+                        misc.GetLoopBack() + '/library/metadata/' + misc.GetRegInfo(track, 'ratingKey'))
                     track = XML.ElementFromURL(
                         myExtendedInfoURL,
                         timeout=float(PMSTIMEOUT)).xpath('//Track')[0]
@@ -871,9 +933,12 @@ def getPhotoItems(medias, bExtraInfo):
         # Elements that are directories
         et = medias.xpath('.//Directory')
         for element in et:
-            myExtendedInfoURL = genParam(misc.GetLoopBack() + element.get('key'))
+            myExtendedInfoURL = genParam(
+                misc.GetLoopBack() + element.get('key'))
             # TODO: Make small steps here when req. photos
-            elements = XML.ElementFromURL(myExtendedInfoURL, timeout=float(PMSTIMEOUT))
+            elements = XML.ElementFromURL(
+                myExtendedInfoURL,
+                timeout=float(PMSTIMEOUT))
             getPhotoItems(elements, bExtraInfo)
     except Exception, e:
         Log.Debug('Exception in getPhotoItems was %s' % str(e))
