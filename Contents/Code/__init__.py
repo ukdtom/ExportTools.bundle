@@ -310,7 +310,9 @@ def cancelScan():
     message = 'Canceling scanning'
     title = message
     oc2 = ObjectContainer(title1=title, message=message, no_history=True)
-    oc2.add(DirectoryObject(key=Callback(MainMenu), title="Canceled...Go to the Main Menu"))
+    oc2.add(DirectoryObject(
+        key=Callback(MainMenu),
+        title="Canceled...Go to the Main Menu"))
     return oc2
 
 
@@ -332,7 +334,12 @@ def backgroundScan(title='', key='', sectiontype='', random=0, statusCheck=0):
             bScanStatusCount = 0
             bScanStatusCountOf = 0
             # Start scanner
-            Thread.Create(backgroundScanThread, globalize=True, title=title, key=key, sectiontype=sectiontype)
+            Thread.Create(
+                backgroundScanThread,
+                globalize=True,
+                title=title,
+                key=key,
+                sectiontype=sectiontype)
             # Wait 10 seconds unless the scanner finishes
             x = 0
             while (x <= initialTimeOut):
@@ -413,7 +420,11 @@ def backgroundScan(title='', key='', sectiontype='', random=0, statusCheck=0):
                     random=time.clock(),
                     statusCheck=1,
                     title=title),
-                title="Exporting " + str(bScanStatusCount) + " of " + str(bScanStatusCountOf),
+                title=''.join((
+                    "Exporting ",
+                    str(bScanStatusCount),
+                    " of ",
+                    str(bScanStatusCountOf))),
                 summary=summary))
             oc2.add(DirectoryObject(
                 key=Callback(cancelScan),
@@ -572,13 +583,23 @@ def scanMovieDB(myMediaURL, outFile):
                 Log.Debug(
                     'Amount of items in this section is %s' % bScanStatusCountOf)
             # HERE WE DO STUFF
-            Log.Debug("Retrieved part of medias okay [%s of %s]" % (str(bScanStatusCount), str(bScanStatusCountOf)))
+            Log.Debug("Retrieved part of medias okay [%s of %s]" % (
+                str(bScanStatusCount),
+                str(bScanStatusCountOf)))
             medias = partMedias.xpath('.//Video')
             for media in medias:
                 myRow = {}
                 # Was extra info needed here?
                 if bExtraInfo:
-                    myExtendedInfoURL = genParam(misc.GetLoopBack() + '/library/metadata/' + misc.GetRegInfo(media, 'ratingKey'))
+                    myExtendedInfoURL = genParam(
+                        ''.join((
+                            misc.GetLoopBack(),
+                            '/library/metadata/',
+                            misc.GetRegInfo(
+                                media,
+                                'ratingKey')
+                            ))
+                        )
                     media = XML.ElementFromURL(
                         myExtendedInfoURL,
                         timeout=float(PMSTIMEOUT)).xpath('//Video')[0]
@@ -626,15 +647,26 @@ def scanShowDB(myMediaURL, outFile):
             Log.Debug("Walking medias")
             iCount = bScanStatusCount
             if 'Show Only' in Prefs['TV_Level']:
-                fetchURL = myMediaURL + '?X-Plex-Container-Start=' + str(iCount) + '&X-Plex-Container-Size=1'
+                fetchURL = ''.join((
+                    myMediaURL,
+                    '?X-Plex-Container-Start=',
+                    str(iCount),
+                    '&X-Plex-Container-Size=1'))
             else:
-                fetchURL = myMediaURL + '?X-Plex-Container-Start=' + str(iCount) + '&X-Plex-Container-Size=' + str(CONTAINERSIZETV)
+                fetchURL = ''.join((
+                    myMediaURL,
+                    '?X-Plex-Container-Start=',
+                    str(iCount),
+                    '&X-Plex-Container-Size=',
+                    str(CONTAINERSIZETV)))
             partMedias = XML.ElementFromURL(
                 fetchURL,
                 timeout=float(PMSTIMEOUT))
             if bScanStatusCount == 0:
                 bScanStatusCountOf = partMedias.get('totalSize')
-                Log.Debug('Amount of items in this section is %s' % bScanStatusCountOf)
+                Log.Debug(''.join((
+                    'Amount of items in this section is ',
+                    '%s' % bScanStatusCountOf)))
             # HERE WE DO STUFF
             Log.Debug("Retrieved part of medias okay [%s of %s]" % (
                 str(iCount), str(bScanStatusCountOf)))
@@ -666,13 +698,17 @@ def scanShowDB(myMediaURL, outFile):
                             'Level 7',
                             'Level 8',
                             'Level 666']:
-                        myURL = misc.GetLoopBack() + '/library/metadata/' + ratingKey
+                        myURL = ''.join((
+                            misc.GetLoopBack(),
+                            '/library/metadata/',
+                            ratingKey))
                         tvSeriesInfo = XML.ElementFromURL(
                             myURL,
                             timeout=float(PMSTIMEOUT))
                         # Getting stuff from the main TV-Show page
                         # Grab collections
-                        serieInfo = tvSeriesInfo.xpath('//Directory/Collection')
+                        serieInfo = tvSeriesInfo.xpath(
+                            '//Directory/Collection')
                         myCol = ''
                         for collection in serieInfo:
                             if myCol == '':
@@ -691,7 +727,10 @@ def scanShowDB(myMediaURL, outFile):
                             if myField == '':
                                 myField = Field.get('name')
                             else:
-                                myField = myField + Prefs['Seperator'] + Field.get('name')
+                                myField = ''.join((
+                                    myField,
+                                    Prefs['Seperator'],
+                                    Field.get('name')))
                         if myField == '':
                             myField = 'N/A'
                     # Get size of TV-Show
@@ -707,10 +746,18 @@ def scanShowDB(myMediaURL, outFile):
                         title,
                         episodeTotalSize))
                     episodeCounter = 0
-                    baseURL = misc.GetLoopBack() + '/library/metadata/' + ratingKey + '/allLeaves'
+                    baseURL = ''.join((
+                        misc.GetLoopBack(),
+                        '/library/metadata/',
+                        ratingKey,
+                        '/allLeaves'))
                     while True:
-                        myURL = baseURL + '?X-Plex-Container-Start=' + str(episodeCounter) + '&X-Plex-Container-Size=' + str(CONTAINERSIZEEPISODES)
-
+                        myURL = ''.join((
+                            baseURL,
+                            '?X-Plex-Container-Start=',
+                            str(episodeCounter),
+                            '&X-Plex-Container-Size=',
+                            str(CONTAINERSIZEEPISODES)))
                         Log.Debug('Show %s of %s with a RatingKey of %s at myURL: %s with a title of "%s" episode %s of %s' % (iCount, bScanStatusCountOf, ratingKey, myURL, title, episodeCounter, episodeTotalSize))
                         MainEpisodes = XML.ElementFromURL(
                             myURL,
@@ -728,7 +775,8 @@ def scanShowDB(myMediaURL, outFile):
                                 myExtendedInfoURL = genParam(strUrl)
                                 Episode = XML.ElementFromURL(
                                     myExtendedInfoURL,
-                                    timeout=float(PMSTIMEOUT)).xpath('//Video')[0]
+                                    timeout=float(
+                                        PMSTIMEOUT)).xpath('//Video')[0]
                             # Export the info
                             myRow = tvseries.getTvInfo(Episode, myRow)
                             if Prefs['TV_Level'] in [
@@ -766,7 +814,8 @@ def selectPList():
             " to auto. You need to specify a manual path in the prefs"))
         oc = ObjectContainer(
             title1=''.join((
-                "Error!. Playlists can not be exported when path is set to auto.",
+                "Error!. Playlists can not be exported ",
+                "when path is set to auto.",
                 " You need to specify a manual path in the prefs")),
             no_cache=True,
             message=message)
@@ -910,7 +959,10 @@ def scanArtistDB(myMediaURL, outFile):
                 # Was extra info needed here?
                 if bExtraInfo:
                     myExtendedInfoURL = genParam(
-                        misc.GetLoopBack() + '/library/metadata/' + misc.GetRegInfo(track, 'ratingKey'))
+                        ''.join((
+                            misc.GetLoopBack(),
+                            '/library/metadata/',
+                            misc.GetRegInfo(track, 'ratingKey'))))
                     track = XML.ElementFromURL(
                         myExtendedInfoURL,
                         timeout=float(PMSTIMEOUT)).xpath('//Track')[0]

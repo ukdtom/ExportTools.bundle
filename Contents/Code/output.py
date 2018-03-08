@@ -97,7 +97,7 @@ def createFile(sectionKey, sectionType, title):
         if Prefs['Auto_Path']:
             # Need to grap the first location for the section
             locations = XML.ElementFromURL(
-                misc.GetLoopBack() + 'library/sections/',
+                misc.GetLoopBack() + '/library/sections/',
                 timeout=float(PMSTIMEOUT)).xpath(
                     './/Directory[@key="' + sectionKey + '"]')[0]
             location = locations[0].get('path')
