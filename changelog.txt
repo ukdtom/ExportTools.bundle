@@ -1,3 +1,6 @@
+V1.0.2.9:
+    -   fix #49: Add to column with, when in xls mode
+    
 V1.0.2.8:
     -   Audio:
         - Fix #46: Audio and Loudness

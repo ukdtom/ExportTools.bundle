@@ -133,7 +133,7 @@ def createFile(sectionKey, sectionType, title):
                 "Level 1",
                 "Level 2",
                 "Special Level 1"
-                ]:
+            ]:
                     doPosters = True
         if doPosters:
             posterDir = os.path.join(os.path.dirname(outFile), 'posters')
@@ -184,7 +184,7 @@ def createHeader(outFile, sectionType, playListType=''):
         col = 0
         for rowname in fieldnames:
             writer.write(row, col, rowname, bold)
-            columnwidth[rowname] = len(rowname) + 5
+            columnwidth[rowname] = len(rowname) + 2
             col += 1
         row += 1
         maxCol = col

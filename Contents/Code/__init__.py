@@ -381,18 +381,24 @@ def backgroundScan(title='', key='', sectiontype='', random=0, statusCheck=0):
         summary = ''.join((
             'The Plex Server will only wait a few seconds for us to ',
             'work, so we run it in the background. This requires you ',
-            'to keep checking on the status until it is complete. \n\n'))
+            'to keep checking on the status until it is complete.'))
         if bScanStatus == 1:
             # Scanning Database
-            summary = summary.join((
-                "The Database is being exported. \nExporting ",
+            summary = summary + ''.join((
+                " The Database is being exported. Exporting ",
                 str(bScanStatusCount),
                 " of ",
                 str(bScanStatusCountOf),
-                ". \nPlease wait a few seconds and check the status again."
+                ". Please wait a few seconds and check the status again."
             ))
             oc2 = ObjectContainer(
-                title1="Exporting the Database " + str(bScanStatusCount) + " of " + str(bScanStatusCountOf) + ".", no_history=True)
+                title1=''.join((
+                    "Exporting the Database ",
+                    str(bScanStatusCount),
+                    " of ",
+                    str(bScanStatusCountOf),
+                    ".")),
+                no_history=True)
             oc2.add(DirectoryObject(
                 key=Callback(
                     backgroundScan,
@@ -457,7 +463,9 @@ def backgroundScan(title='', key='', sectiontype='', random=0, statusCheck=0):
         elif bScanStatus == 401:
             oc2 = ObjectContainer(title1="ERROR", no_history=True)
             # Error condition set by scanner
-            summary = "When running in like Home mode, you must enable authentication in the preferences"
+            summary = ''.join((
+                "When running in like Home mode, ",
+                "you must enable authentication in the preferences"))
             oc2 = ObjectContainer(title1=summary, no_history=True)
             oc2.add(DirectoryObject(
                 key=Callback(MainMenu, random=time.clock()),
@@ -532,7 +540,7 @@ def backgroundScanThread(title, key, sectiontype):
 @route(PREFIX + '/scanMovieDB')
 def scanMovieDB(myMediaURL, outFile):
     ''' This function will scan a movie section. '''
-    Log.Debug("******* Starting scanMovieDB with an URL of %s ***********" % myMediaURL)
+    Log.Debug("*** Starting scanMovieDB with an URL of %s ***" % myMediaURL)
     Log.Debug('Movie Export level is %s' % Prefs['Movie_Level'])
     global bScanStatusCount
     global bScanStatusCountOf
@@ -579,7 +587,9 @@ def scanMovieDB(myMediaURL, outFile):
                 output.writerow(myRow)
                 iCurrent += 1
                 bScanStatusCount += 1
-                Log.Debug("Media #%s from database: '%s'" % (str(iCurrent), misc.GetRegInfo(media, 'title')))
+                Log.Debug("Media #%s from database: '%s'" % (
+                    str(iCurrent),
+                    misc.GetRegInfo(media, 'title')))
             # Got to the end of the line?
             if int(partMedias.get('size')) == 0:
                 break
@@ -619,7 +629,9 @@ def scanShowDB(myMediaURL, outFile):
                 fetchURL = myMediaURL + '?X-Plex-Container-Start=' + str(iCount) + '&X-Plex-Container-Size=1'
             else:
                 fetchURL = myMediaURL + '?X-Plex-Container-Start=' + str(iCount) + '&X-Plex-Container-Size=' + str(CONTAINERSIZETV)
-            partMedias = XML.ElementFromURL(fetchURL, timeout=float(PMSTIMEOUT))
+            partMedias = XML.ElementFromURL(
+                fetchURL,
+                timeout=float(PMSTIMEOUT))
             if bScanStatusCount == 0:
                 bScanStatusCountOf = partMedias.get('totalSize')
                 Log.Debug('Amount of items in this section is %s' % bScanStatusCountOf)
@@ -666,7 +678,10 @@ def scanShowDB(myMediaURL, outFile):
                             if myCol == '':
                                 myCol = collection.get('tag')
                             else:
-                                myCol = myCol + Prefs['Seperator'] + collection.get('tag')
+                                myCol = ''.join((
+                                    myCol,
+                                    Prefs['Seperator'],
+                                    collection.get('tag')))
                         if myCol == '':
                             myCol = 'N/A'
                         # Grab locked fields
@@ -688,11 +703,14 @@ def scanShowDB(myMediaURL, outFile):
                             '/allLeaves?X-Plex-Container-',
                             'Start=0&X-Plex-Container-Size=0')),
                         timeout=float(PMSTIMEOUT)).xpath('@totalSize')[0]
-                    Log.Debug('Show: %s has %s episodes' % (title, episodeTotalSize))
+                    Log.Debug('Show: %s has %s episodes' % (
+                        title,
+                        episodeTotalSize))
                     episodeCounter = 0
                     baseURL = misc.GetLoopBack() + '/library/metadata/' + ratingKey + '/allLeaves'
                     while True:
                         myURL = baseURL + '?X-Plex-Container-Start=' + str(episodeCounter) + '&X-Plex-Container-Size=' + str(CONTAINERSIZEEPISODES)
+
                         Log.Debug('Show %s of %s with a RatingKey of %s at myURL: %s with a title of "%s" episode %s of %s' % (iCount, bScanStatusCountOf, ratingKey, myURL, title, episodeCounter, episodeTotalSize))
                         MainEpisodes = XML.ElementFromURL(
                             myURL,
@@ -743,8 +761,15 @@ def selectPList():
     Log.Debug("User selected to export a playlist")
     # Abort if set to auto path
     if Prefs['Auto_Path']:
-        message = 'Playlists can not be exported when path is set to auto. You need to specify a manual path in the prefs'
-        oc = ObjectContainer(title1='Error!. Playlists can not be exported when path is set to auto. You need to specify a manual path in the prefs', no_cache=True, message=message)
+        message = ''.join((
+            "Playlists can not be exported when path is set",
+            " to auto. You need to specify a manual path in the prefs"))
+        oc = ObjectContainer(
+            title1=''.join((
+                "Error!. Playlists can not be exported when path is set to auto.",
+                " You need to specify a manual path in the prefs")),
+            no_cache=True,
+            message=message)
         oc.add(
             DirectoryObject(
                 key=Callback(MainMenu),
@@ -765,8 +790,23 @@ def selectPList():
         playListType = playlist.get('playlistType')
         if playListType in ['video', 'audio', 'photo']:
             key = playlist.get('key')
-            Log.Debug("Added playlist: " + title + " to the listing with a key of: " + key)
-            oc.add(DirectoryObject(key=Callback(backgroundScan, title=playListType, sectiontype='playlists', key=key, random=time.clock()), thumb=thumb, title='Export from "' + title + '"', summary='Export list from "' + title + '"'))
+            strLog = ''.join((
+                "Added playlist: ",
+                title,
+                " to the listing with a key of: ",
+                key
+            ))
+            Log.Debug(strLog)
+            oc.add(DirectoryObject(
+                key=Callback(
+                    backgroundScan,
+                    title=playListType,
+                    sectiontype='playlists',
+                    key=key,
+                    random=time.clock()),
+                thumb=thumb,
+                title='Export from "' + title + '"',
+                summary='Export list from "' + title + '"'))
     oc.add(DirectoryObject(
         key=Callback(MainMenu),
         title="Go to the Main Menu"))
@@ -851,7 +891,13 @@ def scanArtistDB(myMediaURL, outFile):
                 'Amount of items in this section is %s' % bScanStatusCountOf)
         Log.Debug("Walking medias")
         while True:
-            fetchURL = myMediaURL + '?type=10&sort=artist.titleSort,album.titleSort:asc&X-Plex-Container-Start=' + str(bScanStatusCount) + '&X-Plex-Container-Size=' + str(CONTAINERSIZEAUDIO)
+            fetchURL = ''.join((
+                myMediaURL,
+                '?type=10&sort=artist.titleSort,album.titleSort:',
+                'asc&X-Plex-Container-Start=',
+                str(bScanStatusCount),
+                '&X-Plex-Container-Size=',
+                str(CONTAINERSIZEAUDIO)))
             medias = XML.ElementFromURL(fetchURL, timeout=float(PMSTIMEOUT))
             if medias.get('size') == '0':
                 break
@@ -882,7 +928,7 @@ def scanArtistDB(myMediaURL, outFile):
 @route(PREFIX + '/scanPhotoDB')
 def scanPhotoDB(myMediaURL, outFile):
     ''' This function will scan a Photo section. '''
-    Log.Debug("******* Starting scanPhotoDB with an URL of %s ***********" % myMediaURL)
+    Log.Debug("*** Starting scanPhotoDB with an URL of %s ***" % myMediaURL)
     global bScanStatusCount
     global bScanStatusCountOf
     global bScanStatus
@@ -897,12 +943,21 @@ def scanPhotoDB(myMediaURL, outFile):
         else:
             bExtraInfo = True
         Log.Debug('Starting to fetch the list of items in this section')
-        fetchURL = myMediaURL + '?type=10&X-Plex-Container-Start=' + str(iLocalCounter) + '&X-Plex-Container-Size=0'
+        fetchURL = ''.join((
+            myMediaURL,
+            '?type=10&X-Plex-Container-Start=',
+            str(iLocalCounter),
+            '&X-Plex-Container-Size=0'))
         medias = XML.ElementFromURL(fetchURL, timeout=float(PMSTIMEOUT))
         bScanStatusCountOf = 'N/A'
         Log.Debug("Walking medias")
         while True:
-            fetchURL = myMediaURL + '?X-Plex-Container-Start=' + str(iLocalCounter) + '&X-Plex-Container-Size=' + str(CONTAINERSIZEPHOTO)
+            fetchURL = ''.join((
+                myMediaURL,
+                '?X-Plex-Container-Start=',
+                str(iLocalCounter),
+                '&X-Plex-Container-Size=',
+                str(CONTAINERSIZEPHOTO)))
             medias = XML.ElementFromURL(fetchURL, timeout=float(PMSTIMEOUT))
             if medias.get('size') == '0':
                 break
