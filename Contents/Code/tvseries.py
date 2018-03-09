@@ -1,7 +1,7 @@
-####################################################################################################
-#	Helper file for ExportTools
+###################################################################
+# Helper file for ExportTools
 # This one handles TV-Shows
-####################################################################################################
+###################################################################
 
 import misc
 import tvfields
@@ -10,12 +10,11 @@ from lxml import etree as ET
 
 STACKEDLABELS = ['cd', 'disc', 'disk', 'dvd', 'part', 'pt']
 
-####################################################################################################
-# This function will return the header for the CSV file for TV-Shows
-####################################################################################################
-
 
 def getTVHeader(PrefsLevel):
+    '''
+    This function will return the header for the CSV file for TV-Shows
+    '''
     fieldnames = ()
     # Show only stuff
     if PrefsLevel.startswith('Show Only'):
@@ -69,10 +68,10 @@ def getTVHeader(PrefsLevel):
     return fieldnames
 
 
-####################################################################################################
-# This function will return the info for tv-shows
-####################################################################################################
 def getTvInfo(myMedia, myRow):
+    '''
+    This function will return the info for tv-shows
+    '''
     prefsLevel = Prefs['TV_Level']
     if prefsLevel in ['Show Only 1', 'Show Only 2']:
         myRow = misc.getItemInfo(myMedia, myRow, tvfields.Show_1)
@@ -120,10 +119,8 @@ def getTvInfo(myMedia, myRow):
         return myRow
 
 
-''' Export TV Show info only '''
-
-
 def getShowOnly(myMedia, myRow, level):
+    ''' Export TV Show info only '''
     prefsLevel = Prefs['TV_Level']
     if prefsLevel in ['Show Only 1', 'Show Only 2', 'Show Only 3']:
         for key, value in tvfields.Show_1:
