@@ -288,7 +288,7 @@ def complete(title=''):
     global bScanStatus
     Log.Debug("*******  All done, tell my Master  ***********")
     title = ('Export Completed for %s' % title).encode('UTF-8')
-    title = unicode(title, 'utf-8', 'replace')    
+    title = unicode(title, 'utf-8', 'replace')
     message = 'Check the file: %s'.encode('UTF-8') % EXPORTPATH
     message = unicode(message, 'utf-8', 'replace')
     oc2 = ObjectContainer(title1=title, no_history=True, message=message)
@@ -353,7 +353,7 @@ def backgroundScan(title='', key='', sectiontype='', random=0, statusCheck=0):
                         "******** Scan Done, stopping wait ********")
                     Log.Debug("*******  All done, tell my Master  ***********")
                     title = ('Export Completed for %s' % title).encode('UTF-8')
-                    title = unicode(title, 'utf-8', 'replace')                    
+                    title = unicode(title, 'utf-8', 'replace')
                     message = 'Check the file: %s'.encode('UTF-8') % EXPORTPATH
                     message = unicode(message, 'utf-8', 'replace')
                     oc2 = ObjectContainer(
