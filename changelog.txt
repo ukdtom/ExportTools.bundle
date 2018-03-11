@@ -1,3 +1,7 @@
+V1.0.2.11:
+    -   fix #51: Issue with a library with Russian characters
+        (Refixed due to fat fingers)
+
 V1.0.2.10:
     -   fix #51: Issue with a library with Russian characters
 
