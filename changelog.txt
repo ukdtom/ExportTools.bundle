@@ -1,3 +1,6 @@
+V1.0.2.10:
+    -   fix #51: Issue with a library with Russian characters
+
 V1.0.2.9:
     -   fix #49: Add to column with, when in xls mode
     
