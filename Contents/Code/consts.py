@@ -4,7 +4,7 @@
 ########################################################################
 
 # APP specific stuff
-VERSION = ' V1.0.2.9'
+VERSION = ' V1.0.2.10'
 NAME = 'ExportTools'
 DESCRIPTION = 'Export Plex libraries to csv-files or xlsx-files'
 ART = 'art-default.jpg'

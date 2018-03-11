@@ -14,6 +14,7 @@
 # TODO: Poster view for first menu
 
 import os
+import sys
 import time
 import io
 import csv
@@ -153,20 +154,20 @@ def Start():
         NAME + '.bundle',
         'debug')
     DEBUGMODE = os.path.isfile(debugFile)
+    strLog = ''.join((
+        '"*******  Started % s' % (NAME + ' V' + VERSION),
+        ' on %s' % Platform.OS,
+        ' at % s' % time.strftime("%Y-%m-%d %H:%M"),
+        ' with locale set to % s' % str(locale.getdefaultlocale()),
+        ' and file system encoding is % s' % str(sys.getfilesystemencoding()),
+        ' **********'
+    ))
     if DEBUGMODE:
-        version = VERSION + ' ****** WARNING Debug mode on *********'
-        print("****  Started %s on %s at %s with locale set to %s ******" % (
-            NAME + ' V' + version,
-            Platform.OS,
-            time.strftime("%Y-%m-%d %H:%M"),
-            locale.getdefaultlocale()))
-    else:
-        version = VERSION
-    Log.Debug("****  Started %s on %s at %s with locale set to %s ********" % (
-        NAME + ' V' + version,
-        Platform.OS,
-        time.strftime("%Y-%m-%d %H:%M"),
-        locale.getdefaultlocale()))
+        try:
+            print strLog
+        except:
+            pass
+    Log.Debug(strLog)
     Plugin.AddViewGroup('List', viewMode='List', mediaType='items')
     Plugin.AddViewGroup("Details", viewMode="InfoList", mediaType="items")
     ObjectContainer.art = R(ART)
@@ -286,8 +287,10 @@ def complete(title=''):
     ''' Export Complete. '''
     global bScanStatus
     Log.Debug("*******  All done, tell my Master  ***********")
-    title = ('Export Completed for %s' % title)
-    message = 'Check the file: %s' % EXPORTPATH
+    title = ('Export Completed for %s' % title).encode('UTF-8')
+    title = unicode(title, 'utf-8', 'replace')    
+    message = 'Check the file: %s'.encode('UTF-8') % EXPORTPATH
+    message = unicode(message, 'utf-8', 'replace')
     oc2 = ObjectContainer(title1=title, no_history=True, message=message)
     oc2.add(
         DirectoryObject(
@@ -349,8 +352,10 @@ def backgroundScan(title='', key='', sectiontype='', random=0, statusCheck=0):
                     Log.Debug(
                         "******** Scan Done, stopping wait ********")
                     Log.Debug("*******  All done, tell my Master  ***********")
-                    title = ('Export Completed for %s' % title)
-                    message = 'Check the file: %s' % EXPORTPATH
+                    title = ('Export Completed for %s' % title).encode('UTF-8')
+                    title = unicode(title, 'utf-8', 'replace')                    
+                    message = 'Check the file: %s'.encode('UTF-8') % EXPORTPATH
+                    message = unicode(message, 'utf-8', 'replace')
                     oc2 = ObjectContainer(
                         title1=title,
                         no_cache=True,
