@@ -287,10 +287,17 @@ def complete(title=''):
     ''' Export Complete. '''
     global bScanStatus
     Log.Debug("*******  All done, tell my Master  ***********")
-    title = ('Export Completed for %s' % title).encode('UTF-8')
-    title = unicode(title, 'utf-8', 'replace')
-    message = 'Check the file: %s'.encode('UTF-8') % EXPORTPATH
-    message = unicode(message, 'utf-8', 'replace')
+    title = ('Export Completed for %s' % title)
+    try:
+        title = unicode(title, 'utf-8', 'replace')
+    except TypeError:
+        continue
+    message = 'Check the file: %s' % EXPORTPATH
+    try:
+        message = unicode(message, 'utf-8', 'replace')
+    except TypeError:
+        continue
+
     oc2 = ObjectContainer(title1=title, no_history=True, message=message)
     oc2.add(
         DirectoryObject(
@@ -352,10 +359,16 @@ def backgroundScan(title='', key='', sectiontype='', random=0, statusCheck=0):
                     Log.Debug(
                         "******** Scan Done, stopping wait ********")
                     Log.Debug("*******  All done, tell my Master  ***********")
-                    title = ('Export Completed for %s' % title).encode('UTF-8')
-                    title = unicode(title, 'utf-8', 'replace')
-                    message = 'Check the file: %s'.encode('UTF-8') % EXPORTPATH
-                    message = unicode(message, 'utf-8', 'replace')
+                    title = ('Export Completed for %s' % title)
+                    try:
+                        title = unicode(title, 'utf-8', 'replace')
+                    except TypeError:
+                        continue
+                    message = 'Check the file: %s' % EXPORTPATH
+                    try:
+                        message = unicode(message, 'utf-8', 'replace')
+                    except TypeError:
+                        continue
                     oc2 = ObjectContainer(
                         title1=title,
                         no_cache=True,
