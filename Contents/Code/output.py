@@ -143,7 +143,7 @@ def createFile(sectionKey, sectionType, title):
 
 
 def createHeader(outFile, sectionType, playListType=''):
-    ''' Create file header '''''' Create file header '''
+    ''' Create file header '''
     global writer
     global targetfile
     global row
