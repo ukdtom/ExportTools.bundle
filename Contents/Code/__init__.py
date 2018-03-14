@@ -922,7 +922,7 @@ def scanPList(key, outFile):
     message = 'All done'
     oc = ObjectContainer(title1='Playlists', no_cache=True, message=message)
     oc.add(
-        irectoryObject(
+        DirectoryObject(
             key=Callback(MainMenu),
             title="Go to the Main Menu"))
     Log.Debug("******* Ending scanPListDB ***********")

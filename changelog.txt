@@ -1,3 +1,6 @@
+V1.0.2.12:
+    -   fix #56: Poster url broken due to Pep8
+
 V1.0.2.11:
     -   fix #51: Issue with a library with Russian characters
         (Refixed due to fat fingers)
