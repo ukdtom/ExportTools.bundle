@@ -310,7 +310,7 @@ def writerow(rowentry):
     if doPosters:
         posterUrl = ''.join((
             misc.GetLoopBack(),
-            'photo/:/transcode?width=',
+            '/photo/:/transcode?width=',
             str(Prefs['Poster_Width']),
             '&height=',
             str(Prefs['Poster_Hight']),
