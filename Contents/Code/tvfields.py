@@ -1,17 +1,16 @@
-#############################################################################
-# Helper file for ExportTools
+####################################################################################################
+#	Helper file for ExportTools
 # Written by dane22 on the Plex Forums, UKDTOM on GitHub
 #
 # This one contains the valid fields and attributes for tv-shows
 #
-# To disable a field not needed, simply put a # sign in front of the line,
-# and it'll be ommited.
+# To disable a field not needed, simply put a # sign in front of the line, and it'll be ommited.
 # After above, a PMS restart is sadly req. though
 # Note though, that this will be overwritten, if/when this plugin is updated
 #
 # If level has the number 666 in it, a column named 'PMS Media Path' will
 # automaticly be added to the end
-#############################################################################
+####################################################################################################
 
 # Fields that contains a timestamp and should return a date
 dateTimeFields = ['addedAt', 'updatedAt',
@@ -171,9 +170,7 @@ Level_9 = [
 Level_666 = [
 ]
 
-# Define rows and element name for Show Only level 1
-# (one call for all shows....Note that this level only
-# export on show level!, but is very fast)
+# Define rows and element name for Show Only level 1 (one call for all shows....Note that this level only export on show level!, but is very fast)
 Show_1 = [
     ('Media ID', '@ratingKey'),
     ('Title', '@title'),
@@ -188,9 +185,7 @@ Show_1 = [
     ('Poster url', '@thumb')
 ]
 
-# Define rows and element name for Show Only level 2
-# (one call for all shows....Note that this level only
-# export on show level!, but is very fast)
+# Define rows and element name for Show Only level 2 (one call for all shows....Note that this level only export on show level!, but is very fast)
 Show_2 = [
     ('Directors', '//Director/@tag'),
     ('Writers', '//Writer/@tag'),
@@ -198,9 +193,7 @@ Show_2 = [
     ('Genres', '//Genre/@tag')
 ]
 
-# Define rows and element name for Show Only level 2
-# (two call for all shows....Note that this level
-# only export on show level!)
+# Define rows and element name for Show Only level 2 (two call for all shows....Note that this level only export on show level!)
 Show_3 = [
     ('Location', '//Location/@path'),
     ('MetaDB Link', '@guid'),

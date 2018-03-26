@@ -1,11 +1,14 @@
-##########################################################################
-# Helper file for dane22
+####################################################################################################
+#	Helper file for dane22
 # This one handles misc functions
 #
 # Increment version for all new functions and fixes
 #
-##########################################################################
+####################################################################################################
 
+VERSION = '0.0.0.5'
+
+from textwrap import wrap, fill
 import re
 import datetime
 import moviefields
@@ -18,18 +21,20 @@ import sys
 import os
 import math
 import consts
-from textwrap import wrap, fill
-
-VERSION = '0.0.0.5'
 
 
+####################################################################################################
+# This function will return the version of the misc module
+####################################################################################################
 def getVersion():
-    ''' This function will return the version of the misc module '''
     return VERSION
+
+####################################################################################################
+# This function will return a valid token from plex.tv
+####################################################################################################
 
 
 def getToken():
-    ''' return a valid token from plex.tv '''
     userName = Prefs['Plex_User']
     userPwd = Prefs['Plex_Pwd']
     myUrl = 'https://plex.tv/users/sign_in.json'
@@ -57,11 +62,16 @@ def getToken():
         return ''
     return myToken
 
+####################################################################################################
+# This function will return the loopback address
+####################################################################################################
+
 
 def GetLoopBack():
-    ''' return the loopback address '''
+
     # For now, simply return the IPV4 LB Addy, until PMS is better with this
     return 'http://127.0.0.1:32400'
+
     try:
         httpResponse = HTTP.Request(
             'http://[::1]:32400/web', immediate=True, timeout=5)
@@ -69,15 +79,18 @@ def GetLoopBack():
     except:
         return 'http://127.0.0.1:32400'
 
+####################################################################################################
+# This function will return info from an array, defined in an xpath
+####################################################################################################
+
 
 def GetArrayAsString(Media, Field, default=''):
-    ''' return info from an array, defined in an xpath '''
     Fields = Media.xpath(Field)
     if not Fields:
         Fields = ['']
     Field = ''
     for myField in Fields:
-        if myField is None:
+        if myField == None:
             myField = default
         if myField == '':
             myField = default
@@ -87,31 +100,42 @@ def GetArrayAsString(Media, Field, default=''):
             Field = Field + Prefs['Seperator'] + myField
     return WrapStr(fixCRLF(Field)).encode('utf8')
 
+####################################################################################################
+# This function will return info from extended page for movies
+####################################################################################################
+
 
 def GetExtInfo(ExtInfo, myField, default=''):
-    ''' return info from extended page for movies '''
     try:
         myLookUp = WrapStr(ExtInfo.xpath('Media/@' + myField)[0])
         if not myLookUp:
             myLookUp = WrapStr(default)
     except:
         myLookUp = WrapStr(default)
+#		Log.Debug('Failed to lookup field %s. Reverting to default' %(myField))
     return myLookUp.encode('utf8')
+
+####################################################################################################
+# This function will return info from different parts of a movie
+####################################################################################################
 
 
 def GetMoviePartInfo(ExtInfo, myField, default=''):
-    ''' return info from different parts of a movie '''
     try:
         myLookUp = WrapStr(ExtInfo.get(myField))
         if not myLookUp:
             myLookUp = WrapStr(default)
     except:
         myLookUp = WrapStr(default)
+#		Log.Debug('Failed to lookup field %s. Reverting to default' %(myField))
     return myLookUp.encode('utf8')
+
+####################################################################################################
+#	Pull's a field from the xml
+####################################################################################################
 
 
 def GetRegInfo(myMedia, myField, default=''):
-    ''' Pull's a field from the xml '''
     try:
         if myField in ['rating']:
             myLookUp = "{0:.1f}".format(float(myMedia.get(myField)))
@@ -121,11 +145,15 @@ def GetRegInfo(myMedia, myField, default=''):
             myLookUp = WrapStr(default)
     except:
         myLookUp = WrapStr(default)
+#		Log.Debug('Failed to lookup field %s. Reverting to default' %(myField))
     return myLookUp.encode('utf8')
+
+####################################################################################################
+#	Pull's a field from the xml
+####################################################################################################
 
 
 def GetRegInfo2(myMedia, myField, default=consts.DEFAULT, key='N/A'):
-    ''' Pull's a field from the xml '''
     returnVal = ''
     global retVal
     retVal = ''
@@ -148,9 +176,7 @@ def GetRegInfo2(myMedia, myField, default=consts.DEFAULT, key='N/A'):
                             returnVal = default
                     # IMDB or TheMovieDB?
                     elif fieldsplit[1] == 'guid':
-                        return metaDBLink(
-                            returnVal,
-                            mediatype=myMedia.xpath('@type')[0]).encode('utf8')
+                        return metaDBLink(returnVal, mediatype=myMedia.xpath('@type')[0]).encode('utf8')
             except:
                 Log.Critical('Exception on field: ' + myField)
                 returnVal = default
@@ -195,28 +221,37 @@ def GetRegInfo2(myMedia, myField, default=consts.DEFAULT, key='N/A'):
     except:
         returnVal = default
 
+####################################################################################################
+#	Fix CR/LF
+####################################################################################################
+
 
 def fixCRLF(myString):
-    ''' Fix CR/LF '''
     myString = myString.decode('utf-8').replace('\r\n', ' ')
     myString = myString.decode('utf-8').replace('\n', ' ')
     myString = myString.decode('utf-8').replace('\r', ' ')
     return myString
 
+####################################################################################################
+#	Wraps a string if needed
+####################################################################################################
+
 
 def WrapStr(myStr, default='N/A'):
-    ''' Wraps a string if needed '''
     LineWrap = int(Prefs['Line_Length'])
-    if myStr is None:
+    if myStr == None:
         myStr = default
     if Prefs['Line_Wrap']:
         return fill(myStr, LineWrap)
     else:
         return myStr
 
+####################################################################################################
+# This function will return a string in hh:mm from a millisecond timestamp
+####################################################################################################
+
 
 def ConvertTimeStamp(timeStamp):
-    ''' return a string in hh:mm from a millisecond timestamp '''
     seconds = str(int(timeStamp) / (1000) % 60)
     if len(seconds) < 2:
         seconds = '0' + seconds
@@ -226,24 +261,31 @@ def ConvertTimeStamp(timeStamp):
     hours = str((int(timeStamp) / (1000 * 60 * 60)) % 24)
     return hours + ':' + minutes + ':' + seconds
 
+####################################################################################################
+# This function will return a date string in ISO 8601 format from a millisecond timestamp
+####################################################################################################
+
 
 def ConvertDateStamp(timeStamp):
-    '''
-    return a date string in ISO 8601 format from a millisecond timestamp
-    '''
     return Datetime.FromTimestamp(float(timeStamp)).date().isoformat()
+
+####################################################################################################
+# This function will return fieldnames for a level
+####################################################################################################
 
 
 def getLevelFields(levelFields, fieldnames):
-    ''' return fieldnames for a level '''
     fieldnamesList = list(fieldnames)
     for item in levelFields:
         fieldnamesList.append(str(item[0]))
     return fieldnamesList
 
+####################################################################################################
+# This function fetch the actual info for the element
+####################################################################################################
+
 
 def getItemInfo(et, myRow, fieldList):
-    ''' fetch the actual info for the element '''
     try:
         for item in fieldList:
             try:
@@ -252,24 +294,16 @@ def getItemInfo(et, myRow, fieldList):
                 # Special deal for Sort Title
                 if key == 'Sort title':
                     if Prefs['Sort_title']:
-                        if consts.DEFAULT == GetRegInfo2(
-                                et,
-                                value,
-                                consts.DEFAULT,
-                                key=key):
+                        if consts.DEFAULT == GetRegInfo2(et, value, consts.DEFAULT, key=key):
                             element = GetRegInfo2(
                                 et, '@title', consts.DEFAULT, key='Title')
                         else:
                             element = GetRegInfo2(
                                 et, value, consts.DEFAULT, key=key)
+               # Special deal for Original Title
                 elif key == 'Original Title':
-                    # Special deal for Original Title
                     if Prefs['Original_Title']:
-                        if consts.DEFAULT == GetRegInfo2(
-                                et,
-                                value,
-                                consts.DEFAULT,
-                                key=key):
+                        if consts.DEFAULT == GetRegInfo2(et, value, consts.DEFAULT, key=key):
                             element = GetRegInfo2(
                                 et, '@title', consts.DEFAULT, key='Title')
                         else:
@@ -300,27 +334,29 @@ def getItemInfo(et, myRow, fieldList):
     except Exception, e:
         Log.Exception('Exception in getItemInfo: ' + str(e))
 
+####################################################################################################
+# This function will return the media path info for movies
+####################################################################################################
+
 
 def getMediaPath(myMedia, myRow):
-    ''' return the media path info for movies '''
-    # Get tree info for media
+        # Get tree info for media
     myMediaTreeInfoURL = GetLoopBack() + '/library/metadata/' + \
         GetRegInfo(myMedia, 'ratingKey') + '/tree'
     TreeInfo = XML.ElementFromURL(myMediaTreeInfoURL).xpath('//MediaPart')
     for myPart in TreeInfo:
         MediaHash = GetRegInfo(myPart, 'hash')
-        PMSMediaPath = os.path.join(
-            Core.app_support_path,
-            'Media',
-            'localhost',
-            MediaHash[0], MediaHash[1:] + '.bundle',
-            'Contents')
+        PMSMediaPath = os.path.join(Core.app_support_path, 'Media',
+                                    'localhost', MediaHash[0], MediaHash[1:] + '.bundle', 'Contents')
         myRow['PMS Media Path'] = PMSMediaPath.encode('utf8')
     return myRow
 
+####################################################################################################
+# This function converts Byte to best readable string
+####################################################################################################
+
 
 def ConvertSize(SizeAsString):
-    ''' converts Byte to best readable string '''
     size = float(SizeAsString)
     if (size == 0):
         return '0B'
@@ -330,9 +366,12 @@ def ConvertSize(SizeAsString):
     s = round(size / p, 2)
     return '%s %s' % (s, size_name[i])
 
+####################################################################################################
+# Returns a MetaDb link from a Guid
+####################################################################################################
+
 
 def metaDBLink(guid, mediatype='episode', default='N/A'):
-    ''' Returns a MetaDb link from a Guid '''
     if 'local://' in guid:
         sTmp = default
         return sTmp

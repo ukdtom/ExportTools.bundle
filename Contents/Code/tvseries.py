@@ -1,7 +1,7 @@
-###################################################################
-# Helper file for ExportTools
+####################################################################################################
+#	Helper file for ExportTools
 # This one handles TV-Shows
-###################################################################
+####################################################################################################
 
 import misc
 import tvfields
@@ -10,11 +10,12 @@ from lxml import etree as ET
 
 STACKEDLABELS = ['cd', 'disc', 'disk', 'dvd', 'part', 'pt']
 
+####################################################################################################
+# This function will return the header for the CSV file for TV-Shows
+####################################################################################################
+
 
 def getTVHeader(PrefsLevel):
-    '''
-    This function will return the header for the CSV file for TV-Shows
-    '''
     fieldnames = ()
     # Show only stuff
     if PrefsLevel.startswith('Show Only'):
@@ -45,34 +46,13 @@ def getTVHeader(PrefsLevel):
     # Level 1 fields
     fieldnames = misc.getLevelFields(tvfields.Level_1, fieldnames)
     # Basic fields
-    if PrefsLevel in [
-            'Level 2',
-            'Level 3',
-            'Level 4',
-            'Level 5',
-            'Level 6',
-            'Level 7',
-            'Level 8',
-            'Level 666']:
+    if PrefsLevel in ['Level 2', 'Level 3', 'Level 4', 'Level 5', 'Level 6', 'Level 7', 'Level 8', 'Level 666']:
         fieldnames = misc.getLevelFields(tvfields.Level_2, fieldnames)
     # Extended fields
-    if PrefsLevel in [
-            'Level 3',
-            'Level 4',
-            'Level 5',
-            'Level 6',
-            'Level 7',
-            'Level 8',
-            'Level 666']:
+    if PrefsLevel in ['Level 3', 'Level 4', 'Level 5', 'Level 6', 'Level 7', 'Level 8', 'Level 666']:
         fieldnames = misc.getLevelFields(tvfields.Level_3, fieldnames)
     # Extreme fields
-    if PrefsLevel in [
-            'Level 4',
-            'Level 5',
-            'Level 6',
-            'Level 7',
-            'Level 8',
-            'Level 666']:
+    if PrefsLevel in ['Level 4', 'Level 5', 'Level 6', 'Level 7', 'Level 8', 'Level 666']:
         fieldnames = misc.getLevelFields(tvfields.Level_4, fieldnames)
     # Extreme 2 (Part) level
     if PrefsLevel in ['Level 5', 'Level 6', 'Level 7', 'Level 8', 'Level 666']:
@@ -89,10 +69,10 @@ def getTVHeader(PrefsLevel):
     return fieldnames
 
 
+####################################################################################################
+# This function will return the info for tv-shows
+####################################################################################################
 def getTvInfo(myMedia, myRow):
-    '''
-    This function will return the info for tv-shows
-    '''
     prefsLevel = Prefs['TV_Level']
     if prefsLevel in ['Show Only 1', 'Show Only 2']:
         myRow = misc.getItemInfo(myMedia, myRow, tvfields.Show_1)
@@ -117,42 +97,16 @@ def getTvInfo(myMedia, myRow):
         # Get Simple Info
         myRow = misc.getItemInfo(myMedia, myRow, tvfields.Level_1)
         # Get Basic Info
-        if prefsLevel in [
-                'Level 2',
-                'Level 3',
-                'Level 4',
-                'Level 5',
-                'Level 6',
-                'Level 7',
-                'Level 8',
-                'Level 666']:
+        if prefsLevel in ['Level 2', 'Level 3', 'Level 4', 'Level 5', 'Level 6', 'Level 7', 'Level 8', 'Level 666']:
             myRow = misc.getItemInfo(myMedia, myRow, tvfields.Level_2)
         # Get Extended Info
-        if prefsLevel in [
-                'Level 3',
-                'Level 4',
-                'Level 5',
-                'Level 6',
-                'Level 7',
-                'Level 8',
-                'Level 666']:
+        if prefsLevel in ['Level 3', 'Level 4', 'Level 5', 'Level 6', 'Level 7', 'Level 8', 'Level 666']:
             myRow = misc.getItemInfo(myMedia, myRow, tvfields.Level_3)
         # Get Extreme Info
-        if prefsLevel in [
-                'Level 4',
-                'Level 5',
-                'Level 6',
-                'Level 7',
-                'Level 8',
-                'Level 666']:
+        if prefsLevel in ['Level 4', 'Level 5', 'Level 6', 'Level 7', 'Level 8', 'Level 666']:
             myRow = misc.getItemInfo(myMedia, myRow, tvfields.Level_4)
         # Get Extreme 2 Info
-        if prefsLevel in [
-                'Level 5',
-                'Level 6',
-                'Level 7',
-                'Level 8',
-                'Level 666']:
+        if prefsLevel in ['Level 5', 'Level 6', 'Level 7', 'Level 8', 'Level 666']:
             myRow = misc.getItemInfo(myMedia, myRow, tvfields.Level_5)
         # Get Extreme 3 Info
         if prefsLevel in ['Level 6', 'Level 7', 'Level 8', 'Level 666']:
@@ -166,13 +120,15 @@ def getTvInfo(myMedia, myRow):
         return myRow
 
 
+''' Export TV Show info only '''
+
+
 def getShowOnly(myMedia, myRow, level):
-    ''' Export TV Show info only '''
     prefsLevel = Prefs['TV_Level']
     if prefsLevel in ['Show Only 1', 'Show Only 2', 'Show Only 3']:
         for key, value in tvfields.Show_1:
             element = myMedia.get(value[1:])
-            if element is None:
+            if element == None:
                 element = 'N/A'
             element = misc.WrapStr(misc.fixCRLF(element).encode('utf8'))
             if key == 'MetaDB Link':
