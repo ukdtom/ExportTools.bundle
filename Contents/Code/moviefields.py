@@ -138,7 +138,11 @@ Level_4 = [
 
 # Define rows and element name for level 5 (Part info) (One call pr. movie)
 Level_5 = [
-    ('Part File',
+    ('Part File Combined',
+        'Media/Part/@file'),
+    ('Part File Only',
+        'Media/Part/@file'),
+    ('Part File Path',
         'Media/Part/@file'),
     ('Part Size',
         'Media/Part/@size'),

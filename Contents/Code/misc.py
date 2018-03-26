@@ -262,6 +262,16 @@ def getItemInfo(et, myRow, fieldList):
                         else:
                             element = GetRegInfo2(
                                 et, value, consts.DEFAULT, key=key)
+                elif key in ['Part File Only', 'Part File Path']:
+                    element = GetRegInfo2(
+                            et,
+                            value,
+                            consts.DEFAULT,
+                            key='Part File Only')
+                    if key == 'Part File Only':
+                        element = os.path.split(element)[1]
+                    else:
+                        element = os.path.split(element)[0]
                 elif key == 'Original Title':
                     # Special deal for Original Title
                     if Prefs['Original_Title']:
