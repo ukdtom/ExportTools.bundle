@@ -1,10 +1,10 @@
-####################################################################################################
-#	Helper file for ExportTools
+########################################################################
+# Helper file for ExportTools
 # This one handles global constants
-####################################################################################################
+########################################################################
 
 # APP specific stuff
-VERSION = ' V1.0.2.8'
+VERSION = ' V1.0.2.12'
 NAME = 'ExportTools'
 DESCRIPTION = 'Export Plex libraries to csv-files or xlsx-files'
 ART = 'art-default.jpg'

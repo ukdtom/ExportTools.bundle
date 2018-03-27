@@ -1,16 +1,17 @@
-####################################################################################################
-#	Helper file for ExportTools
+#####################################################################
+# Helper file for ExportTools
 # Written by dane22 on the Plex Forums, UKDTOM on GitHub
 #
 # This one contains the valid fields and attributes for audio
 #
-# To disable a field not needed, simply put a # sign in front of the line, and it'll be ommited.
+# To disable a field not needed, simply put a # sign in front of the
+# line, and it'll be ommited.
 # After above, a PMS restart is sadly req. though
 # Note though, that this will be overwritten, if/when this plugin is updated
 #
 # If level has the number 666 in it, a column named 'PMS Media Path' will
 # automaticly be added to the end
-####################################################################################################
+######################################################################
 
 # Fields that contains a timestamp and should return a date
 dateTimeFields = ['addedAt', 'updatedAt', 'lastViewedAt']

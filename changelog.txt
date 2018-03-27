@@ -1,6 +1,3 @@
-V1.0.2.13:
-    -   fix #59: Create output columns, that separate filename and path
-
 V1.0.2.12:
     -   fix #56: Poster url broken due to Pep8
 
