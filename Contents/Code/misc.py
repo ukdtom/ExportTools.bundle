@@ -191,6 +191,7 @@ def GetRegInfo2(myMedia, myField, default=consts.DEFAULT, key='N/A'):
                     else:
                         returnVal = default
                         pass
+
         return WrapStr(fixCRLF(returnVal)).encode('utf8')
     except:
         returnVal = default
@@ -275,7 +276,13 @@ def getItemInfo(et, myRow, fieldList):
                         else:
                             element = GetRegInfo2(
                                 et, value, consts.DEFAULT, key=key)
-
+                # part file
+                elif key.startswith('Part File'):
+                    element = GetRegInfo2(et, value, consts.DEFAULT, key=key)
+                    if key == 'Part File':
+                        element = os.path.split(element)[1]
+                    elif key == 'Part File Path':
+                        element = os.path.split(element)[0]
                 # Special guid extract of the language code
                 elif key == 'MetaData Language':
                     element = et.get('guid')
