@@ -70,7 +70,12 @@ Level_3 = [
 Level_4 = [
     ('MetaDB Link', '@guid'),
     ('MetaData Language', '@guid'),
-    ('Part File', 'Media/Part/@file'),
+    ('Part File Combined',
+        'Media/Part/@file'),
+    ('Part File',
+        'Media/Part/@file'),
+    ('Part File Path',
+        'Media/Part/@file'),
     ('Part Duration', 'Media/Part/@duration'),
     ('Part Size', 'Media/Part/@size'),
     ('Part Size as Bytes', 'Media/Part/@size'),
