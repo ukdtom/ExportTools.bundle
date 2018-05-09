@@ -1,3 +1,8 @@
+V1.0.2.14:
+    -   Movies:
+        -   fix #62: Missing color properties: 
+            Added colorPrimaries, colorRange, colorSpace, colorTrc for level 6
+
 V1.0.2.13:
     -   fix #59: File Path now split into: 
         "Part File Combined", "Part File" and "Part File Path"
