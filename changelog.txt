@@ -1,3 +1,12 @@
+V1.0.2.14:
+    -   Movies:
+        -   fix #62: Missing color properties:
+            Added "Video Stream Color Primaries", "Video Stream Color Range",
+            "Video Stream Color Space", "Video Stream Color Trc" to level 6
+        'Media/Part/Stream[@streamType=1]/@colorTrc'),
+        -   fix #62: Missing color properties:
+            Added "Video Stream Color Primaries", "Video Stream Color Trc" to level 5
+
 V1.0.2.13:
     -   fix #59: File Path now split into: 
         "Part File Combined", "Part File" and "Part File Path"

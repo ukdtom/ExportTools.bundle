@@ -4,7 +4,7 @@
 ########################################################################
 
 # APP specific stuff
-VERSION = ' V1.0.2.13'
+VERSION = ' V1.0.2.14'
 NAME = 'ExportTools'
 DESCRIPTION = 'Export Plex libraries to csv-files or xlsx-files'
 ART = 'art-default.jpg'
@@ -14,7 +14,7 @@ APPGUID = '7608cf36-742b-11e4-8b39-00af17210b2'
 PLAYLIST = 'playlist.png'
 DEFAULT = 'N/A'
 
-# How many items we ask for each time, when accessing a section or Show
+# How many items we ask for each time, when accessing a section
 CONTAINERSIZEMOVIES = 30
 CONTAINERSIZETV = 20
 CONTAINERSIZEEPISODES = 30
