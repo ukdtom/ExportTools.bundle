@@ -2,9 +2,8 @@ V1.0.2.14:
     -   Movies:
         -   fix #62: Missing color properties:
             Added "Video Stream Color Primaries", "Video Stream Color Range",
-            "Video Stream Color Space", "Video Stream Color Trc" to level 6
-        'Media/Part/Stream[@streamType=1]/@colorTrc'),
-    - Shows:
+            "Video Stream Color Space", "Video Stream Color Trc" to level 6        
+    -   Shows:
         -   fix #62: Missing color properties:
             Added "Video Stream Color Primaries", "Video Stream Color Trc" to level 5
 
