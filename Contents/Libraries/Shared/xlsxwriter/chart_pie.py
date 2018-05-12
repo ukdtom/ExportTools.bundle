@@ -2,7 +2,7 @@
 #
 # ChartPie - A class for writing the Excel XLSX Pie charts.
 #
-# Copyright 2013-2016, John McNamara, jmcnamara@cpan.org
+# Copyright 2013-2018, John McNamara, jmcnamara@cpan.org
 #
 
 from warnings import warn
@@ -112,6 +112,9 @@ class ChartPie(chart.Chart):
 
         # Write the subclass chart type element.
         self._write_chart_type(None)
+
+        # Write the c:spPr element for the plotarea formatting.
+        self._write_sp_pr(self.plotarea)
 
         self._xml_end_tag('c:plotArea')
 

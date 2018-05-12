@@ -2,7 +2,7 @@
 #
 # ChartArea - A class for writing the Excel XLSX Area charts.
 #
-# Copyright 2013-2016, John McNamara, jmcnamara@cpan.org
+# Copyright 2013-2018, John McNamara, jmcnamara@cpan.org
 #
 
 from . import chart
@@ -93,9 +93,6 @@ class ChartArea(chart.Chart):
 
         # Write the c:dropLines element.
         self._write_drop_lines()
-
-        # Write the c:marker element.
-        self._write_marker_value()
 
         # Write the c:axId elements
         self._write_axis_ids(args)

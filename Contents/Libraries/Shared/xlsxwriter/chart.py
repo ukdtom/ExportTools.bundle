@@ -2,7 +2,7 @@
 #
 # Chart - A class for writing the Excel XLSX Worksheet file.
 #
-# Copyright 2013-2016, John McNamara, jmcnamara@cpan.org
+# Copyright 2013-2018, John McNamara, jmcnamara@cpan.org
 #
 import re
 import copy
@@ -98,11 +98,13 @@ class Chart(xmlwriter.XMLwriter):
         self.title_none = False
         self.date_category = False
         self.date_1904 = False
+        self.remove_timezone = False
         self.label_positions = {}
         self.label_position_default = ''
         self.already_inserted = False
         self.combined = None
         self.is_secondary = False
+        self.warn_sheetname = True
         self._set_default_properties()
 
     def add_series(self, options):
@@ -126,6 +128,12 @@ class Chart(xmlwriter.XMLwriter):
         if self.requires_category and 'categories' not in options:
             warn("Must specify 'categories' in add_series() "
                  "for this chart type")
+            return
+
+        if len(self.series) == 255:
+            warn("The maximum number of series that can be added to an "
+                 "Excel Chart is 255")
+            return
 
         # Convert list into a formula string.
         values = self._list_to_formula(options.get('values'))
@@ -504,7 +512,7 @@ class Chart(xmlwriter.XMLwriter):
                 up_line = Shape._get_line_properties(options['up']['line'])
 
             if 'fill' in options['up']:
-                up_fill = Shape._get_line_properties(options['up']['fill'])
+                up_fill = Shape._get_fill_properties(options['up']['fill'])
 
         # Set properties for 'down' bar.
         if options.get('down'):
@@ -517,7 +525,7 @@ class Chart(xmlwriter.XMLwriter):
                 down_line = Shape._get_line_properties(options['down']['line'])
 
             if 'fill' in options['down']:
-                down_fill = Shape._get_line_properties(options['down']['fill'])
+                down_fill = Shape._get_fill_properties(options['down']['fill'])
 
         self.up_down_bars = {'up': {'line': up_line,
                                     'fill': up_fill,
@@ -740,13 +748,16 @@ class Chart(xmlwriter.XMLwriter):
         # Convert datetime args if required.
         if axis.get('min') and supported_datetime(axis['min']):
             axis['min'] = datetime_to_excel_datetime(axis['min'],
-                                                     self.date_1904)
+                                                     self.date_1904,
+                                                     self.remove_timezone)
         if axis.get('max') and supported_datetime(axis['max']):
             axis['max'] = datetime_to_excel_datetime(axis['max'],
-                                                     self.date_1904)
+                                                     self.date_1904,
+                                                     self.remove_timezone)
         if axis.get('crossing') and supported_datetime(axis['crossing']):
             axis['crossing'] = datetime_to_excel_datetime(axis['crossing'],
-                                                          self.date_1904)
+                                                          self.date_1904,
+                                                          self.remove_timezone)
 
         # Set the font properties if present.
         axis['num_font'] = self._convert_font_args(options.get('num_font'))
@@ -819,6 +830,11 @@ class Chart(xmlwriter.XMLwriter):
 
         # If it isn't an array ref it is probably a formula already.
         if type(data) is not list:
+            # Check for unquoted sheetnames.
+            if (data and ' ' in data and "'" not in data
+                    and self.warn_sheetname):
+                warn("Sheetname in '%s' contains spaces but isn't quoted. "
+                     "This may cause errors in Excel." % data)
             return data
 
         formula = xl_range_formula(*data)
@@ -929,8 +945,6 @@ class Chart(xmlwriter.XMLwriter):
         marker_type = marker.get('type')
 
         if marker_type is not None:
-            if marker_type == 'automatic':
-                marker['automatic'] = 1
 
             if marker_type in types:
                 marker['type'] = types[marker_type]
@@ -1085,7 +1099,6 @@ class Chart(xmlwriter.XMLwriter):
 
         # Set the line properties for the error bars.
         error_bars['line'] = Shape._get_line_properties(options.get('line'))
-        error_bars['fill'] = Shape._get_line_properties(options.get('fill'))
 
         return error_bars
 
@@ -1097,7 +1110,6 @@ class Chart(xmlwriter.XMLwriter):
 
         # Set the line properties for the gridline.
         gridline['line'] = Shape._get_line_properties(options.get('line'))
-        gridline['fill'] = Shape._get_line_properties(options.get('fill'))
 
         return gridline
 
@@ -2270,7 +2282,7 @@ class Chart(xmlwriter.XMLwriter):
         self._xml_empty_tag('c:orientation', attributes)
 
     def _write_c_max(self, max_val):
-        # Write the <c:max_val> element.
+        # Write the <c:max> element.
 
         if max_val is None:
             return
@@ -2280,7 +2292,7 @@ class Chart(xmlwriter.XMLwriter):
         self._xml_empty_tag('c:max', attributes)
 
     def _write_c_min(self, min_val):
-        # Write the <c:min_val> element.
+        # Write the <c:min> element.
 
         if min_val is None:
             return
@@ -2942,7 +2954,8 @@ class Chart(xmlwriter.XMLwriter):
 
         if not marker:
             return
-        if 'automatic' in marker:
+
+        if marker['type'] == 'automatic':
             return
 
         self._xml_start_tag('c:marker')
@@ -2958,17 +2971,6 @@ class Chart(xmlwriter.XMLwriter):
         self._write_sp_pr(marker)
 
         self._xml_end_tag('c:marker')
-
-    def _write_marker_value(self):
-        # Write the <c:marker> element without a sub-element.
-        style = self.default_marker
-
-        if not style:
-            return
-
-        attributes = [('val', 1)]
-
-        self._xml_empty_tag('c:marker', attributes)
 
     def _write_marker_size(self, val):
         # Write the <c:size> element.
@@ -3173,7 +3175,8 @@ class Chart(xmlwriter.XMLwriter):
 
     def _write_trendline_order(self, val):
         # Write the <c:order> element.
-        # val = _[0] is not None ? _[0]: 2
+        if val < 2:
+            val = 2
 
         attributes = [('val', val)]
 
@@ -3181,7 +3184,8 @@ class Chart(xmlwriter.XMLwriter):
 
     def _write_period(self, val):
         # Write the <c:period> element.
-        # val = _[0] is not None ? _[0]: 2
+        if val < 2:
+            val = 2
 
         attributes = [('val', val)]
 

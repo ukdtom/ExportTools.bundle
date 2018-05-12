@@ -2,7 +2,7 @@
 #
 # ChartStock - A class for writing the Excel XLSX Stock charts.
 #
-# Copyright 2013-2016, John McNamara, jmcnamara@cpan.org
+# Copyright 2013-2018, John McNamara, jmcnamara@cpan.org
 #
 
 from . import chart
@@ -100,9 +100,6 @@ class ChartStock(chart.Chart):
 
         # Write the c:upDownBars element.
         self._write_up_down_bars()
-
-        # Write the c:marker element.
-        self._write_marker_value()
 
         # Write the c:axId elements
         self._write_axis_ids(args)

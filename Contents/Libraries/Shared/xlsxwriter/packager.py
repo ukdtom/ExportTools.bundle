@@ -2,7 +2,7 @@
 #
 # Packager - A class for writing the Excel XLSX Worksheet file.
 #
-# Copyright 2013-2016, John McNamara, jmcnamara@cpan.org
+# Copyright 2013-2018, John McNamara, jmcnamara@cpan.org
 #
 
 # Standard packages.
@@ -15,17 +15,17 @@ from .compatibility import StringIO
 from .compatibility import BytesIO
 
 # Package imports.
-from xlsxwriter.app import App
-from xlsxwriter.contenttypes import ContentTypes
-from xlsxwriter.core import Core
-from xlsxwriter.custom import Custom
-from xlsxwriter.relationships import Relationships
-from xlsxwriter.sharedstrings import SharedStrings
-from xlsxwriter.styles import Styles
-from xlsxwriter.theme import Theme
-from xlsxwriter.vml import Vml
-from xlsxwriter.table import Table
-from xlsxwriter.comments import Comments
+from .app import App
+from .contenttypes import ContentTypes
+from .core import Core
+from .custom import Custom
+from .relationships import Relationships
+from .sharedstrings import SharedStrings
+from .styles import Styles
+from .theme import Theme
+from .vml import Vml
+from .table import Table
+from .comments import Comments
 
 
 class Packager(object):
@@ -180,7 +180,7 @@ class Packager(object):
             if worksheet.is_chartsheet:
                 continue
 
-            if worksheet.optimization == 1:
+            if worksheet.constant_memory:
                 worksheet._opt_reopen()
                 worksheet._write_single_row()
 
