@@ -53,7 +53,7 @@ Level_4 = [
     ('Part Duration', 'Media/Part/@duration'),
     ('Part File Combined',
         'Media/Part/@file'),
-    ('Part File Only',
+    ('Part File',
         'Media/Part/@file'),
     ('Part File Path',
         'Media/Part/@file'),

@@ -41,7 +41,7 @@ Level_2 = [
 Level_3 = [
     ('Part File Combined',
         'Media/Part/@file'),
-    ('Part File Only',
+    ('Part File',
         'Media/Part/@file'),
     ('Part File Path',
         'Media/Part/@file'),
