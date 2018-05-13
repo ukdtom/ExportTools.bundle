@@ -174,5 +174,11 @@
         "label": "Perform 'file present/accessibility' check. Requires more time. Useful when part of media file storage was accidentally lost",
         "type": "bool",
         "default": "false"
-    }
+    },
+    {
+        "id": "TimeOut",
+        "label": "Timeout when requesting info from PMS in sec.",
+        "type": "text",
+        "default": "30"
+    }   
 ]

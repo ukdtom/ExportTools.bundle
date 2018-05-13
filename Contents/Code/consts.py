@@ -22,4 +22,4 @@ CONTAINERSIZEAUDIO = 10
 CONTAINERSIZEPHOTO = 20
 
 # For slow PMS HW, we might need to wait some time here
-PMSTIMEOUT = 30
+PMSTIMEOUT = Prefs['TimeOut']

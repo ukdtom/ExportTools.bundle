@@ -1,6 +1,7 @@
 V1.0.2.15:
     -   General:
         -   Updated xlsx library to newest version
+        -   Fix #65 Expose Timeout
 
 V1.0.2.14:
     -   Movies:
