@@ -2,14 +2,15 @@
 #
 # Worksheet - A class for writing the Excel XLSX Worksheet file.
 #
-# Copyright 2013-2016, John McNamara, jmcnamara@cpan.org
+# Copyright 2013-2018, John McNamara, jmcnamara@cpan.org
 #
 
 # Standard packages.
-import re
-import tempfile
 import codecs
 import os
+import re
+import sys
+import tempfile
 
 from warnings import warn
 
@@ -166,7 +167,7 @@ class Worksheet(xmlwriter.XMLwriter):
         self.index = None
         self.str_table = None
         self.palette = None
-        self.optimization = 0
+        self.constant_memory = 0
         self.tmpdir = None
         self.is_chartsheet = False
 
@@ -283,7 +284,6 @@ class Worksheet(xmlwriter.XMLwriter):
         self.autofilter_ref = None
         self.filter_range = []
         self.filter_on = 0
-        self.filter_range = []
         self.filter_cols = {}
         self.filter_type = {}
 
@@ -317,6 +317,8 @@ class Worksheet(xmlwriter.XMLwriter):
 
         self.validations = []
         self.cond_formats = {}
+        self.data_bars_2010 = []
+        self.use_data_bars_2010 = False
         self.dxf_priority = 1
         self.is_chartsheet = 0
         self.page_view = 0
@@ -333,6 +335,7 @@ class Worksheet(xmlwriter.XMLwriter):
 
         self.default_date_format = None
         self.default_url_format = None
+        self.remove_timezone = False
 
         self.row_data_filename = None
         self.row_data_fh = None
@@ -465,14 +468,14 @@ class Worksheet(xmlwriter.XMLwriter):
             string = string[:self.xls_strmax]
             str_error = -2
 
-        # Write a shared string or an in-line string in optimization mode.
-        if self.optimization == 0:
+        # Write a shared string or an in-line string in constant_memory mode.
+        if not self.constant_memory:
             string_index = self.str_table._get_shared_string_index(string)
         else:
             string_index = string
 
-        # Write previous row if in in-line string optimization mode.
-        if self.optimization and row > self.previous_row:
+        # Write previous row if in in-line string constant_memory mode.
+        if self.constant_memory and row > self.previous_row:
             self._write_single_row(row)
 
         # Store the cell data in the worksheet data table.
@@ -513,8 +516,8 @@ class Worksheet(xmlwriter.XMLwriter):
         if self._check_dimensions(row, col):
             return -1
 
-        # Write previous row if in in-line string optimization mode.
-        if self.optimization and row > self.previous_row:
+        # Write previous row if in in-line string constant_memory mode.
+        if self.constant_memory and row > self.previous_row:
             self._write_single_row(row)
 
         # Store the cell data in the worksheet data table.
@@ -547,8 +550,8 @@ class Worksheet(xmlwriter.XMLwriter):
         if self._check_dimensions(row, col):
             return -1
 
-        # Write previous row if in in-line string optimization mode.
-        if self.optimization and row > self.previous_row:
+        # Write previous row if in in-line string constant_memory mode.
+        if self.constant_memory and row > self.previous_row:
             self._write_single_row(row)
 
         # Store the cell data in the worksheet data table.
@@ -586,8 +589,8 @@ class Worksheet(xmlwriter.XMLwriter):
         if formula.startswith('='):
             formula = formula.lstrip('=')
 
-        # Write previous row if in in-line string optimization mode.
-        if self.optimization and row > self.previous_row:
+        # Write previous row if in in-line string constant_memory mode.
+        if self.constant_memory and row > self.previous_row:
             self._write_single_row(row)
 
         # Store the cell data in the worksheet data table.
@@ -641,8 +644,8 @@ class Worksheet(xmlwriter.XMLwriter):
         if formula[-1] == '}':
             formula = formula[:-1]
 
-        # Write previous row if in in-line string optimization mode.
-        if self.optimization and first_row > self.previous_row:
+        # Write previous row if in in-line string constant_memory mode.
+        if self.constant_memory and first_row > self.previous_row:
             self._write_single_row(first_row)
 
         # Store the cell data in the worksheet data table.
@@ -652,7 +655,7 @@ class Worksheet(xmlwriter.XMLwriter):
                                                                 cell_range)
 
         # Pad out the rest of the area with formatted zeroes.
-        if not self.optimization:
+        if not self.constant_memory:
             for row in range(first_row, last_row + 1):
                 for col in range(first_col, last_col + 1):
                     if row != first_row or col != first_col:
@@ -680,8 +683,8 @@ class Worksheet(xmlwriter.XMLwriter):
         if self._check_dimensions(row, col):
             return -1
 
-        # Write previous row if in in-line string optimization mode.
-        if self.optimization and row > self.previous_row:
+        # Write previous row if in in-line string constant_memory mode.
+        if self.constant_memory and row > self.previous_row:
             self._write_single_row(row)
 
         # Convert datetime to an Excel date.
@@ -716,8 +719,8 @@ class Worksheet(xmlwriter.XMLwriter):
         if self._check_dimensions(row, col):
             return -1
 
-        # Write previous row if in in-line string optimization mode.
-        if self.optimization and row > self.previous_row:
+        # Write previous row if in in-line string constant_memory mode.
+        if self.constant_memory and row > self.previous_row:
             self._write_single_row(row)
 
         if boolean:
@@ -837,8 +840,8 @@ class Worksheet(xmlwriter.XMLwriter):
                  "65,530 URLS per worksheet." % force_unicode(url))
             return -5
 
-        # Write previous row if in in-line string optimization mode.
-        if self.optimization == 1 and row > self.previous_row:
+        # Write previous row if in in-line string constant_memory mode.
+        if self.constant_memory and row > self.previous_row:
             self._write_single_row(row)
 
         # Add the default URL format.
@@ -956,14 +959,14 @@ class Worksheet(xmlwriter.XMLwriter):
         if str_length > self.xls_strmax:
             return -2
 
-        # Write a shared string or an in-line string in optimization mode.
-        if self.optimization == 0:
+        # Write a shared string or an in-line string in constant_memory mode.
+        if not self.constant_memory:
             string_index = self.str_table._get_shared_string_index(string)
         else:
             string_index = string
 
-        # Write previous row if in in-line string optimization mode.
-        if self.optimization and row > self.previous_row:
+        # Write previous row if in in-line string constant_memory mode.
+        if self.constant_memory and row > self.previous_row:
             self._write_single_row(row)
 
         # Store the cell data in the worksheet data table.
@@ -1018,17 +1021,29 @@ class Worksheet(xmlwriter.XMLwriter):
         return 0
 
     @convert_cell_args
-    def insert_image(self, row, col, filename, options={}):
+    def insert_image(self, row, col, filename, options=None):
         """
         Insert an image with its top-left corner in a worksheet cell.
+
         Args:
             row:      The cell row (zero indexed).
             col:      The cell column (zero indexed).
             filename: Path and filename for image in PNG, JPG or BMP format.
             options:  Position, scale, url and data stream of the image.
+
         Returns:
             0:  Success.
+            -1: Row or column is out of worksheet bounds.
+
         """
+        # Check insert (row, col) without storing.
+        if self._check_dimensions(row, col, True, True):
+            warn('Cannot insert image at (%d, %d).' % (row, col))
+            return -1
+
+        if options is None:
+            options = {}
+
         x_offset = options.get('x_offset', 0)
         y_offset = options.get('y_offset', 0)
         x_scale = options.get('x_scale', 1)
@@ -1049,14 +1064,23 @@ class Worksheet(xmlwriter.XMLwriter):
     def insert_textbox(self, row, col, text, options=None):
         """
         Insert an textbox with its top-left corner in a worksheet cell.
+
         Args:
             row:      The cell row (zero indexed).
             col:      The cell column (zero indexed).
             text:     The text for the textbox.
             options:  Textbox options.
+
         Returns:
             0:  Success.
+            -1: Row or column is out of worksheet bounds.
+
         """
+        # Check insert (row, col) without storing.
+        if self._check_dimensions(row, col, True, True):
+            warn('Cannot insert textbox at (%d, %d).' % (row, col))
+            return -1
+
         if options is None:
             options = {}
 
@@ -1069,9 +1093,10 @@ class Worksheet(xmlwriter.XMLwriter):
                             x_scale, y_scale, text, options])
 
     @convert_cell_args
-    def insert_chart(self, row, col, chart, options={}):
+    def insert_chart(self, row, col, chart, options=None):
         """
         Insert an chart with its top-left corner in a worksheet cell.
+
         Args:
             row:     The cell row (zero indexed).
             col:     The cell column (zero indexed).
@@ -1080,7 +1105,16 @@ class Worksheet(xmlwriter.XMLwriter):
 
         Returns:
             0:  Success.
+            -1: Row or column is out of worksheet bounds.
+
         """
+        # Check insert (row, col) without storing.
+        if self._check_dimensions(row, col, True, True):
+            warn('Cannot insert chart at (%d, %d).' % (row, col))
+            return -1
+
+        if options is None:
+            options = {}
 
         # Ensure a chart isn't inserted more than once.
         if (chart.already_inserted or chart.combined
@@ -1117,7 +1151,7 @@ class Worksheet(xmlwriter.XMLwriter):
                             x_scale, y_scale])
 
     @convert_cell_args
-    def write_comment(self, row, col, comment, options={}):
+    def write_comment(self, row, col, comment, options=None):
         """
         Write a comment to a worksheet cell.
 
@@ -1133,6 +1167,9 @@ class Worksheet(xmlwriter.XMLwriter):
             -2: String longer than 32k characters.
 
         """
+        if options is None:
+            options = {}
+
         # Check that row and col are valid and store max and min values
         if self._check_dimensions(row, col):
             return -1
@@ -1261,15 +1298,15 @@ class Worksheet(xmlwriter.XMLwriter):
         self.worksheet_meta.firstsheet = self.index
 
     @convert_column_args
-    def set_column(self, firstcol, lastcol, width=None, cell_format=None,
-                   options={}):
+    def set_column(self, first_col, last_col, width=None, cell_format=None,
+                   options=None):
         """
         Set the width, and other properties of a single column or a
         range of columns.
 
         Args:
-            firstcol:    First column (zero-indexed).
-            lastcol:     Last column (zero-indexed). Can be same as firstcol.
+            first_col:    First column (zero-indexed).
+            last_col:     Last column (zero-indexed). Can be same as first_col.
             width:       Column width. (optional).
             cell_format: Column cell_format. (optional).
             options:     Dict of options such as hidden and level.
@@ -1279,9 +1316,12 @@ class Worksheet(xmlwriter.XMLwriter):
             -1: Column number is out of worksheet bounds.
 
         """
+        if options is None:
+            options = {}
+
         # Ensure 2nd col is larger than first.
-        if firstcol > lastcol:
-            (firstcol, lastcol) = (lastcol, firstcol)
+        if first_col > last_col:
+            (first_col, last_col) = (last_col, first_col)
 
         # Don't modify the row dimensions when checking the columns.
         ignore_row = True
@@ -1297,9 +1337,9 @@ class Worksheet(xmlwriter.XMLwriter):
             ignore_col = True
 
         # Check that each column is valid and store the max and min values.
-        if self._check_dimensions(0, lastcol, ignore_row, ignore_col):
+        if self._check_dimensions(0, last_col, ignore_row, ignore_col):
             return -1
-        if self._check_dimensions(0, firstcol, ignore_row, ignore_col):
+        if self._check_dimensions(0, first_col, ignore_row, ignore_col):
             return -1
 
         # Set the limits for the outline levels (0 <= x <= 7).
@@ -1312,9 +1352,9 @@ class Worksheet(xmlwriter.XMLwriter):
             self.outline_col_level = level
 
         # Store the column data. Padded for sorting.
-        self.colinfo["%05d" % firstcol] = [firstcol, lastcol, width,
-                                           cell_format, hidden, level,
-                                           collapsed]
+        self.colinfo["%05d" % first_col] = [first_col, last_col, width,
+                                            cell_format, hidden, level,
+                                            collapsed]
 
         # Store the column change to allow optimizations.
         self.col_size_changed = True
@@ -1326,14 +1366,14 @@ class Worksheet(xmlwriter.XMLwriter):
         if hidden:
             width = 0
 
-        for col in range(firstcol, lastcol + 1):
+        for col in range(first_col, last_col + 1):
             self.col_sizes[col] = width
             if cell_format:
                 self.col_formats[col] = cell_format
 
         return 0
 
-    def set_row(self, row, height=None, cell_format=None, options={}):
+    def set_row(self, row, height=None, cell_format=None, options=None):
         """
         Set the width, and other properties of a row.
 
@@ -1348,6 +1388,9 @@ class Worksheet(xmlwriter.XMLwriter):
             -1: Row number is out of worksheet bounds.
 
         """
+        if options is None:
+            options = {}
+
         # Use minimum col in _check_dimensions().
         if self.dim_colmin is not None:
             min_col = self.dim_colmin
@@ -1619,7 +1662,7 @@ class Worksheet(xmlwriter.XMLwriter):
         if self._check_dimensions(last_row, last_col, True, True):
             return -1
 
-        # List of valid input parameters.
+        # Valid input parameters.
         valid_parameters = {
             'validate': True,
             'criteria': True,
@@ -1700,7 +1743,7 @@ class Worksheet(xmlwriter.XMLwriter):
             warn("Parameter 'criteria' is required in data_validation()")
             return -2
 
-        # List of valid criteria types.
+        # Valid criteria types.
         criteria_types = {
             'between': 'between',
             'not between': 'notBetween',
@@ -1738,7 +1781,7 @@ class Worksheet(xmlwriter.XMLwriter):
         else:
             options['maximum'] = None
 
-        # List of valid error dialog types.
+        # Valid error dialog types.
         error_types = {
             'stop': 0,
             'warning': 1,
@@ -1862,7 +1905,7 @@ class Worksheet(xmlwriter.XMLwriter):
         # Copy the user defined options so they aren't modified.
         options = options.copy()
 
-        # List of valid input parameters.
+        # Valid input parameters.
         valid_parameter = {
             'type': True,
             'format': True,
@@ -1870,6 +1913,7 @@ class Worksheet(xmlwriter.XMLwriter):
             'value': True,
             'minimum': True,
             'maximum': True,
+            'stop_if_true': True,
             'min_type': True,
             'mid_type': True,
             'max_type': True,
@@ -1879,22 +1923,40 @@ class Worksheet(xmlwriter.XMLwriter):
             'min_color': True,
             'mid_color': True,
             'max_color': True,
+            'min_length': True,
+            'max_length': True,
             'multi_range': True,
-            'bar_color': 1}
+            'bar_color': True,
+            'bar_negative_color': True,
+            'bar_negative_color_same': True,
+            'bar_solid': True,
+            'bar_border_color': True,
+            'bar_negative_border_color': True,
+            'bar_negative_border_color_same': True,
+            'bar_no_border': True,
+            'bar_direction': True,
+            'bar_axis_position': True,
+            'bar_axis_color': True,
+            'bar_only': True,
+            'data_bar_2010': True,
+            'icon_style': True,
+            'reverse_icons': True,
+            'icons_only': True,
+            'icons': True}
 
         # Check for valid input parameters.
         for param_key in options.keys():
             if param_key not in valid_parameter:
-                warn("Unknown parameter '%s' in conditional_formatting()" %
+                warn("Unknown parameter '%s' in conditional_format()" %
                      param_key)
                 return -2
 
         # 'type' is a required parameter.
         if 'type' not in options:
-            warn("Parameter 'type' is required in conditional_formatting()")
+            warn("Parameter 'type' is required in conditional_format()")
             return -2
 
-        # List of  valid validation types.
+        # Valid types.
         valid_type = {
             'cell': 'cellIs',
             'date': 'date',
@@ -1913,19 +1975,20 @@ class Worksheet(xmlwriter.XMLwriter):
             '2_color_scale': '2_color_scale',
             '3_color_scale': '3_color_scale',
             'data_bar': 'dataBar',
-            'formula': 'expression'}
+            'formula': 'expression',
+            'icon_set': 'iconSet'}
 
-        # Check for valid validation types.
+        # Check for valid types.
         if options['type'] not in valid_type:
-            warn("Unknown validation type '%s' for parameter 'type' "
-                 "in conditional_formatting()" % options['type'])
+            warn("Unknown value '%s' for parameter 'type' "
+                 "in conditional_format()" % options['type'])
             return -2
         else:
             if options['type'] == 'bottom':
                 options['direction'] = 'bottom'
             options['type'] = valid_type[options['type']]
 
-        # List of valid criteria types.
+        # Valid criteria types.
         criteria_type = {
             'between': 'between',
             'not between': 'notBetween',
@@ -1952,10 +2015,13 @@ class Worksheet(xmlwriter.XMLwriter):
             'last 7 days': 'last7Days',
             'last week': 'lastWeek',
             'this week': 'thisWeek',
-            'continue week': 'continueWeek',
+            'next week': 'nextWeek',
             'last month': 'lastMonth',
             'this month': 'thisMonth',
-            'continue month': 'continueMonth'}
+            'next month': 'nextMonth',
+            # For legacy, but incorrect, support.
+            'continue week': 'nextWeek',
+            'continue month': 'nextMonth'}
 
         # Check for valid criteria types.
         if 'criteria' in options and options['criteria'] in criteria_type:
@@ -1993,6 +2059,53 @@ class Worksheet(xmlwriter.XMLwriter):
                     date_time = self._convert_date_time(options['maximum'])
                     options['maximum'] = "%.16g" % date_time
 
+        # Valid icon styles.
+        valid_icons = {
+            "3_arrows": "3Arrows",                          # 1
+            "3_flags": "3Flags",                            # 2
+            "3_traffic_lights_rimmed": "3TrafficLights2",   # 3
+            "3_symbols_circled": "3Symbols",                # 4
+            "4_arrows": "4Arrows",                          # 5
+            "4_red_to_black": "4RedToBlack",                # 6
+            "4_traffic_lights": "4TrafficLights",           # 7
+            "5_arrows_gray": "5ArrowsGray",                 # 8
+            "5_quarters": "5Quarters",                      # 9
+            "3_arrows_gray": "3ArrowsGray",                 # 10
+            "3_traffic_lights": "3TrafficLights",           # 11
+            "3_signs": "3Signs",                            # 12
+            "3_symbols": "3Symbols2",                       # 13
+            "4_arrows_gray": "4ArrowsGray",                 # 14
+            "4_ratings": "4Rating",                         # 15
+            "5_arrows": "5Arrows",                          # 16
+            "5_ratings": "5Rating"}                         # 17
+
+        # Set the icon set properties.
+        if options['type'] == 'iconSet':
+
+            # An icon_set must have an icon style.
+            if not options.get('icon_style'):
+                warn("The 'icon_style' parameter must be specified when "
+                     "'type' == 'icon_set' in conditional_format()")
+                return -3
+
+            # Check for valid icon styles.
+            if options['icon_style'] not in valid_icons:
+                warn("Unknown icon_style '%s' in conditional_format()" %
+                     options['icon_style'])
+                return -2
+            else:
+                options['icon_style'] = valid_icons[options['icon_style']]
+
+            # Set the number of icons for the icon style.
+            options['total_icons'] = 3
+            if options['icon_style'].startswith('4'):
+                options['total_icons'] = 4
+            elif options['icon_style'].startswith('5'):
+                options['total_icons'] = 5
+
+            options['icons'] = self._set_icon_props(options.get('total_icons'),
+                                                    options.get('icons'))
+
         # Swap last row/col for first row/col as necessary
         if first_row > last_row:
             first_row, last_row = last_row, first_row
@@ -2022,6 +2135,21 @@ class Worksheet(xmlwriter.XMLwriter):
         options['priority'] = self.dxf_priority
         self.dxf_priority += 1
 
+        # Check for 2010 style data_bar parameters.
+        if (self.use_data_bars_2010 or
+                options.get('data_bar_2010') or
+                options.get('bar_solid') or
+                options.get('bar_border_color') or
+                options.get('bar_negative_color') or
+                options.get('bar_negative_color_same') or
+                options.get('bar_negative_border_color') or
+                options.get('bar_negative_border_color_same') or
+                options.get('bar_no_border') or
+                options.get('bar_axis_position') or
+                options.get('bar_axis_color') or
+                options.get('bar_direction')):
+            options['is_data_bar_2010'] = True
+
         # Special handling of text criteria.
         if options['type'] == 'text':
 
@@ -2046,8 +2174,8 @@ class Worksheet(xmlwriter.XMLwriter):
                                          len(options['value']),
                                          options['value']))
             else:
-                warn("Invalid text criteria 'options['criteria']' "
-                     "in conditional_formatting()")
+                warn("Invalid text criteria '%s' "
+                     "in conditional_format()" % options['criteria'])
 
         # Special handling of time time_period criteria.
         if options['type'] == 'timePeriod':
@@ -2078,7 +2206,7 @@ class Worksheet(xmlwriter.XMLwriter):
                      'ROUNDDOWN(%s,0)-TODAY()<=7-WEEKDAY(TODAY()))' %
                      (start_cell, start_cell))
 
-            elif options['criteria'] == 'continueWeek':
+            elif options['criteria'] == 'nextWeek':
                 options['formula'] = \
                     ('AND(ROUNDDOWN(%s,0)-TODAY()>(7-WEEKDAY(TODAY())),'
                      'ROUNDDOWN(%s,0)-TODAY()<(15-WEEKDAY(TODAY())))' %
@@ -2095,15 +2223,15 @@ class Worksheet(xmlwriter.XMLwriter):
                     ('AND(MONTH(%s)=MONTH(TODAY()),YEAR(%s)=YEAR(TODAY()))' %
                      (start_cell, start_cell))
 
-            elif options['criteria'] == 'continueMonth':
+            elif options['criteria'] == 'nextMonth':
                 options['formula'] = \
                     ('AND(MONTH(%s)=MONTH(TODAY())+1,OR(YEAR(%s)=YEAR('
                      'TODAY()),AND(MONTH(%s)=12,YEAR(%s)=YEAR(TODAY())+1)))' %
                      (start_cell, start_cell, start_cell, start_cell))
 
             else:
-                warn("Invalid time_period criteria 'options['criteria']' "
-                     "in conditional_formatting()")
+                warn("Invalid time_period criteria '%s' "
+                     "in conditional_format()" % options['criteria'])
 
         # Special handling of blanks/error types.
         if options['type'] == 'containsBlanks':
@@ -2169,15 +2297,68 @@ class Worksheet(xmlwriter.XMLwriter):
             # Color scales don't use any additional formatting.
             options['format'] = None
 
-            options.setdefault('min_type', 'min')
-            options.setdefault('max_type', 'max')
+            if not options.get('min_type'):
+                options['min_type'] = 'min'
+                options['x14_min_type'] = 'autoMin'
+            else:
+                options['x14_min_type'] = options['min_type']
+
+            if not options.get('max_type'):
+                options['max_type'] = 'max'
+                options['x14_max_type'] = 'autoMax'
+            else:
+                options['x14_max_type'] = options['max_type']
+
             options.setdefault('min_value', 0)
             options.setdefault('max_value', 0)
             options.setdefault('bar_color', '#638EC6')
+            options.setdefault('bar_border_color', options['bar_color'])
+            options.setdefault('bar_only', False)
+            options.setdefault('bar_no_border', False)
+            options.setdefault('bar_solid', False)
+            options.setdefault('bar_direction', '')
+            options.setdefault('bar_negative_color', '#FF0000')
+            options.setdefault('bar_negative_border_color', '#FF0000')
+            options.setdefault('bar_negative_color_same', False)
+            options.setdefault('bar_negative_border_color_same', False)
+            options.setdefault('bar_axis_position', '')
+            options.setdefault('bar_axis_color', '#000000')
 
             options['bar_color'] = xl_color(options['bar_color'])
+            options['bar_border_color'] = xl_color(options['bar_border_color'])
+            options['bar_axis_color'] = xl_color(options['bar_axis_color'])
+            options['bar_negative_color'] = \
+                xl_color(options['bar_negative_color'])
+            options['bar_negative_border_color'] = \
+                xl_color(options['bar_negative_border_color'])
 
-        # Store the validation information until we close the worksheet.
+        # Adjust for 2010 style data_bar parameters.
+        if options.get('is_data_bar_2010'):
+            self.excel_version = 2010
+
+            if options['min_type'] is 'min' and options['min_value'] == 0:
+                options['min_value'] = None
+
+            if options['max_type'] is 'max' and options['max_value'] == 0:
+                options['max_value'] = None
+
+            options['range'] = cell_range
+
+        # Strip the leading = from formulas.
+        try:
+            options['min_value'] = options['min_value'].lstrip('=')
+        except:
+            pass
+        try:
+            options['mid_value'] = options['mid_value'].lstrip('=')
+        except:
+            pass
+        try:
+            options['max_value'] = options['max_value'].lstrip('=')
+        except:
+            pass
+
+        # Store the conditional format until we close the worksheet.
         if cell_range in self.cond_formats:
             self.cond_formats[cell_range].append(options)
         else:
@@ -2198,7 +2379,7 @@ class Worksheet(xmlwriter.XMLwriter):
 
         Returns:
             0:  Success.
-            -1: Not supported in optimization mode.
+            -1: Not supported in constant_memory mode.
             -2: Row or column is out of worksheet bounds.
             -3: Incorrect parameter or option.
         """
@@ -2208,8 +2389,8 @@ class Worksheet(xmlwriter.XMLwriter):
         if options is None:
             options = {}
 
-        if self.optimization == 1:
-            warn("add_table() isn't supported when set_optimization() is on")
+        if self.constant_memory:
+            warn("add_table() isn't supported in 'constant_memory' mode")
             return -1
 
         # Check that row and col are valid without storing the values.
@@ -2218,7 +2399,7 @@ class Worksheet(xmlwriter.XMLwriter):
         if self._check_dimensions(last_row, last_col, True, True):
             return -2
 
-        # List of valid input parameters.
+        # Valid input parameters.
         valid_parameter = {
             'autofilter': True,
             'banded_columns': True,
@@ -2300,10 +2481,10 @@ class Worksheet(xmlwriter.XMLwriter):
         first_data_row = first_row
         last_data_row = last_row
 
-        if 'header_row' in options:
+        if options.get('header_row'):
             first_data_row += 1
 
-        if 'total_row' in options:
+        if options.get('total_row'):
             last_data_row -= 1
 
         # Set the table and autofilter ranges.
@@ -2344,6 +2525,8 @@ class Worksheet(xmlwriter.XMLwriter):
                 # Check if there are user defined values for this column.
                 if col_id <= len(options['columns']):
                     user_data = options['columns'][col_id - 1]
+                else:
+                    user_data = None
 
                 if user_data:
                     # Get the column format.
@@ -2477,7 +2660,7 @@ class Worksheet(xmlwriter.XMLwriter):
 
         sparkline = {'locations': [xl_rowcol_to_cell(row, col)]}
 
-        # List of valid input parameters.
+        # Valid input parameters.
         valid_parameters = {
             'location': True,
             'range': True,
@@ -2677,26 +2860,26 @@ class Worksheet(xmlwriter.XMLwriter):
 
         self.selections = [[pane, active_cell, sqref]]
 
-    def outline_settings(self, outline_on=1, outline_below=1, outline_right=1,
-                         outline_style=0):
+    def outline_settings(self, visible=1, symbols_below=1, symbols_right=1,
+                         auto_style=0):
         """
         Control outline settings.
 
         Args:
-            outline_on:    Outlines are visible. Optional, defaults to True.
-            outline_below: Show row outline symbols below the outline bar.
+            visible:       Outlines are visible. Optional, defaults to True.
+            symbols_below: Show row outline symbols below the outline bar.
                            Optional, defaults to True.
-            outline_right: Show column outline symbols to the right of the
+            symbols_right: Show column outline symbols to the right of the
                            outline bar. Optional, defaults to True.
-            outline_style: Use Automatic style. Optional, defaults to False.
+            auto_style:    Use Automatic style. Optional, defaults to False.
 
         Returns:
             0:  Nothing.
         """
-        self.outline_on = outline_on
-        self.outline_below = outline_below
-        self.outline_right = outline_right
-        self.outline_style = outline_style
+        self.outline_on = visible
+        self.outline_below = symbols_below
+        self.outline_right = symbols_right
+        self.outline_style = auto_style
 
         self.outline_changed = True
 
@@ -2850,7 +3033,7 @@ class Worksheet(xmlwriter.XMLwriter):
         self.protect_options = defaults
 
     @convert_cell_args
-    def insert_button(self, row, col, options={}):
+    def insert_button(self, row, col, options=None):
         """
         Insert a button form object into the worksheet.
 
@@ -2864,6 +3047,14 @@ class Worksheet(xmlwriter.XMLwriter):
             -1: Row or column is out of worksheet bounds.
 
         """
+        # Check insert (row, col) without storing.
+        if self._check_dimensions(row, col, True, True):
+            warn('Cannot insert button at (%d, %d).' % (row, col))
+            return -1
+
+        if options is None:
+            options = {}
+
         button = self._button_params(row, col, options)
 
         self.buttons_list.append(button)
@@ -3362,7 +3553,7 @@ class Worksheet(xmlwriter.XMLwriter):
         self.index = init_data['index']
         self.str_table = init_data['str_table']
         self.worksheet_meta = init_data['worksheet_meta']
-        self.optimization = init_data['optimization']
+        self.constant_memory = init_data['constant_memory']
         self.tmpdir = init_data['tmpdir']
         self.date_1904 = init_data['date_1904']
         self.strings_to_numbers = init_data['strings_to_numbers']
@@ -3372,6 +3563,7 @@ class Worksheet(xmlwriter.XMLwriter):
         self.default_date_format = init_data['default_date_format']
         self.default_url_format = init_data['default_url_format']
         self.excel2003_style = init_data['excel2003_style']
+        self.remove_timezone = init_data['remove_timezone']
 
         if self.excel2003_style:
             self.original_row_height = 12.75
@@ -3385,8 +3577,8 @@ class Worksheet(xmlwriter.XMLwriter):
             self.margin_footer = 0.5
             self.header_footer_aligns = False
 
-        # Open a temp filehandle to store row data in optimization mode.
-        if self.optimization == 1:
+        # Open a temp filehandle to store row data in constant_memory mode.
+        if self.constant_memory:
             # This is sub-optimal but we need to create a temp file
             # with utf8 encoding in Python < 3.
             (fd, filename) = tempfile.mkstemp(dir=self.tmpdir)
@@ -3422,7 +3614,7 @@ class Worksheet(xmlwriter.XMLwriter):
         self._write_cols()
 
         # Write the worksheet data such as rows columns and cells.
-        if self.optimization == 0:
+        if not self.constant_memory:
             self._write_sheet_data()
         else:
             self._write_optimized_sheet_data()
@@ -3479,8 +3671,8 @@ class Worksheet(xmlwriter.XMLwriter):
         # Write the tableParts element.
         self._write_table_parts()
 
-        # Write the extLst and sparklines.
-        self._write_ext_sparklines()
+        # Write the extLst elements.
+        self._write_ext_list()
 
         # Close the worksheet tag.
         self._xml_end_tag('worksheet')
@@ -3501,9 +3693,9 @@ class Worksheet(xmlwriter.XMLwriter):
         if row >= self.xls_rowmax or col >= self.xls_colmax:
             return -1
 
-        # In optimization mode we don't change dimensions for rows
+        # In constant_memory mode we don't change dimensions for rows
         # that are already written.
-        if not ignore_row and not ignore_col and self.optimization == 1:
+        if not ignore_row and not ignore_col and self.constant_memory:
             if row < self.previous_row:
                 return -2
 
@@ -3523,7 +3715,9 @@ class Worksheet(xmlwriter.XMLwriter):
 
     def _convert_date_time(self, dt_obj):
         # Convert a datetime object to an Excel serial date and time.
-        return datetime_to_excel_datetime(dt_obj, self.date_1904)
+        return datetime_to_excel_datetime(dt_obj,
+                                          self.date_1904,
+                                          self.remove_timezone)
 
     def _convert_name_area(self, row_num_1, col_num_1, row_num_2, col_num_2):
         # Convert zero indexed rows and columns to the format required by
@@ -4417,7 +4611,7 @@ class Worksheet(xmlwriter.XMLwriter):
         # in the workbook. Return None for data that doesn't exist since
         # Excel can chart series with data missing.
 
-        if self.optimization:
+        if self.constant_memory:
             return ()
 
         data = []
@@ -4594,18 +4788,87 @@ class Worksheet(xmlwriter.XMLwriter):
         return (x - x) != 0
 
     def _opt_close(self):
-        # Close the row data filehandle in optimization mode.
+        # Close the row data filehandle in constant_memory mode.
         if not self.row_data_fh_closed:
             self.row_data_fh.close()
             self.row_data_fh_closed = True
 
     def _opt_reopen(self):
-        # Reopen the row data filehandle in optimization mode.
+        # Reopen the row data filehandle in constant_memory mode.
         if self.row_data_fh_closed:
             filename = self.row_data_filename
             self.row_data_fh = codecs.open(filename, 'a+', 'utf-8')
             self.row_data_fh_closed = False
             self.fh = self.row_data_fh
+
+    def _set_icon_props(self, total_icons, user_props=None):
+        # Set the sub-properties for icons.
+        props = []
+
+        # Set the defaults.
+        for _ in range(total_icons):
+            props.append({'criteria': False,
+                          'value': 0,
+                          'type': 'percent'})
+
+        # Set the default icon values based on the number of icons.
+        if total_icons == 3:
+            props[0]['value'] = 67
+            props[1]['value'] = 33
+
+        if total_icons == 4:
+            props[0]['value'] = 75
+            props[1]['value'] = 50
+            props[2]['value'] = 25
+
+        if total_icons == 5:
+            props[0]['value'] = 80
+            props[1]['value'] = 60
+            props[2]['value'] = 40
+            props[3]['value'] = 20
+
+        # Overwrite default properties with user defined properties.
+        if user_props:
+
+            # Ensure we don't set user properties for lowest icon.
+            max_data = len(user_props)
+            if max_data >= total_icons:
+                max_data = total_icons - 1
+
+            for i in range(max_data):
+
+                # Set the user defined 'value' property.
+                if user_props[i].get('value'):
+                    props[i]['value'] = user_props[i]['value']
+
+                    # Remove the formula '=' sign if it exists.
+                    tmp = props[i]['value']
+                    if isinstance(tmp, str_types) and tmp.startswith('='):
+                        props[i]['value'] = tmp.lstrip('=')
+
+                # Set the user defined 'type' property.
+                if user_props[i].get('type'):
+                    valid_types = ('percent',
+                                   'percentile',
+                                   'number',
+                                   'formula')
+
+                    if user_props[i]['type'] not in valid_types:
+                        warn("Unknown icon property type '%s' for sub-"
+                             "property 'type' in conditional_format()" %
+                             user_props[i]['type'])
+                    else:
+                        props[i]['type'] = user_props[i]['type']
+
+                        if props[i]['type'] is 'number':
+                            props[i]['type'] = 'num'
+
+                # Set the user defined 'criteria' property.
+                criteria = user_props[i].get('criteria')
+                if criteria and criteria == '>':
+                    props[i]['criteria'] = True
+
+        return props
 
     ###########################################################################
     #
@@ -4830,9 +5093,9 @@ class Worksheet(xmlwriter.XMLwriter):
             self._xml_end_tag('sheetData')
 
     def _write_optimized_sheet_data(self):
-        # Write the <sheetData> element when the memory optimization is on.
-        # In this case we read the data stored in the temp file and rewrite
-        # it to the XML sheet file.
+        # Write the <sheetData> element when constant_memory is on. In this
+        # case we read the data stored in the temp file and rewrite it to the
+        # XML sheet file.
         if self.dim_rowmin is None:
             # If the dimensions aren't defined then there is no data to write.
             self._xml_empty_tag('sheetData')
@@ -5027,7 +5290,7 @@ class Worksheet(xmlwriter.XMLwriter):
 
     def _write_single_row(self, current_row_num=0):
         # Write out the worksheet data as a single row with cells.
-        # This method is used when memory optimization is on. A single
+        # This method is used when constant_memory is on. A single
         # row is written and the data table is reset. That way only
         # one row of data is kept in memory at any one time. We don't
         # write span data in the optimized case since it is optional.
@@ -5200,7 +5463,7 @@ class Worksheet(xmlwriter.XMLwriter):
             # Write a string.
             string = cell.string
 
-            if not self.optimization:
+            if not self.constant_memory:
                 # Write a shared string.
                 self._xml_string_element(string, attributes)
             else:
@@ -5211,6 +5474,17 @@ class Worksheet(xmlwriter.XMLwriter):
                 string = re.sub(r'([\x00-\x08\x0B-\x1F])',
                                 lambda match: "_x%04X_" %
                                 ord(match.group(1)), string)
+
+                # Escape non characters.
+                if sys.version_info[0] == 2:
+                    non_char1 = unichr(0xFFFE)
+                    non_char2 = unichr(0xFFFF)
+                else:
+                    non_char1 = "\uFFFE"
+                    non_char2 = "\uFFFF"
+
+                string = re.sub(non_char1, '_xFFFE_', string)
+                string = re.sub(non_char2, '_xFFFF_', string)
 
                 # Write any rich strings without further tags.
                 if re.search('^<r>', string) and re.search('</r>$', string):
@@ -5587,15 +5861,21 @@ class Worksheet(xmlwriter.XMLwriter):
 
     def _write_filters(self, filters):
         # Write the <filters> element.
+        non_blanks = [filter for filter in filters
+                      if str(filter).lower() != 'blanks']
+        attributes = []
 
-        if len(filters) == 1 and filters[0] == 'blanks':
+        if len(filters) != len(non_blanks):
+            attributes = [('blank', 1)]
+
+        if len(filters) == 1 and len(non_blanks) == 0:
             # Special case for blank cells only.
-            self._xml_empty_tag('filters', [('blank', 1)])
+            self._xml_empty_tag('filters', attributes)
         else:
             # General case.
-            self._xml_start_tag('filters')
+            self._xml_start_tag('filters', attributes)
 
-            for autofilter in filters:
+            for autofilter in sorted(non_blanks):
                 self._write_filter(autofilter)
 
             self._xml_end_tag('filters')
@@ -5903,6 +6183,9 @@ class Worksheet(xmlwriter.XMLwriter):
 
         attributes.append(('priority', params['priority']))
 
+        if params.get('stop_if_true'):
+            attributes.append(('stopIfTrue', 1))
+
         if params['type'] == 'cellIs':
             attributes.append(('operator', params['criteria']))
 
@@ -5979,11 +6262,20 @@ class Worksheet(xmlwriter.XMLwriter):
         elif params['type'] == 'dataBar':
             self._xml_start_tag('cfRule', attributes)
             self._write_data_bar(params)
+
+            if params.get('is_data_bar_2010'):
+                self._write_data_bar_ext(params)
+
             self._xml_end_tag('cfRule')
 
         elif params['type'] == 'expression':
             self._xml_start_tag('cfRule', attributes)
             self._write_formula(params['criteria'])
+            self._xml_end_tag('cfRule')
+
+        elif params['type'] == 'iconSet':
+            self._xml_start_tag('cfRule', attributes)
+            self._write_icon_set(params)
             self._xml_end_tag('cfRule')
 
     def _write_formula(self, formula):
@@ -6022,7 +6314,20 @@ class Worksheet(xmlwriter.XMLwriter):
 
     def _write_data_bar(self, param):
         # Write the <dataBar> element.
-        self._xml_start_tag('dataBar')
+        attributes = []
+
+        # Min and max bar lengths in in the spec but not supported directly by
+        # Excel.
+        if param.get('min_length'):
+            attributes.append(('minLength', param['min_length']))
+
+        if param.get('max_length'):
+            attributes.append(('maxLength', param['max_length']))
+
+        if param.get('bar_only'):
+            attributes.append(('showValue', 0))
+
+        self._xml_start_tag('dataBar', attributes)
 
         self._write_cfvo(param['min_type'], param['min_value'])
         self._write_cfvo(param['max_type'], param['max_value'])
@@ -6030,9 +6335,59 @@ class Worksheet(xmlwriter.XMLwriter):
 
         self._xml_end_tag('dataBar')
 
-    def _write_cfvo(self, cf_type, val):
+    def _write_data_bar_ext(self, param):
+        # Write the <extLst> dataBar extension element.
+
+        # Create a pseudo GUID for each unique Excel 2010 data bar.
+        worksheet_count = self.index + 1
+        data_bar_count = len(self.data_bars_2010) + 1
+        guid = "{DA7ABA51-AAAA-BBBB-%04X-%012X}" % (worksheet_count,
+                                                    data_bar_count)
+
+        # Store the 2010 data bar parameters to write the extLst elements.
+        param['guid'] = guid
+        self.data_bars_2010.append(param)
+
+        self._xml_start_tag('extLst')
+        self._write_ext('{B025F937-C7B1-47D3-B67F-A62EFF666E3E}')
+        self._xml_data_element('x14:id', guid)
+        self._xml_end_tag('ext')
+        self._xml_end_tag('extLst')
+
+    def _write_icon_set(self, param):
+        # Write the <iconSet> element.
+        attributes = []
+
+        # Don't set attribute for default style.
+        if param['icon_style'] != '3TrafficLights':
+            attributes = [('iconSet', param['icon_style'])]
+
+        if param.get('icons_only'):
+            attributes.append(('showValue', 0))
+
+        if param.get('reverse_icons'):
+            attributes.append(('reverse', 1))
+
+        self._xml_start_tag('iconSet', attributes)
+
+        # Write the properties for different icon styles.
+        for icon in reversed(param['icons']):
+            self._write_cfvo(
+                icon['type'],
+                icon['value'],
+                icon['criteria'])
+
+        self._xml_end_tag('iconSet')
+
+    def _write_cfvo(self, cf_type, val, criteria=None):
         # Write the <cfvo> element.
-        attributes = [('type', cf_type), ('val', val)]
+        attributes = [('type', cf_type)]
+
+        if val is not None:
+            attributes.append(('val', val))
+
+        if criteria:
+            attributes.append(('gte', 0))
 
         self._xml_empty_tag('cfvo', attributes)
 
@@ -6254,26 +6609,169 @@ class Worksheet(xmlwriter.XMLwriter):
 
         self._xml_empty_tag('tablePart', attributes)
 
-    def _write_ext_sparklines(self):
-        # Write the <extLst> element and sparkline sub-elements.
-        sparklines = self.sparklines
-        count = len(sparklines)
+    def _write_ext_list(self):
+        # Write the <extLst> element for data bars and sparklines.
+        has_data_bars = len(self.data_bars_2010)
+        has_sparklines = len(self.sparklines)
 
-        # Return if worksheet doesn't contain any sparklines.
-        if not count:
+        if not has_data_bars and not has_sparklines:
             return
 
         # Write the extLst element.
         self._xml_start_tag('extLst')
 
-        # Write the ext element.
-        self._write_ext()
+        if has_data_bars:
+            self._write_ext_list_data_bars()
+
+        if has_sparklines:
+            self._write_ext_list_sparklines()
+
+        self._xml_end_tag('extLst')
+
+    def _write_ext_list_data_bars(self):
+        # Write the Excel 2010 data_bar subelements.
+        self._write_ext('{78C0D931-6437-407d-A8EE-F0AAD7539E65}')
+
+        self._xml_start_tag('x14:conditionalFormattings')
+
+        # Write the Excel 2010 conditional formatting data bar elements.
+        for data_bar in self.data_bars_2010:
+            # Write the x14:conditionalFormatting element.
+            self._write_conditional_formatting_2010(data_bar)
+
+        self._xml_end_tag('x14:conditionalFormattings')
+        self._xml_end_tag('ext')
+
+    def _write_conditional_formatting_2010(self, data_bar):
+        # Write the <x14:conditionalFormatting> element.
+        xmlns_xm = 'http://schemas.microsoft.com/office/excel/2006/main'
+
+        attributes = [('xmlns:xm', xmlns_xm)]
+
+        self._xml_start_tag('x14:conditionalFormatting', attributes)
+
+        # Write the x14:cfRule element.
+        self._write_x14_cf_rule(data_bar)
+
+        # Write the x14:dataBar element.
+        self._write_x14_data_bar(data_bar)
+
+        # Write the x14 max and min data bars.
+        self._write_x14_cfvo(data_bar['x14_min_type'], data_bar['min_value'])
+        self._write_x14_cfvo(data_bar['x14_max_type'], data_bar['max_value'])
+
+        if not data_bar['bar_no_border']:
+            # Write the x14:borderColor element.
+            self._write_x14_border_color(data_bar['bar_border_color'])
+
+        # Write the x14:negativeFillColor element.
+        if not data_bar['bar_negative_color_same']:
+            self._write_x14_negative_fill_color(
+                data_bar['bar_negative_color'])
+
+        # Write the x14:negativeBorderColor element.
+        if (not data_bar['bar_no_border'] and
+                not data_bar['bar_negative_border_color_same']):
+            self._write_x14_negative_border_color(
+                data_bar['bar_negative_border_color'])
+
+        # Write the x14:axisColor element.
+        if data_bar['bar_axis_position'] is not 'none':
+            self._write_x14_axis_color(data_bar['bar_axis_color'])
+
+        self._xml_end_tag('x14:dataBar')
+        self._xml_end_tag('x14:cfRule')
+
+        # Write the xm:sqref element.
+        self._xml_data_element('xm:sqref', data_bar['range'])
+
+        self._xml_end_tag('x14:conditionalFormatting')
+
+    def _write_x14_cf_rule(self, data_bar):
+        # Write the <x14:cfRule> element.
+        rule_type = 'dataBar'
+        guid = data_bar['guid']
+        attributes = [('type', rule_type), ('id', guid)]
+
+        self._xml_start_tag('x14:cfRule', attributes)
+
+    def _write_x14_data_bar(self, data_bar):
+        # Write the <x14:dataBar> element.
+        min_length = 0
+        max_length = 100
+
+        attributes = [
+            ('minLength', min_length),
+            ('maxLength', max_length),
+        ]
+
+        if not data_bar['bar_no_border']:
+            attributes.append(('border', 1))
+
+        if data_bar['bar_solid']:
+            attributes.append(('gradient', 0))
+
+        if data_bar['bar_direction'] is 'left':
+            attributes.append(('direction', 'leftToRight'))
+
+        if data_bar['bar_direction'] is 'right':
+            attributes.append(('direction', 'rightToLeft'))
+
+        if data_bar['bar_negative_color_same']:
+            attributes.append(('negativeBarColorSameAsPositive', 1))
+
+        if (not data_bar['bar_no_border'] and
+                not data_bar['bar_negative_border_color_same']):
+            attributes.append(('negativeBarBorderColorSameAsPositive', 0))
+
+        if data_bar['bar_axis_position'] is 'middle':
+            attributes.append(('axisPosition', 'middle'))
+
+        if data_bar['bar_axis_position'] is 'none':
+            attributes.append(('axisPosition', 'none'))
+
+        self._xml_start_tag('x14:dataBar', attributes)
+
+    def _write_x14_cfvo(self, rule_type, value):
+        # Write the <x14:cfvo> element.
+        attributes = [('type', rule_type)]
+
+        if rule_type in ('min', 'max', 'autoMin', 'autoMax'):
+            self._xml_empty_tag('x14:cfvo', attributes)
+        else:
+            self._xml_start_tag('x14:cfvo', attributes)
+            self._xml_data_element('xm:f', value)
+            self._xml_end_tag('x14:cfvo')
+
+    def _write_x14_border_color(self, rgb):
+        # Write the <x14:borderColor> element.
+        attributes = [('rgb', rgb)]
+        self._xml_empty_tag('x14:borderColor', attributes)
+
+    def _write_x14_negative_fill_color(self, rgb):
+        # Write the <x14:negativeFillColor> element.
+        attributes = [('rgb', rgb)]
+        self._xml_empty_tag('x14:negativeFillColor', attributes)
+
+    def _write_x14_negative_border_color(self, rgb):
+        # Write the <x14:negativeBorderColor> element.
+        attributes = [('rgb', rgb)]
+        self._xml_empty_tag('x14:negativeBorderColor', attributes)
+
+    def _write_x14_axis_color(self, rgb):
+        # Write the <x14:axisColor> element.
+        attributes = [('rgb', rgb)]
+        self._xml_empty_tag('x14:axisColor', attributes)
+
+    def _write_ext_list_sparklines(self):
+        # Write the sparkline extension sub-elements.
+        self._write_ext('{05C60535-1F16-4fd2-B633-F4F36F0B64E0}')
 
         # Write the x14:sparklineGroups element.
         self._write_sparkline_groups()
 
         # Write the sparkline elements.
-        for sparkline in reversed(sparklines):
+        for sparkline in reversed(self.sparklines):
 
             # Write the x14:sparklineGroup element.
             self._write_sparkline_group(sparkline)
@@ -6311,7 +6809,6 @@ class Worksheet(xmlwriter.XMLwriter):
 
         self._xml_end_tag('x14:sparklineGroups')
         self._xml_end_tag('ext')
-        self._xml_end_tag('extLst')
 
     def _write_sparklines(self, sparkline):
         # Write the <x14:sparklines> element and <x14:sparkline> sub-elements.
@@ -6330,14 +6827,13 @@ class Worksheet(xmlwriter.XMLwriter):
 
         self._xml_end_tag('x14:sparklines')
 
-    def _write_ext(self):
+    def _write_ext(self, uri):
         # Write the <ext> element.
         schema = 'http://schemas.microsoft.com/office/'
-        xmlns_x_14 = schema + 'spreadsheetml/2009/9/main'
-        uri = '{05C60535-1F16-4fd2-B633-F4F36F0B64E0}'
+        xmlns_x14 = schema + 'spreadsheetml/2009/9/main'
 
         attributes = [
-            ('xmlns:x14', xmlns_x_14),
+            ('xmlns:x14', xmlns_x14),
             ('uri', uri),
         ]
 

@@ -4,7 +4,7 @@
 ########################################################################
 
 # APP specific stuff
-VERSION = ' V1.0.2.14'
+VERSION = ' V1.0.2.15'
 NAME = 'ExportTools'
 DESCRIPTION = 'Export Plex libraries to csv-files or xlsx-files'
 ART = 'art-default.jpg'
@@ -22,4 +22,4 @@ CONTAINERSIZEAUDIO = 10
 CONTAINERSIZEPHOTO = 20
 
 # For slow PMS HW, we might need to wait some time here
-PMSTIMEOUT = 30
+PMSTIMEOUT = Prefs['TimeOut']

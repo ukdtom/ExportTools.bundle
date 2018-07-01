@@ -2,7 +2,7 @@
 #
 # Worksheet - A class for writing Excel Worksheets.
 #
-# Copyright 2013-2016, John McNamara, jmcnamara@cpan.org
+# Copyright 2013-2018, John McNamara, jmcnamara@cpan.org
 #
 import re
 import datetime
@@ -609,10 +609,27 @@ def supported_datetime(dt):
                            datetime.timedelta)))
 
 
-def datetime_to_excel_datetime(dt_obj, date_1904):
+def remove_datetime_timezone(dt_obj, remove_timezone):
+    # Excel doesn't support timezones in datetimes/times so we remove the
+    # tzinfo from the object if the user has specified that option in the
+    # constructor.
+    if remove_timezone:
+        dt_obj = dt_obj.replace(tzinfo=None)
+    else:
+        if dt_obj.tzinfo:
+            raise TypeError(
+                "Excel doesn't support timezones in datetimes. "
+                "Set the tzinfo in the datetime/time object to None or "
+                "use the 'remove_timezone' Workbook() option")
+
+    return dt_obj
+
+
+def datetime_to_excel_datetime(dt_obj, date_1904, remove_timezone):
     # Convert a datetime object to an Excel serial date and time. The integer
     # part of the number stores the number of days since the epoch and the
     # fractional part stores the percentage of the day.
+    date_type = dt_obj
 
     if date_1904:
         # Excel for Mac date epoch.
@@ -624,12 +641,14 @@ def datetime_to_excel_datetime(dt_obj, date_1904):
     # We handle datetime .datetime, .date and .time objects but convert
     # them to datetime.datetime objects and process them in the same way.
     if isinstance(dt_obj, datetime.datetime):
+        dt_obj = remove_datetime_timezone(dt_obj, remove_timezone)
         delta = dt_obj - epoch
     elif isinstance(dt_obj, datetime.date):
         dt_obj = datetime.datetime.fromordinal(dt_obj.toordinal())
         delta = dt_obj - epoch
     elif isinstance(dt_obj, datetime.time):
         dt_obj = datetime.datetime.combine(epoch, dt_obj)
+        dt_obj = remove_datetime_timezone(dt_obj, remove_timezone)
         delta = dt_obj - epoch
     elif isinstance(dt_obj, datetime.timedelta):
         delta = dt_obj
@@ -642,9 +661,10 @@ def datetime_to_excel_datetime(dt_obj, date_1904):
                      + float(delta.microseconds) / 1E6)
                   / (60 * 60 * 24))
 
-    # Special case for datetime where time only has been specified and
-    # the default date of 1900-01-01 is used.
-    if (not isinstance(dt_obj, datetime.timedelta)
+    # The following is a workaround for the fact that in Excel a time only
+    # value is represented as 1899-12-31+time whereas in datetime.datetime()
+    # it is 1900-1-1+time so we need to subtract the 1 day difference.
+    if (isinstance(date_type, datetime.datetime)
             and dt_obj.isocalendar() == (1900, 1, 1)):
         excel_time -= 1
 

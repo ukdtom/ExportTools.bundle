@@ -4,13 +4,12 @@
 #
 # Used in conjunction with XlsxWriter.
 #
-# Copyright 2013-2016, John McNamara, jmcnamara@cpan.org
+# Copyright 2013-2018, John McNamara, jmcnamara@cpan.org
 #
 
 # Standard packages.
 import re
 import codecs
-import io
 
 # Standard packages in Python 2/3 compatibility mode.
 from .compatibility import StringIO
@@ -39,10 +38,7 @@ class XMLwriter(object):
             self.fh = filename
         else:
             self.internal_fh = True
-#            self.fh = io.open(filename, mode='w', encoding='utf-8')
-#            self.fh = io.open(file = filename, mode='w', encoding='utf-8')
-#            self.fh = codecs.open(filename, 'w', 'utf-8')
-            self.fh = codecs.open(filename, 'w')
+            self.fh = codecs.open(filename, 'w', 'utf-8')
 
     def _xml_close(self):
         # Close the XML filehandle if we created it.
@@ -51,8 +47,8 @@ class XMLwriter(object):
 
     def _xml_declaration(self):
         # Write the XML declaration.
-        self.fh.write(unicode(
-            """<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n"""))
+        self.fh.write(
+            """<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n""")
 
     def _xml_start_tag(self, tag, attributes=[]):
         # Write an XML start tag with optional attributes.

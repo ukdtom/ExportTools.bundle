@@ -2,7 +2,7 @@
 #
 # Workbook - A class for writing the Excel XLSX Workbook file.
 #
-# Copyright 2013-2016, John McNamara, jmcnamara@cpan.org
+# Copyright 2013-2018, John McNamara, jmcnamara@cpan.org
 #
 
 # Standard packages.
@@ -10,30 +10,32 @@ import sys
 import re
 import os
 import operator
+import time
+import warnings
 from warnings import warn
 from datetime import datetime
-from zipfile import ZipFile, ZIP_DEFLATED
+from zipfile import ZipFile, ZipInfo, ZIP_DEFLATED
 from struct import unpack
 
 from .compatibility import int_types, num_types, str_types, force_unicode
 
 # Package imports.
 from . import xmlwriter
-from xlsxwriter.worksheet import Worksheet
-from xlsxwriter.chartsheet import Chartsheet
-from xlsxwriter.sharedstrings import SharedStringTable
-from xlsxwriter.format import Format
-from xlsxwriter.packager import Packager
+from .worksheet import Worksheet
+from .chartsheet import Chartsheet
+from .sharedstrings import SharedStringTable
+from .format import Format
+from .packager import Packager
 from .utility import xl_cell_to_rowcol
-from xlsxwriter.chart_area import ChartArea
-from xlsxwriter.chart_bar import ChartBar
-from xlsxwriter.chart_column import ChartColumn
-from xlsxwriter.chart_doughnut import ChartDoughnut
-from xlsxwriter.chart_line import ChartLine
-from xlsxwriter.chart_pie import ChartPie
-from xlsxwriter.chart_radar import ChartRadar
-from xlsxwriter.chart_scatter import ChartScatter
-from xlsxwriter.chart_stock import ChartStock
+from .chart_area import ChartArea
+from .chart_bar import ChartBar
+from .chart_column import ChartColumn
+from .chart_doughnut import ChartDoughnut
+from .chart_line import ChartLine
+from .chart_pie import ChartPie
+from .chart_radar import ChartRadar
+from .chart_scatter import ChartScatter
+from .chart_stock import ChartStock
 
 
 class Workbook(xmlwriter.XMLwriter):
@@ -48,12 +50,16 @@ class Workbook(xmlwriter.XMLwriter):
     # Public API.
     #
     ###########################################################################
+    chartsheet_class = Chartsheet
+    worksheet_class = Worksheet
 
-    def __init__(self, filename=None, options={}):
+    def __init__(self, filename=None, options=None):
         """
         Constructor.
 
         """
+        if options is None:
+            options = {}
 
         super(Workbook, self).__init__()
 
@@ -66,9 +72,10 @@ class Workbook(xmlwriter.XMLwriter):
         self.strings_to_urls = options.get('strings_to_urls', True)
         self.nan_inf_to_errors = options.get('nan_inf_to_errors', False)
         self.default_date_format = options.get('default_date_format', None)
-        self.optimization = options.get('constant_memory', False)
+        self.constant_memory = options.get('constant_memory', False)
         self.in_memory = options.get('in_memory', False)
         self.excel2003_style = options.get('excel2003_style', False)
+        self.remove_timezone = options.get('remove_timezone', False)
         self.default_format_properties = \
             options.get('default_format_properties', {})
 
@@ -122,7 +129,7 @@ class Workbook(xmlwriter.XMLwriter):
 
         # We can't do 'constant_memory' mode while doing 'in_memory' mode.
         if self.in_memory:
-            self.optimization = False
+            self.constant_memory = False
 
         # Add the default cell format.
         if self.excel2003_style:
@@ -131,8 +138,7 @@ class Workbook(xmlwriter.XMLwriter):
             self.add_format({'xf_index': 0})
 
         # Add a default URL format.
-        self.default_url_format = self.add_format({'color': 'blue',
-                                                   'underline': 1})
+        self.default_url_format = self.add_format({'hyperlink': True})
 
         # Add the default date format.
         if self.default_date_format is not None:
@@ -156,7 +162,7 @@ class Workbook(xmlwriter.XMLwriter):
         """Close workbook when exiting "with" statement."""
         self.close()
 
-    def add_worksheet(self, name=None):
+    def add_worksheet(self, name=None, worksheet_class=None):
         """
         Add a new worksheet to the Excel workbook.
 
@@ -167,9 +173,12 @@ class Workbook(xmlwriter.XMLwriter):
             Reference to a worksheet object.
 
         """
-        return self._add_sheet(name, is_chartsheet=False)
+        if worksheet_class is None:
+            worksheet_class = self.worksheet_class
 
-    def add_chartsheet(self, name=None):
+        return self._add_sheet(name, worksheet_class=worksheet_class)
+
+    def add_chartsheet(self, name=None, chartsheet_class=None):
         """
         Add a new chartsheet to the Excel workbook.
 
@@ -180,9 +189,12 @@ class Workbook(xmlwriter.XMLwriter):
             Reference to a chartsheet object.
 
         """
-        return self._add_sheet(name, is_chartsheet=True)
+        if chartsheet_class is None:
+            chartsheet_class = self.chartsheet_class
 
-    def add_format(self, properties={}):
+        return self._add_sheet(name, worksheet_class=chartsheet_class)
+
+    def add_format(self, properties=None):
         """
         Add a new Format to the Excel Workbook.
 
@@ -199,7 +211,8 @@ class Workbook(xmlwriter.XMLwriter):
             format_properties = {'font_name': 'Arial', 'font_size': 10,
                                  'theme': 1 * -1}
 
-        format_properties.update(properties)
+        if properties:
+            format_properties.update(properties)
 
         xf_format = Format(format_properties,
                            self.xf_format_indices,
@@ -256,6 +269,7 @@ class Workbook(xmlwriter.XMLwriter):
 
         chart.embedded = True
         chart.date_1904 = self.date_1904
+        chart.remove_timezone = self.remove_timezone
 
         self.charts.append(chart)
 
@@ -490,6 +504,21 @@ class Workbook(xmlwriter.XMLwriter):
         """
         return self.sheetnames.get(name)
 
+    def get_default_url_format(self):
+        """
+        Get the default url format used when a user defined format isn't
+        specified with write_url(). The format is the hyperlink style defined
+        by Excel for the default theme.
+
+        Args:
+            None.
+
+        Returns:
+            A format object.
+
+        """
+        return self.default_url_format
+
     def use_zip64(self):
         """
         Allow ZIP64 extensions when writing xlsx file zip container.
@@ -613,24 +642,48 @@ class Workbook(xmlwriter.XMLwriter):
         # Add XML sub-files to the Zip file with their Excel filename.
         for os_filename, xml_filename, is_binary in xml_files:
             if self.in_memory:
-                # The files are in-memory StringIOs.
+
+                zipinfo = ZipInfo(xml_filename, (1980, 1, 1, 0, 0, 0))
                 if is_binary:
-                    xlsx_file.writestr(xml_filename, os_filename.getvalue())
+                    xlsx_file.writestr(zipinfo, os_filename.getvalue())
                 else:
-                    xlsx_file.writestr(xml_filename,
+                    xlsx_file.writestr(zipinfo,
                                        os_filename.getvalue().encode('utf-8'))
             else:
                 # The files are tempfiles.
+
+                timestamp = time.mktime((1980, 1, 1, 0, 0, 0, 0, 0, 0))
+                os.utime(os_filename, (timestamp, timestamp))
+
                 xlsx_file.write(os_filename, xml_filename)
                 os.remove(os_filename)
 
         xlsx_file.close()
 
-    def _add_sheet(self, name, is_chartsheet):
+    def _add_sheet(self, name, is_chartsheet=None, worksheet_class=None):
         # Utility for shared code in add_worksheet() and add_chartsheet().
 
+        if is_chartsheet is not None:
+            warnings.warn(
+                "'is_chartsheet' has been deprecated and "
+                "may be removed in a future version. Use 'worksheet_class' "
+                "to get the same result",
+                PendingDeprecationWarning)
+
+        if is_chartsheet is None and worksheet_class is None:
+            raise ValueError(
+                "You must provide 'is_chartsheet' or 'worksheet_class'")
+
+        if worksheet_class:
+            worksheet = worksheet_class()
+        else:
+            if is_chartsheet:
+                worksheet = self.chartsheet_class()
+            else:
+                worksheet = self.worksheet_class()
+
         sheet_index = len(self.worksheets_objs)
-        name = self._check_sheetname(name, is_chartsheet)
+        name = self._check_sheetname(name, isinstance(worksheet, Chartsheet))
 
         # Initialization data to pass to the worksheet.
         init_data = {
@@ -638,7 +691,7 @@ class Workbook(xmlwriter.XMLwriter):
             'index': sheet_index,
             'str_table': self.str_table,
             'worksheet_meta': self.worksheet_meta,
-            'optimization': self.optimization,
+            'constant_memory': self.constant_memory,
             'tmpdir': self.tmpdir,
             'date_1904': self.date_1904,
             'strings_to_numbers': self.strings_to_numbers,
@@ -648,12 +701,8 @@ class Workbook(xmlwriter.XMLwriter):
             'default_date_format': self.default_date_format,
             'default_url_format': self.default_url_format,
             'excel2003_style': self.excel2003_style,
+            'remove_timezone': self.remove_timezone,
         }
-
-        if is_chartsheet:
-            worksheet = Chartsheet()
-        else:
-            worksheet = Worksheet()
 
         worksheet._initialize(init_data)
 
@@ -679,6 +728,10 @@ class Workbook(xmlwriter.XMLwriter):
                 sheetname = self.chart_name + str(self.chartname_count)
             else:
                 sheetname = self.sheet_name + str(self.sheetname_count)
+
+        # Check if sheetname is empty.
+        if sheetname == '':
+            raise Exception("Excel worksheet name cannot be empty")
 
         # Check that sheet sheetname is <= 31. Excel limit.
         if len(sheetname) > 31:
@@ -1193,19 +1246,22 @@ class Workbook(xmlwriter.XMLwriter):
         x_dpi = 96
         y_dpi = 96
 
-        # Search through the image data to read the height and width in the
-        # 0xFFC0/C2 element. Also read the DPI in the 0xFFE0 element.
+        # Search through the image data to read the JPEG markers.
         while not end_marker and offset < data_length:
 
             marker = (unpack('>H', data[offset + 0:offset + 2]))[0]
             length = (unpack('>H', data[offset + 2:offset + 4]))[0]
 
-            # Read the image dimensions.
-            if marker == 0xFFC0 or marker == 0xFFC2:
+            # Read the height and width in the 0xFFCn elements (except C4, C8
+            # and CC which aren't SOF markers).
+            if ((marker & 0xFFF0) == 0xFFC0
+                    and marker != 0xFFC4
+                    and marker != 0xFFC8
+                    and marker != 0xFFCC):
                 height = (unpack('>H', data[offset + 5:offset + 7]))[0]
                 width = (unpack('>H', data[offset + 7:offset + 9]))[0]
 
-            # Read the image DPI.
+            # Read the DPI in the 0xFFE0 element.
             if marker == 0xFFE0:
                 units = (unpack('b', data[offset + 11:offset + 12]))[0]
                 x_density = (unpack('>H', data[offset + 12:offset + 14]))[0]

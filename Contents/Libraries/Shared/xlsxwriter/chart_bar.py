@@ -2,7 +2,7 @@
 #
 # ChartBar - A class for writing the Excel XLSX Bar charts.
 #
-# Copyright 2013-2016, John McNamara, jmcnamara@cpan.org
+# Copyright 2013-2018, John McNamara, jmcnamara@cpan.org
 #
 
 from . import chart
@@ -135,9 +135,6 @@ class ChartBar(chart.Chart):
         # Write the c:ser elements.
         for data in series:
             self._write_ser(data)
-
-        # Write the c:marker element.
-        self._write_marker_value()
 
         # Write the c:gapWidth element.
         if args['primary_axes']:
