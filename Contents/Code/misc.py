@@ -20,6 +20,9 @@ import math
 import consts
 from textwrap import wrap, fill
 
+
+from xml.etree import ElementTree
+
 VERSION = '0.0.0.5'
 
 
@@ -191,7 +194,6 @@ def GetRegInfo2(myMedia, myField, default=consts.DEFAULT, key='N/A'):
                     else:
                         returnVal = default
                         pass
-
         return WrapStr(fixCRLF(returnVal)).encode('utf8')
     except:
         returnVal = default
@@ -245,6 +247,14 @@ def getLevelFields(levelFields, fieldnames):
 
 def getItemInfo(et, myRow, fieldList):
     ''' fetch the actual info for the element '''
+    intBehindthescenes = 0
+    intDeleted = 0
+    intFeaturette = 0
+    intInterview = 0
+    intScene = 0
+    intShort = 0
+    intTrailer = 0
+
     try:
         for item in fieldList:
             try:
@@ -263,6 +273,9 @@ def getItemInfo(et, myRow, fieldList):
                         else:
                             element = GetRegInfo2(
                                 et, value, consts.DEFAULT, key=key)
+                elif key.startswith('Extras-'):
+                    retVals = et.xpath(value)
+                    element = str(len(retVals))
                 elif key in ['Part File Only', 'Part File Path']:
                     element = GetRegInfo2(
                             et,
