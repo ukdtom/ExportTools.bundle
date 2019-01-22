@@ -1,3 +1,11 @@
+V1.0.2.16:
+    -   Movies:
+        - Consider count of different extras #71
+    -   General:
+        - Spelling error #68
+    -   Shows Only:
+        - Shows only #75
+        
 V1.0.2.15:
     -   General:
         -   Updated xlsx library to newest version

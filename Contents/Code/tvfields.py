@@ -194,7 +194,9 @@ Show_1 = [
     ('Rating', '@rating'),
     ('Content Rating', '@contentRating'),
     ('Studio', '@studio'),
-    ('Poster url', '@thumb')
+    ('Poster url', '@thumb'),
+    ('Amount of Episodes', '@leafCount'),
+    ('Amount of Seasons', '@childCount')
 ]
 
 # Define rows and element name for Show Only level 2
