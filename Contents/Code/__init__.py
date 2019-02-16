@@ -381,7 +381,6 @@ def backgroundScan(title='', key='', sectiontype='', random=0, statusCheck=0):
                     break
                 if bScanStatus == 3:
                     Log.Info('Canceled job')
-                    #TODO: When canceling, we should save what we got so far
                     break
                 if bScanStatus >= 90:
                     Log.Debug(
