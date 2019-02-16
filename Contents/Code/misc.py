@@ -276,6 +276,9 @@ def getItemInfo(et, myRow, fieldList):
                 elif key.startswith('Extras-'):
                     retVals = et.xpath(value)
                     element = str(len(retVals))
+                elif key == ('Chapter Count'):
+                    retVals = et.xpath(value)
+                    element = str(len(retVals))
                 elif key in ['Part File Only', 'Part File Path']:
                     element = GetRegInfo2(
                             et,

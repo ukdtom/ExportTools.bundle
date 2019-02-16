@@ -123,6 +123,8 @@ Level_3 = [
     ('Chapter Source',
         '@chapterSource'),
     ('Chapter Title',
+        'Chapter/@tag'),
+    ('Chapter Count',
         'Chapter/@tag')
     ]
 
