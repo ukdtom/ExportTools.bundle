@@ -63,7 +63,11 @@ Level_2 = [
     ('Directors',
         'Director/@tag'),
     ('Roles',
-        'Role/@tag')
+        'Role/@tag'),
+    ('Audience Rating',
+        '@audienceRating'),
+    ('User Rating',
+        '@userRating')
     ]
 
 # Define rows and element name for level 3 (One call pr. movie)

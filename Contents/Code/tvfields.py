@@ -34,7 +34,8 @@ Level_1 = [
     ('Episode', '@index'),
     ('Content Rating', '@contentRating'),
     ('Summary', '@summary'),
-    ('Rating', '@rating')
+    ('Rating', '@rating'),
+    ('User Rating', '@userRating')    
 ]
 
 Level_2 = [
@@ -196,7 +197,8 @@ Show_1 = [
     ('Studio', '@studio'),
     ('Poster url', '@thumb'),
     ('Amount of Episodes', '@leafCount'),
-    ('Amount of Seasons', '@childCount')
+    ('Amount of Seasons', '@childCount'),
+    ('User Rating', '@userRating')    
 ]
 
 # Define rows and element name for Show Only level 2
