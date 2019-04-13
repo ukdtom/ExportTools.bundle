@@ -28,8 +28,8 @@
         "default": "false"
     },
     {
-        "id": "Poster_Hight",
-        "label": "Poster Hight",
+        "id": "Poster_Height",
+        "label": "Poster Height",
         "type": "text",
         "default": "75"
     },
