@@ -8,11 +8,6 @@ ExportTools.bundle
 [![master](https://img.shields.io/badge/master-stable-green.svg?maxAge=2592000)]()
 ![Maintenance](https://img.shields.io/badge/Maintained-Yes-green.svg)
 
-[![Release](https://img.shields.io/github/release/ukdtom/WebTools.bundle.svg?style=flat)](https://github.com/ukdtom/WebTools.bundle/releases/latest)
-
-
-
-
 Export Plex Library to a csv, xlsx or m3u8 file
 
 To get futher info about this plugin, check out the wiki:
