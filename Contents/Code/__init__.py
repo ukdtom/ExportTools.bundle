@@ -20,6 +20,8 @@ import io
 import csv
 import re
 import locale
+import json
+import plistlib
 import movies
 import tvseries
 import audio
@@ -50,6 +52,62 @@ sectiontype = ''
 bScanStatusCount = 0
 # Path to export file
 EXPORTPATH = ''
+
+@route(PREFIX + '/restart')
+def restart():
+    try:
+        Log.Debug('Restarting plugin')
+        pFile = Core.storage.join_path(
+            Core.app_support_path,
+            Core.config.bundles_dir_name,
+            NAME + '.bundle',
+            'Contents',
+            'Info.plist')
+        pl = plistlib.readPlist(pFile)
+        url = ''.join((
+            misc.GetLoopBack(),
+            '/:/plugins/%s/restart')) % pl[
+                'CFBundleIdentifier']        
+        HTTP.Request(misc.GetLoopBack() + '/:/plugins/%s/restart' %
+            pl['CFBundleIdentifier'],
+            cacheTime=0,
+            immediate=True)
+    except Exception, e:
+        try:            
+            HTTP.Request(
+                misc.GetLoopBack() + '/:/plugins/com.plexapp.system/restart', immediate=True)
+        except:
+            pass
+
+
+@route(PREFIX + '/sectionList')
+def sectionList():
+    # Path to DefaultPrefs.json
+    prefsFile = Core.storage.join_path(
+        Core.app_support_path,
+        Core.config.bundles_dir_name,
+        NAME + '.bundle','Contents','DefaultPrefs.json')    
+    with io.open(prefsFile) as json_file:  
+        data = json.load(json_file)             
+    #print(json.dumps(data, indent=4, sort_keys=True))
+    
+    # Get list of libraries
+    SectionsURL = misc.GetLoopBack() + '/library/sections'    
+    SectionList = XML.ElementFromURL(SectionsURL).xpath('//Directory')    
+    LibraryValues = []
+    LibraryValues.append('*** Idle ***'.decode('utf-8'))
+    LibraryValues.append('*** Reload Library List ***'.decode('utf-8'))                
+    for Section in SectionList:
+        LibraryValues.append(Section.get('title').decode('utf-8'))
+    for item in data:
+        if item['id'] == 'Libraries':
+            print json.dumps(item, indent=4, sort_keys=True)
+            item['values'] = LibraryValues
+            break
+    with io.open(prefsFile, 'wb') as outfile:  
+        json.dump(data, outfile, indent=4)    
+    restart()
+    return
 
 
 @route(PREFIX + '/genParam')
@@ -168,6 +226,7 @@ def Start():
         except:
             pass
     Log.Debug(strLog)
+    
     Plugin.AddViewGroup('List', viewMode='List', mediaType='items')
     Plugin.AddViewGroup("Details", viewMode="InfoList", mediaType="items")
     ObjectContainer.art = R(ART)
@@ -273,12 +332,64 @@ def ValidateExportPath():
         return False
 
 
+@route(PREFIX + '/ResetToIdle')
+def ResetToIdle():
+    '''
+    Reset Library Prefs to idle
+    '''
+    pFile = Core.storage.join_path(
+        Core.app_support_path,
+        Core.config.bundles_dir_name,
+        NAME + '.bundle',
+        'Contents',
+        'Info.plist')
+    pl = plistlib.readPlist(pFile)
+    CFBundleIdentifier = pl['CFBundleIdentifier']
+    url = ''.join((
+        misc.GetLoopBack(),
+        '/:/plugins/',
+        CFBundleIdentifier,
+        '/prefs/set?Libraries=***%20Idle%20***'))
+    HTTP.Request(url, cacheTime=0, immediate=True)
+    return
+
+
+@route(PREFIX + '/ScanLib')
+def ScanLib(title=''):    
+    Log.Debug('Starting to scan section from prefs: %s' %title)
+    # Get list of libraries
+    SectionsURL = misc.GetLoopBack() + '/library/sections'        
+    Library = XML.ElementFromURL(SectionsURL).xpath('//Directory[@title="' + title + '"]')    
+    key = Library[0].get('key').decode('utf-8')
+    sectiontype = Library[0].get('type').decode('utf-8')
+    Log.Debug('Key detected as %s and type as %s' %(key, sectiontype))    
+    Thread.Create(
+        backgroundScanThread,
+        globalize=True,
+        title=title,
+        key=key,
+        sectiontype=sectiontype)    
+    return
+
 @route(PREFIX + '/ValidatePrefs')
 def ValidatePrefs():
     '''
     Called by the framework every time a user changes the prefs
-    '''
-    return
+    ''' 
+    SelectedLib =  Prefs['Libraries']    
+    if SelectedLib == '*** Reload Library List ***':
+        # Start by flipping prefs back to idle
+        ResetToIdle()                        
+        Thread.Create(sectionList(), globalize=True)
+        return
+    elif SelectedLib == '*** Idle ***':        
+        return
+    elif SelectedLib == None:
+        return
+    else:        
+        ScanLib(title= SelectedLib)
+        ResetToIdle()
+        return
 
 
 @indirect
@@ -297,7 +408,6 @@ def complete(title=''):
         message = unicode(message, 'utf-8', 'replace')
     except TypeError:
         pass
-
     oc2 = ObjectContainer(title1=title, no_history=True, message=message)
     oc2.add(
         DirectoryObject(
@@ -358,7 +468,7 @@ def backgroundScan(title='', key='', sectiontype='', random=0, statusCheck=0):
                 if bScanStatus == 2:
                     Log.Debug(
                         "******** Scan Done, stopping wait ********")
-                    Log.Debug("*******  All done, tell my Master  ***********")
+                    Log.Debug("*******  All done, tell my Master  ***********")                    
                     title = ('Export Completed for %s' % title)
                     try:
                         title = unicode(title, 'utf-8', 'replace')

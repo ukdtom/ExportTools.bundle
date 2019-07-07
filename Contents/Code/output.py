@@ -36,6 +36,7 @@ def createFile(sectionKey, sectionType, title):
     # fileObject for 3mu file
     global writer3muFile
     global playListType
+    global outFile
     extension = '.' + Prefs['Output_Format']
     # Placeholder for return array
     retVal = []
@@ -117,7 +118,8 @@ def createFile(sectionKey, sectionType, title):
                 Prefs['Export_Path'],
                 NAME,
                 newtitle + '-' + myLevel + '-' + timestr + extension)
-    # Add what we got to the return array
+    # Add what we got to the return array    
+    outFile = outFile + '.tmp-Wait-Please'    
     retVal.append(outFile)
     retVal.append(myMediaURL)
     # Posters ?
@@ -341,6 +343,9 @@ def closefile():
         targetfile.close()
     if muFile != '':
         writer3muFile.close()
+    # Rename output to real file
+    FinalFile = outFile.split('.tmp-Wait-')[0]    
+    os.rename(outFile, FinalFile)
 
 
 def setOptimalColWidth():
