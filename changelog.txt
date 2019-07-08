@@ -1,3 +1,9 @@
+V2.0.0.1:
+	- General
+		- Due to Plex has removed GUI for Plugins, we kinda worked around it.
+			- Please see the Wiki on Github
+				- https://github.com/ukdtom/ExportTools.bundle/wiki/IMPORTANT-NOTICE!
+
 V1.0.2.18:
     -   Movies:
         - Added Audience Rating and User Rating to Level 2

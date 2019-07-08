@@ -23,6 +23,26 @@ muFile = ''
 writer3muFile = ''
 
 
+
+def getStatusFileName():
+    ''' Get name of status file '''
+    global StatusFile
+    StatusFile = os.path.join(
+        os.path.dirname(outFile),
+        'ExportTools-Status_IDLE')    
+    return StatusFile
+
+def setMax(Max):
+    ''' Set vars and file for status '''
+    global iMax
+    iMax = Max
+    global iCurrent
+    iCurrent = 0
+    global CurStatusFile
+    CurStatusFile = getStatusFileName()
+    io.open(CurStatusFile, 'a').close()
+
+
 def createFile(sectionKey, sectionType, title):
     '''
     Create the output file,
@@ -119,7 +139,7 @@ def createFile(sectionKey, sectionType, title):
                 NAME,
                 newtitle + '-' + myLevel + '-' + timestr + extension)
     # Add what we got to the return array    
-    outFile = outFile + '.tmp-Wait-Please'    
+    outFile = outFile + '.tmp-Wait-Please' 
     retVal.append(outFile)
     retVal.append(myMediaURL)
     # Posters ?
@@ -201,6 +221,19 @@ def writerow(rowentry):
     ''' Write row entry '''
     global row
     global columnwidth
+    try:        
+        global CurStatusFile
+        global iCurrent
+        if (iCurrent % 10 == 0):
+            StatusTekst = 'ExportTools-Status_Exporting_%s-of-%s' %(str(iCurrent), str(iMax))
+            NewStatusFile = os.path.join(
+                os.path.dirname(StatusFile),
+                StatusTekst)
+            os.rename(CurStatusFile, NewStatusFile)
+            CurStatusFile = NewStatusFile
+        iCurrent += 1
+    except Exception, e:
+        Log.Exception('Exception happened in WriteRow-status was %s' % str(e))
     try:
         if extension == '.csv':
             writer.writerow(rowentry)
@@ -345,7 +378,9 @@ def closefile():
         writer3muFile.close()
     # Rename output to real file
     FinalFile = outFile.split('.tmp-Wait-')[0]    
-    os.rename(outFile, FinalFile)
+    os.rename(outFile, FinalFile)    
+    if os.path.exists(CurStatusFile):
+        os.remove(CurStatusFile)
 
 
 def setOptimalColWidth():

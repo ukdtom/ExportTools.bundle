@@ -1,194 +1,194 @@
 [
     {
-        "default": "Idle", 
+        "id": "Libraries",
+        "label": "Select Library to export, and click Save ",
+        "type": "enum",
         "values": [
-            "*** Idle ***", 
+            "*** Idle ***",
             "*** Reload Library List ***"
-        ], 
-        "type": "enum", 
-        "id": "Libraries", 
-        "label": "Select Library to export, and click Save "
-    }, 
+        ],
+        "default": "*** Idle ***"
+    },
     {
-        "default": "csv", 
+        "id": "Output_Format",
+        "label": "Output format (If on Windows, use latest version of Plex Media Server)",
+        "type": "enum",
         "values": [
-            "csv", 
+            "csv",
             "xlsx"
-        ], 
-        "type": "enum", 
-        "id": "Output_Format", 
-        "label": "Output format (If on Windows, use latest version of Plex Media Server)"
-    }, 
+        ],
+        "default": "csv"
+    },
     {
-        "default": "true", 
-        "type": "bool", 
-        "id": "Autosize_Column", 
-        "label": "Autosize column (xlsx only)"
-    }, 
+        "id": "Autosize_Column",
+        "label": "Autosize column (xlsx only)",
+        "type": "bool",
+        "default": "true"
+    },
     {
-        "default": "true", 
-        "type": "bool", 
-        "id": "Autosize_Row", 
-        "label": "Autosize row (xlsx only)"
-    }, 
+        "id": "Autosize_Row",
+        "label": "Autosize row (xlsx only)",
+        "type": "bool",
+        "default": "true"
+    },
     {
-        "default": "false", 
-        "type": "bool", 
-        "id": "Export_Posters", 
-        "label": "Export posters - Req. level 3 for movies, and level 2 for shows as a minimum. Takes longer time!"
-    }, 
+        "id": "Export_Posters",
+        "label": "Export posters - Req. level 3 for movies, and level 2 for shows as a minimum. Takes longer time!",
+        "type": "bool",
+        "default": "false"
+    },
     {
-        "default": "75", 
-        "type": "text", 
-        "id": "Poster_Hight", 
-        "label": "Poster Hight"
-    }, 
+        "id": "Poster_Hight",
+        "label": "Poster Hight",
+        "type": "text",
+        "default": "75"
+    },
     {
-        "default": "50", 
-        "type": "text", 
-        "id": "Poster_Width", 
-        "label": "Poster Width"
-    }, 
+        "id": "Poster_Width",
+        "label": "Poster Width",
+        "type": "text",
+        "default": "50"
+    },
     {
-        "default": "None", 
-        "type": "text", 
-        "id": "Export_Path", 
-        "label": "Path to export media to"
-    }, 
+        "id": "Export_Path",
+        "label": "Path to export media to",
+        "type": "text",
+        "default": "None"
+    },
     {
-        "default": "true", 
-        "type": "bool", 
-        "id": "Auto_Path", 
-        "label": "Ignore export path and write output to the media storage instead"
-    }, 
+        "id": "Auto_Path",
+        "label": "Ignore export path and write output to the media storage instead",
+        "type": "bool",
+        "default": "true"
+    },
     {
-        "default": ",", 
-        "type": "text", 
-        "id": "Delimiter", 
-        "label": "Delimiter between fields in CSV file....NOTE.....Only one character!!!"
-    }, 
+        "id": "Delimiter",
+        "label": "Delimiter between fields in CSV file....NOTE.....Only one character!!!",
+        "type": "text",
+        "default": ","
+    },
     {
-        "default": "true", 
-        "type": "bool", 
-        "id": "Line_Wrap", 
-        "label": "Wrap lines"
-    }, 
+        "id": "Line_Wrap",
+        "label": "Wrap lines",
+        "type": "bool",
+        "default": "true"
+    },
     {
-        "default": "40", 
-        "type": "text", 
-        "id": "Line_Length", 
-        "label": "Max lines length"
-    }, 
+        "id": "Line_Length",
+        "label": "Max lines length",
+        "type": "text",
+        "default": "40"
+    },
     {
-        "default": " - ", 
-        "type": "text", 
-        "id": "Seperator", 
-        "label": "Seperator, with multiple info in same field"
-    }, 
+        "id": "Seperator",
+        "label": "Seperator, with multiple info in same field",
+        "type": "text",
+        "default": " - "
+    },
     {
-        "default": "true", 
-        "type": "bool", 
-        "id": "Sort_title", 
-        "label": "Default Sort title to title, if empty"
-    }, 
+        "id": "Sort_title",
+        "label": "Default Sort title to title, if empty",
+        "type": "bool",
+        "default": "true"
+    },
     {
-        "default": "true", 
-        "type": "bool", 
-        "id": "Original_Title", 
-        "label": "Default Original Title to title, if empty"
-    }, 
+        "id": "Original_Title",
+        "label": "Default Original Title to title, if empty",
+        "type": "bool",
+        "default": "true"
+    },
     {
-        "default": "Level 2", 
+        "id": "Movie_Level",
+        "label": "Movie Export Level.......",
+        "type": "enum",
         "values": [
-            "Level 1", 
-            "Level 2", 
-            "Level 3", 
-            "Level 4", 
-            "Level 5", 
-            "Level 6", 
-            "Special Level 1", 
-            "Special Level 2", 
-            "Special Level 3", 
+            "Level 1",
+            "Level 2",
+            "Level 3",
+            "Level 4",
+            "Level 5",
+            "Level 6",
+            "Special Level 1",
+            "Special Level 2",
+            "Special Level 3",
             "Level 666"
-        ], 
-        "type": "enum", 
-        "id": "Movie_Level", 
-        "label": "Movie Export Level......."
-    }, 
+        ],
+        "default": "Level 2"
+    },
     {
-        "default": "Level 2", 
+        "id": "TV_Level",
+        "label": "TV Export Level..........",
+        "type": "enum",
         "values": [
-            "Level 1", 
-            "Level 2", 
-            "Level 3", 
-            "Level 4", 
-            "Level 5", 
-            "Level 6", 
-            "Level 666", 
-            "Show Only 1", 
-            "Show Only 2", 
+            "Level 1",
+            "Level 2",
+            "Level 3",
+            "Level 4",
+            "Level 5",
+            "Level 6",
+            "Level 666",
+            "Show Only 1",
+            "Show Only 2",
             "Show Only 3"
-        ], 
-        "type": "enum", 
-        "id": "TV_Level", 
-        "label": "TV Export Level.........."
-    }, 
+        ],
+        "default": "Level 2"
+    },
     {
-        "default": "Level 2", 
+        "id": "Artist_Level",
+        "label": "Audio Export Level.......",
+        "type": "enum",
         "values": [
-            "Level 1", 
-            "Level 2", 
-            "Level 3", 
-            "Level 4", 
-            "Level 5", 
+            "Level 1",
+            "Level 2",
+            "Level 3",
+            "Level 4",
+            "Level 5",
             "Level 666"
-        ], 
-        "type": "enum", 
-        "id": "Artist_Level", 
-        "label": "Audio Export Level......."
-    }, 
+        ],
+        "default": "Level 2"
+    },
     {
-        "default": "Level 1", 
+        "id": "Photo_Level",
+        "label": "Photo Export Level.......",
+        "type": "enum",
         "values": [
-            "Level 1", 
-            "Level 2", 
+            "Level 1",
+            "Level 2",
             "Level 3"
-        ], 
-        "type": "enum", 
-        "id": "Photo_Level", 
-        "label": "Photo Export Level......."
-    }, 
+        ],
+        "default": "Level 1"
+    },
     {
-        "default": "Simple", 
+        "id": "PlayList_Level",
+        "label": "PlayList Export Level....",
+        "type": "enum",
         "values": [
-            "Simple", 
+            "Simple",
             "Basic"
-        ], 
-        "type": "enum", 
-        "id": "PlayList_Level", 
-        "label": "PlayList Export Level...."
-    }, 
+        ],
+        "default": "Simple"
+    },
     {
-        "default": "Disabled", 
+        "id": "mu_Level",
+        "label": "create m3u8 playlist file",
+        "type": "enum",
         "values": [
-            "Disabled", 
-            "Simple", 
+            "Disabled",
+            "Simple",
             "Enhanced"
-        ], 
-        "type": "enum", 
-        "id": "mu_Level", 
-        "label": "create m3u8 playlist file"
-    }, 
+        ],
+        "default": "Disabled"
+    },
     {
-        "default": "false", 
-        "type": "bool", 
-        "id": "Check_Files", 
-        "label": "Perform 'file present/accessibility' check. Requires more time. Useful when part of media file storage was accidentally lost"
-    }, 
+        "id": "Check_Files",
+        "label": "Perform 'file present/accessibility' check. Requires more time. Useful when part of media file storage was accidentally lost",
+        "type": "bool",
+        "default": "false"
+    },
     {
-        "default": "30", 
-        "type": "text", 
-        "id": "TimeOut", 
-        "label": "Timeout when requesting info from PMS in sec."
-    }
+        "id": "TimeOut",
+        "label": "Timeout when requesting info from PMS in sec.",
+        "type": "text",
+        "default": "30"
+    }   
 ]

@@ -100,8 +100,7 @@ def sectionList():
     for Section in SectionList:
         LibraryValues.append(Section.get('title').decode('utf-8'))
     for item in data:
-        if item['id'] == 'Libraries':
-            print json.dumps(item, indent=4, sort_keys=True)
+        if item['id'] == 'Libraries':            
             item['values'] = LibraryValues
             break
     with io.open(prefsFile, 'wb') as outfile:  
@@ -708,6 +707,7 @@ def scanMovieDB(myMediaURL, outFile):
                 timeout=float(PMSTIMEOUT))
             if bScanStatusCount == 0:
                 bScanStatusCountOf = partMedias.get('totalSize')
+                output.setMax(int(bScanStatusCountOf))
                 Log.Debug(
                     'Amount of items in this section is %s' % bScanStatusCountOf)
             # HERE WE DO STUFF
