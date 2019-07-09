@@ -11,6 +11,12 @@ https://github.com/ukdtom/ExportTools.bundle/wiki
 
 
 
+# Important Notice:
+
+If using Plex Web Client V 3.104.1, you **MUST** read [this Wiki Page](https://github.com/ukdtom/ExportTools.bundle/wiki/IMPORTANT-NOTICE)
+
+
+
 /Tommy
 
 Huge thanks goes to srazer for helping with the code, and to 
