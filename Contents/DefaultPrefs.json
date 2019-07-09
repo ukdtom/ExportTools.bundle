@@ -1,5 +1,15 @@
 [
     {
+        "id": "Libraries",
+        "label": "Select Library to export, and click Save ",
+        "type": "enum",
+        "values": [
+            "*** Idle ***",
+            "*** Reload Library List ***"
+        ],
+        "default": "*** Idle ***"
+    },
+    {
         "id": "Output_Format",
         "label": "Output format (If on Windows, use latest version of Plex Media Server)",
         "type": "enum",
