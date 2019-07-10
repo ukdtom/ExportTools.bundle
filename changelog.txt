@@ -4,6 +4,7 @@ V2.0.0.2:
 			- Syntax is:
     		  http://IP-OF-PMS:32400/applications/ExportTools/launch?title=TITLE-OF-SECTION&X-Plex-Token=MY-TOKEN
 		- Fixed "Poster Height" misspel in prefs
+		- Added Version number to the Prefs settings title
 
 V2.0.0.1:
 	- General
