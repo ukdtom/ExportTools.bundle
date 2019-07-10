@@ -53,6 +53,16 @@ bScanStatusCount = 0
 # Path to export file
 EXPORTPATH = ''
 
+@route(PREFIX + '/launch')
+def launch(title=''):
+    '''
+    Used to launch an export from an url
+    Syntax is:
+    http://IP-OF-PMS:32400/applications/ExportTools/launch?title=TITLE-OF-SECTION&X-Plex-Token=MY-TOKEN
+    '''    
+    Log.Debug('I was asked via url to scan section: %s' %title)
+    ScanLib(title=title)
+
 @route(PREFIX + '/restart')
 def restart():
     try:
@@ -212,7 +222,7 @@ def Start():
         'debug')
     DEBUGMODE = os.path.isfile(debugFile)
     strLog = ''.join((
-        '"*******  Started % s' % (NAME + ' V' + VERSION),
+        '"*******  Started % s' % (NAME),
         ' on %s' % Platform.OS,
         ' at % s' % time.strftime("%Y-%m-%d %H:%M"),
         ' with locale set to % s' % str(locale.getdefaultlocale()),
@@ -225,11 +235,11 @@ def Start():
         except:
             pass
     Log.Debug(strLog)
-    
+    Plugin.AddPrefixHandler(PREFIX, launch, NAME, ICON, ART)
     Plugin.AddViewGroup('List', viewMode='List', mediaType='items')
     Plugin.AddViewGroup("Details", viewMode="InfoList", mediaType="items")
     ObjectContainer.art = R(ART)
-    ObjectContainer.title1 = NAME + VERSION
+    ObjectContainer.title1 = NAME
     DirectoryObject.thumb = R(ICON)
     HTTP.CacheTime = 0
     Log.Debug('Misc module is version: %s' % misc.getVersion())
@@ -241,7 +251,7 @@ def MainMenu(random=0):
     ''' Main Menu '''
     Log.Debug("**********  Starting MainMenu  **********")
     global sectiontype
-    title = NAME + VERSION
+    title = NAME
     oc = ObjectContainer(
         title1=title,
         no_cache=True,
