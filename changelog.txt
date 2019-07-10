@@ -1,3 +1,9 @@
+V2.0.0.2:
+	- General
+		- Added possibillity to start a scan from an url
+			- Syntax is:
+    		  http://IP-OF-PMS:32400/applications/ExportTools/launch?title=TITLE-OF-SECTION&X-Plex-Token=MY-TOKEN
+			  
 V2.0.0.1:
 	- General
 		- Due to Plex has removed GUI for Plugins, we kinda worked around it.
