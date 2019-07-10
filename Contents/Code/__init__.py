@@ -222,7 +222,7 @@ def Start():
         'debug')
     DEBUGMODE = os.path.isfile(debugFile)
     strLog = ''.join((
-        '"*******  Started % s' % (NAME + ' V' + VERSION),
+        '"*******  Started % s' % (NAME),
         ' on %s' % Platform.OS,
         ' at % s' % time.strftime("%Y-%m-%d %H:%M"),
         ' with locale set to % s' % str(locale.getdefaultlocale()),
@@ -239,7 +239,7 @@ def Start():
     Plugin.AddViewGroup('List', viewMode='List', mediaType='items')
     Plugin.AddViewGroup("Details", viewMode="InfoList", mediaType="items")
     ObjectContainer.art = R(ART)
-    ObjectContainer.title1 = NAME + VERSION
+    ObjectContainer.title1 = NAME
     DirectoryObject.thumb = R(ICON)
     HTTP.CacheTime = 0
     Log.Debug('Misc module is version: %s' % misc.getVersion())
@@ -251,7 +251,7 @@ def MainMenu(random=0):
     ''' Main Menu '''
     Log.Debug("**********  Starting MainMenu  **********")
     global sectiontype
-    title = NAME + VERSION
+    title = NAME
     oc = ObjectContainer(
         title1=title,
         no_cache=True,
