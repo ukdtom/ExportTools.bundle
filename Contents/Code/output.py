@@ -80,7 +80,7 @@ def createFile(sectionKey, sectionType, title, skipts=False):
         print 'ged33 skipts', skipts
     else:
         print 'ged34 skipts', skipts
-        timestr = '' + time.strftime("%Y%m%d-%H%M%S")
+        timestr = '-' + time.strftime("%Y%m%d-%H%M%S")
     # Generate Output FileName
     if sectionType == 'show':
         myLevel = Prefs['TV_Level']

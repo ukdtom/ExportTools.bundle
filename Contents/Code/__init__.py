@@ -32,7 +32,7 @@ import moviefields
 import audiofields
 import tvfields
 import photofields
-from consts import NAME, VERSION, PREFIX, ICON, ART, PLAYLIST
+from consts import NAME, VERSION, PREFIX, ICON, ART, PLAYLIST, APPNAME
 from consts import CONTAINERSIZEMOVIES, PMSTIMEOUT, CONTAINERSIZETV
 from consts import CONTAINERSIZEEPISODES, CONTAINERSIZEPHOTO
 from consts import CONTAINERSIZEAUDIO
@@ -81,7 +81,7 @@ def restart():
         pFile = Core.storage.join_path(
             Core.app_support_path,
             Core.config.bundles_dir_name,
-            NAME + '.bundle',
+            APPNAME + '.bundle',
             'Contents',
             'Info.plist')
         pl = plistlib.readPlist(pFile)
@@ -107,7 +107,7 @@ def sectionList():
     prefsFile = Core.storage.join_path(
         Core.app_support_path,
         Core.config.bundles_dir_name,
-        NAME + '.bundle','Contents','DefaultPrefs.json')    
+        APPNAME + '.bundle','Contents','DefaultPrefs.json')    
     with io.open(prefsFile) as json_file:  
         data = json.load(json_file)             
     #print(json.dumps(data, indent=4, sort_keys=True))
@@ -229,7 +229,7 @@ def Start():
     debugFile = Core.storage.join_path(
         Core.app_support_path,
         Core.config.bundles_dir_name,
-        NAME + '.bundle',
+        APPNAME + '.bundle',
         'debug')    
     DEBUGMODE = os.path.isfile(debugFile)
     strLog = ''.join((
@@ -347,8 +347,8 @@ def ValidateExportPath():
         else:
             raise Exception("Wrong path specified as export path")
             return False
-    except:
-        Log.Critical('Bad export path')
+    except Exception, e:        
+        Log.Exception('Bad Export Path eith error: %s' %(str(e)))
         return False
 
 
