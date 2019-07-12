@@ -60,8 +60,7 @@ def launch(title='', skipts='False', level=None):
     Syntax is:
     http://IP-OF-PMS:32400/applications/ExportTools/launch?title=TITLE-OF-SECTION&skipts=False&level=Level%203&X-Plex-Token=MY-TOKEN
     '''
-    skipts = (skipts.upper() == 'TRUE') 
-    print 'Ged Launch', title, skipts, level
+    skipts = (skipts.upper() == 'TRUE')     
     Log.Debug('I was asked via url to scan section: %s with skip timestamp set to %s and with a level of %s' %(title, str(skipts), level))
     try:
         ScanLib(title=title, skipts=skipts, level=level)
@@ -668,13 +667,28 @@ def backgroundScanThread(title, key, sectiontype, skipts=False, level=None):
         Log.Debug("Section type is %s" % sectiontype)
         # Generate parameters
         genExtParam(sectiontype)
+        # Get level        
+        if level:
+            myLevel = level            
+        elif sectiontype == 'show':
+            myLevel = Prefs['TV_Level']
+        elif sectiontype == 'movie':
+            myLevel = Prefs['Movie_Level']
+        elif sectiontype == 'artist':
+            myLevel = Prefs['Artist_Level']
+        elif sectiontype == 'photo':
+            myLevel = Prefs['Photo_Level']
+        elif sectiontype == 'playlists':
+            myLevel = Prefs['PlayList_Level']
+        else:
+            myLevel = ''        
         # Create the output file
-        [outFile, myMediaURL] = output.createFile(key, sectiontype, title, skipts=skipts)
+        [outFile, myMediaURL] = output.createFile(key, sectiontype, title, skipts=skipts, level=myLevel)
         EXPORTPATH = outFile
         Log.Debug('Output file is named %s' % outFile)
         # Scan the database based on the type of section
         if sectiontype == "movie":
-            scanMovieDB(myMediaURL, outFile)
+            scanMovieDB(myMediaURL, outFile, level=myLevel)
         elif sectiontype == "artist":
             scanArtistDB(myMediaURL, outFile)
         elif sectiontype == "show":
@@ -701,10 +715,10 @@ def backgroundScanThread(title, key, sectiontype, skipts=False, level=None):
 
 
 @route(PREFIX + '/scanMovieDB')
-def scanMovieDB(myMediaURL, outFile):
+def scanMovieDB(myMediaURL, outFile, level):
     ''' This function will scan a movie section. '''
     Log.Debug("*** Starting scanMovieDB with an URL of %s ***" % myMediaURL)
-    Log.Debug('Movie Export level is %s' % Prefs['Movie_Level'])
+    Log.Debug('Movie Export level is %s' % level)
     global bScanStatusCount
     global bScanStatusCountOf
     global bScanStatus
@@ -713,8 +727,8 @@ def scanMovieDB(myMediaURL, outFile):
     iCurrent = 0
     try:
         Log.Debug("About to open file %s" % outFile)
-        output.createHeader(outFile, 'movies')
-        if Prefs['Movie_Level'] in moviefields.singleCall:
+        output.createHeader(outFile, 'movies', level)
+        if level in moviefields.singleCall:
             bExtraInfo = False
         else:
             bExtraInfo = True

@@ -43,12 +43,12 @@ def setMax(Max):
     io.open(CurStatusFile, 'a').close()
 
 
-def createFile(sectionKey, sectionType, title, skipts=False):
+def createFile(sectionKey, sectionType, title, skipts=False, level=None):
     '''
     Create the output file,
     based on section title, timestamp and output type
     '''
-    print 'Ged22', skipts
+    myLevel = level    
     global newtitle
     # Type of export
     global extension
@@ -77,23 +77,10 @@ def createFile(sectionKey, sectionType, title, skipts=False):
     # Get current date and time
     if skipts:
         timestr = ''
-        print 'ged33 skipts', skipts
-    else:
-        print 'ged34 skipts', skipts
+    else:        
         timestr = '-' + time.strftime("%Y%m%d-%H%M%S")
     # Generate Output FileName
-    if sectionType == 'show':
-        myLevel = Prefs['TV_Level']
-    elif sectionType == 'movie':
-        myLevel = Prefs['Movie_Level']
-    elif sectionType == 'artist':
-        myLevel = Prefs['Artist_Level']
-    elif sectionType == 'photo':
-        myLevel = Prefs['Photo_Level']
-    elif sectionType == 'playlists':
-        myLevel = Prefs['PlayList_Level']
-    else:
-        myLevel = ''
+
     # Remove invalid caracters, if on Windows......
     newtitle = re.sub('[\/[:#*?"<>|]', '_', title).strip()    
     if sectionType == 'playlists':
@@ -171,7 +158,7 @@ def createFile(sectionKey, sectionType, title, skipts=False):
     return retVal
 
 
-def createHeader(outFile, sectionType, playListType=''):
+def createHeader(outFile, sectionType, playListType='', level=None):
     ''' Create file header '''
     global writer
     global targetfile
@@ -181,8 +168,11 @@ def createHeader(outFile, sectionType, playListType=''):
     global columnwidth
 
     columnwidth = {}
-    if sectionType == 'movies':
-        fieldnames = movies.getMovieHeader(Prefs['Movie_Level'])
+    if sectionType == 'movies':        
+        if level:
+            fieldnames = movies.getMovieHeader(level)            
+        else:
+            fieldnames = movies.getMovieHeader(Prefs['Movie_Level'])            
     elif sectionType == 'tvseries':
         fieldnames = tvseries.getTVHeader(Prefs['TV_Level'])
     elif sectionType == 'audio':
