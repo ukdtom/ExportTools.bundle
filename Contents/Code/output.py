@@ -11,7 +11,7 @@ import os
 import io
 import urllib2
 import codecs
-from consts import PMSTIMEOUT, NAME, DEFAULT
+from consts import PMSTIMEOUT, NAME, DEFAULT, APPNAME
 
 import sys
 import encodings
@@ -43,11 +43,12 @@ def setMax(Max):
     io.open(CurStatusFile, 'a').close()
 
 
-def createFile(sectionKey, sectionType, title):
+def createFile(sectionKey, sectionType, title, skipts=False):
     '''
     Create the output file,
     based on section title, timestamp and output type
     '''
+    print 'Ged22', skipts
     global newtitle
     # Type of export
     global extension
@@ -74,7 +75,12 @@ def createFile(sectionKey, sectionType, title):
             "/all"))
     Log.Debug("Path to medias in selection is %s" % (myMediaURL))
     # Get current date and time
-    timestr = time.strftime("%Y%m%d-%H%M%S")
+    if skipts:
+        timestr = ''
+        print 'ged33 skipts', skipts
+    else:
+        print 'ged34 skipts', skipts
+        timestr = '' + time.strftime("%Y%m%d-%H%M%S")
     # Generate Output FileName
     if sectionType == 'show':
         myLevel = Prefs['TV_Level']
@@ -89,22 +95,21 @@ def createFile(sectionKey, sectionType, title):
     else:
         myLevel = ''
     # Remove invalid caracters, if on Windows......
-    newtitle = re.sub('[\/[:#*?"<>|]', '_', title).strip()
+    newtitle = re.sub('[\/[:#*?"<>|]', '_', title).strip()    
     if sectionType == 'playlists':
         outFile = os.path.join(
             Prefs['Export_Path'],
-            NAME,
-            'Playlist-' + newtitle + '-' + myLevel + '-' + timestr + extension)
+            APPNAME,
+            'Playlist-' + newtitle + '-' + myLevel + timestr + extension)
         if Prefs['mu_Level'] != 'Disabled':
             muFile = os.path.join(
                 Prefs['Export_Path'],
-                NAME,
+                APPNAME,
                 ''.join((
                     'Playlist-',
                     newtitle,
                     '-',
-                    Prefs['mu_Level'],
-                    '-',
+                    Prefs['mu_Level'],                    
                     timestr,
                     '.m3u8')))
             writer3muFile = codecs.open(muFile, 'w', encoding='utf8')
@@ -124,20 +129,22 @@ def createFile(sectionKey, sectionType, title):
             location = locations[0].get('path')
             outFile = os.path.join(
                 location,
-                NAME,
+                APPNAME,
                 newtitle + '-' + myLevel + '-' + timestr + extension)
-            if not os.path.exists(os.path.join(location, NAME)):
-                os.makedirs(os.path.join(location, NAME))
+            if not os.path.exists(os.path.join(location, APPNAME)):
+                os.makedirs(os.path.join(location, APPNAME))
                 Log.Debug('Auto Created directory named: %s' % (os.path.join(
-                    location, NAME)))
+                    location, APPNAME)))
             else:
                 Log.Debug('Auto directory named: %s already exists' % (
-                    os.path.join(location, NAME)))
+                    os.path.join(location, APPNAME)))
         else:
+            if not os.path.exists(os.path.join(Prefs['Export_Path'], APPNAME)):
+                os.makedirs(os.path.join(Prefs['Export_Path'], APPNAME))
             outFile = os.path.join(
                 Prefs['Export_Path'],
-                NAME,
-                newtitle + '-' + myLevel + '-' + timestr + extension)
+                APPNAME,
+                newtitle + '-' + myLevel + timestr + extension)
     # Add what we got to the return array    
     outFile = outFile + '.tmp-Wait-Please' 
     retVal.append(outFile)

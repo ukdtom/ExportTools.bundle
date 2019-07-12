@@ -54,14 +54,25 @@ bScanStatusCount = 0
 EXPORTPATH = ''
 
 @route(PREFIX + '/launch')
-def launch(title=''):
+def launch(title='', skipts='False', level=None):
     '''
     Used to launch an export from an url
     Syntax is:
-    http://IP-OF-PMS:32400/applications/ExportTools/launch?title=TITLE-OF-SECTION&X-Plex-Token=MY-TOKEN
-    '''    
-    Log.Debug('I was asked via url to scan section: %s' %title)
-    ScanLib(title=title)
+    http://IP-OF-PMS:32400/applications/ExportTools/launch?title=TITLE-OF-SECTION&skipts=False&level=Level%203&X-Plex-Token=MY-TOKEN
+    '''
+    skipts = (skipts.upper() == 'TRUE') 
+    print 'Ged Launch', title, skipts, level
+    Log.Debug('I was asked via url to scan section: %s with skip timestamp set to %s and with a level of %s' %(title, str(skipts), level))
+    try:
+        ScanLib(title=title, skipts=skipts, level=level)
+        return 'Export started'
+    except Exception, e:
+        if str(e) == 'list index out of range':
+            return 'Library not found'
+        else:
+            return str(e)
+
+   
 
 @route(PREFIX + '/restart')
 def restart():
@@ -213,13 +224,13 @@ def genExtParam(sectionType=''):
 
 def Start():
     ''' Start function '''
-    global DEBUGMODE
+    global DEBUGMODE    
     # Switch to debug mode if needed
     debugFile = Core.storage.join_path(
         Core.app_support_path,
         Core.config.bundles_dir_name,
         NAME + '.bundle',
-        'debug')
+        'debug')    
     DEBUGMODE = os.path.isfile(debugFile)
     strLog = ''.join((
         '"*******  Started % s' % (NAME),
@@ -324,11 +335,11 @@ def ValidateExportPath():
         if os.path.exists(myPath):
             Log.Debug(
                 'Master entered a path that already existed as: %s' % myPath)
-            if not os.path.exists(os.path.join(myPath, NAME)):
-                os.makedirs(os.path.join(myPath, NAME))
+            if not os.path.exists(os.path.join(myPath, APPNAME)):
+                os.makedirs(os.path.join(myPath, APPNAME))
                 Log.Debug(
                     'Created directory named: %s' % os.path.join(
-                        myPath, NAME))
+                        myPath, APPNAME))
                 return True
             else:
                 Log.Debug('Path verified as already present')
@@ -346,10 +357,11 @@ def ResetToIdle():
     '''
     Reset Library Prefs to idle
     '''
+
     pFile = Core.storage.join_path(
         Core.app_support_path,
         Core.config.bundles_dir_name,
-        NAME + '.bundle',
+        APPNAME + '.bundle',
         'Contents',
         'Info.plist')
     pl = plistlib.readPlist(pFile)
@@ -364,7 +376,7 @@ def ResetToIdle():
 
 
 @route(PREFIX + '/ScanLib')
-def ScanLib(title=''):    
+def ScanLib(title='', skipts=False, level=None):    
     Log.Debug('Starting to scan section from prefs: %s' %title)
     # Get list of libraries
     SectionsURL = misc.GetLoopBack() + '/library/sections'        
@@ -377,7 +389,10 @@ def ScanLib(title=''):
         globalize=True,
         title=title,
         key=key,
-        sectiontype=sectiontype)    
+        sectiontype=sectiontype,
+        skipts=skipts,
+        level=level
+        )    
     return
 
 @route(PREFIX + '/ValidatePrefs')
@@ -640,7 +655,7 @@ def backgroundScan(title='', key='', sectiontype='', random=0, statusCheck=0):
 
 
 @route(PREFIX + '/backgroundScanThread')
-def backgroundScanThread(title, key, sectiontype):
+def backgroundScanThread(title, key, sectiontype, skipts=False, level=None):
     ''' Background scanner thread. '''
     Log.Debug("*******  Starting backgroundScanThread  ***********")
     logSettings()
@@ -654,7 +669,7 @@ def backgroundScanThread(title, key, sectiontype):
         # Generate parameters
         genExtParam(sectiontype)
         # Create the output file
-        [outFile, myMediaURL] = output.createFile(key, sectiontype, title)
+        [outFile, myMediaURL] = output.createFile(key, sectiontype, title, skipts=skipts)
         EXPORTPATH = outFile
         Log.Debug('Output file is named %s' % outFile)
         # Scan the database based on the type of section
