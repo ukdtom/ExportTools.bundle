@@ -32,7 +32,7 @@ import moviefields
 import audiofields
 import tvfields
 import photofields
-from consts import NAME, VERSION, PREFIX, ICON, ART, PLAYLIST
+from consts import NAME, VERSION, PREFIX, ICON, ART, PLAYLIST, APPNAME
 from consts import CONTAINERSIZEMOVIES, PMSTIMEOUT, CONTAINERSIZETV
 from consts import CONTAINERSIZEEPISODES, CONTAINERSIZEPHOTO
 from consts import CONTAINERSIZEAUDIO
@@ -54,14 +54,24 @@ bScanStatusCount = 0
 EXPORTPATH = ''
 
 @route(PREFIX + '/launch')
-def launch(title=''):
+def launch(title='', skipts='False', level=None):
     '''
     Used to launch an export from an url
     Syntax is:
-    http://IP-OF-PMS:32400/applications/ExportTools/launch?title=TITLE-OF-SECTION&X-Plex-Token=MY-TOKEN
-    '''    
-    Log.Debug('I was asked via url to scan section: %s' %title)
-    ScanLib(title=title)
+    http://IP-OF-PMS:32400/applications/ExportTools/launch?title=TITLE-OF-SECTION&skipts=False&level=Level%203&X-Plex-Token=MY-TOKEN
+    '''
+    skipts = (skipts.upper() == 'TRUE')     
+    Log.Debug('I was asked via url to scan section: %s with skip timestamp set to %s and with a level of %s' %(title, str(skipts), level))
+    try:
+        ScanLib(title=title, skipts=skipts, level=level)
+        return 'Export started'
+    except Exception, e:
+        if str(e) == 'list index out of range':
+            return 'Library not found'
+        else:
+            return str(e)
+
+   
 
 @route(PREFIX + '/restart')
 def restart():
@@ -70,7 +80,7 @@ def restart():
         pFile = Core.storage.join_path(
             Core.app_support_path,
             Core.config.bundles_dir_name,
-            NAME + '.bundle',
+            APPNAME + '.bundle',
             'Contents',
             'Info.plist')
         pl = plistlib.readPlist(pFile)
@@ -96,7 +106,7 @@ def sectionList():
     prefsFile = Core.storage.join_path(
         Core.app_support_path,
         Core.config.bundles_dir_name,
-        NAME + '.bundle','Contents','DefaultPrefs.json')    
+        APPNAME + '.bundle','Contents','DefaultPrefs.json')    
     with io.open(prefsFile) as json_file:  
         data = json.load(json_file)             
     #print(json.dumps(data, indent=4, sort_keys=True))
@@ -213,13 +223,13 @@ def genExtParam(sectionType=''):
 
 def Start():
     ''' Start function '''
-    global DEBUGMODE
+    global DEBUGMODE    
     # Switch to debug mode if needed
     debugFile = Core.storage.join_path(
         Core.app_support_path,
         Core.config.bundles_dir_name,
-        NAME + '.bundle',
-        'debug')
+        APPNAME + '.bundle',
+        'debug')    
     DEBUGMODE = os.path.isfile(debugFile)
     strLog = ''.join((
         '"*******  Started % s' % (NAME),
@@ -324,11 +334,11 @@ def ValidateExportPath():
         if os.path.exists(myPath):
             Log.Debug(
                 'Master entered a path that already existed as: %s' % myPath)
-            if not os.path.exists(os.path.join(myPath, NAME)):
-                os.makedirs(os.path.join(myPath, NAME))
+            if not os.path.exists(os.path.join(myPath, APPNAME)):
+                os.makedirs(os.path.join(myPath, APPNAME))
                 Log.Debug(
                     'Created directory named: %s' % os.path.join(
-                        myPath, NAME))
+                        myPath, APPNAME))
                 return True
             else:
                 Log.Debug('Path verified as already present')
@@ -336,8 +346,8 @@ def ValidateExportPath():
         else:
             raise Exception("Wrong path specified as export path")
             return False
-    except:
-        Log.Critical('Bad export path')
+    except Exception, e:        
+        Log.Exception('Bad Export Path eith error: %s' %(str(e)))
         return False
 
 
@@ -346,10 +356,11 @@ def ResetToIdle():
     '''
     Reset Library Prefs to idle
     '''
+
     pFile = Core.storage.join_path(
         Core.app_support_path,
         Core.config.bundles_dir_name,
-        NAME + '.bundle',
+        APPNAME + '.bundle',
         'Contents',
         'Info.plist')
     pl = plistlib.readPlist(pFile)
@@ -364,7 +375,7 @@ def ResetToIdle():
 
 
 @route(PREFIX + '/ScanLib')
-def ScanLib(title=''):    
+def ScanLib(title='', skipts=False, level=None):    
     Log.Debug('Starting to scan section from prefs: %s' %title)
     # Get list of libraries
     SectionsURL = misc.GetLoopBack() + '/library/sections'        
@@ -377,7 +388,10 @@ def ScanLib(title=''):
         globalize=True,
         title=title,
         key=key,
-        sectiontype=sectiontype)    
+        sectiontype=sectiontype,
+        skipts=skipts,
+        level=level
+        )    
     return
 
 @route(PREFIX + '/ValidatePrefs')
@@ -640,7 +654,7 @@ def backgroundScan(title='', key='', sectiontype='', random=0, statusCheck=0):
 
 
 @route(PREFIX + '/backgroundScanThread')
-def backgroundScanThread(title, key, sectiontype):
+def backgroundScanThread(title, key, sectiontype, skipts=False, level=None):
     ''' Background scanner thread. '''
     Log.Debug("*******  Starting backgroundScanThread  ***********")
     logSettings()
@@ -653,13 +667,28 @@ def backgroundScanThread(title, key, sectiontype):
         Log.Debug("Section type is %s" % sectiontype)
         # Generate parameters
         genExtParam(sectiontype)
+        # Get level        
+        if level:
+            myLevel = level            
+        elif sectiontype == 'show':
+            myLevel = Prefs['TV_Level']
+        elif sectiontype == 'movie':
+            myLevel = Prefs['Movie_Level']
+        elif sectiontype == 'artist':
+            myLevel = Prefs['Artist_Level']
+        elif sectiontype == 'photo':
+            myLevel = Prefs['Photo_Level']
+        elif sectiontype == 'playlists':
+            myLevel = Prefs['PlayList_Level']
+        else:
+            myLevel = ''        
         # Create the output file
-        [outFile, myMediaURL] = output.createFile(key, sectiontype, title)
+        [outFile, myMediaURL] = output.createFile(key, sectiontype, title, skipts=skipts, level=myLevel)
         EXPORTPATH = outFile
         Log.Debug('Output file is named %s' % outFile)
         # Scan the database based on the type of section
         if sectiontype == "movie":
-            scanMovieDB(myMediaURL, outFile)
+            scanMovieDB(myMediaURL, outFile, level=myLevel)
         elif sectiontype == "artist":
             scanArtistDB(myMediaURL, outFile)
         elif sectiontype == "show":
@@ -686,10 +715,10 @@ def backgroundScanThread(title, key, sectiontype):
 
 
 @route(PREFIX + '/scanMovieDB')
-def scanMovieDB(myMediaURL, outFile):
+def scanMovieDB(myMediaURL, outFile, level):
     ''' This function will scan a movie section. '''
     Log.Debug("*** Starting scanMovieDB with an URL of %s ***" % myMediaURL)
-    Log.Debug('Movie Export level is %s' % Prefs['Movie_Level'])
+    Log.Debug('Movie Export level is %s' % level)
     global bScanStatusCount
     global bScanStatusCountOf
     global bScanStatus
@@ -698,8 +727,8 @@ def scanMovieDB(myMediaURL, outFile):
     iCurrent = 0
     try:
         Log.Debug("About to open file %s" % outFile)
-        output.createHeader(outFile, 'movies')
-        if Prefs['Movie_Level'] in moviefields.singleCall:
+        output.createHeader(outFile, 'movies', level)
+        if level in moviefields.singleCall:
             bExtraInfo = False
         else:
             bExtraInfo = True

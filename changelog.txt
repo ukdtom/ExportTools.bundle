@@ -1,3 +1,12 @@
+V2.0.0.3:
+	- General
+		New:
+			- #88 Make url line export use a static file
+		Fix:
+			- #90 Exportdir now containes version number
+			- #91 Better return values if launched via url
+			- #92 BLOCKER: V2.0.0.2 broke getting libs
+
 V2.0.0.2:
 	- General
 		- Added possibillity to start a scan from an url
