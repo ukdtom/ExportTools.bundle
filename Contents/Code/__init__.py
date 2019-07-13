@@ -53,6 +53,7 @@ bScanStatusCount = 0
 # Path to export file
 EXPORTPATH = ''
 
+
 @route(PREFIX + '/launch')
 def launch(title='', skipts='False', level=None):
     '''
@@ -72,7 +73,6 @@ def launch(title='', skipts='False', level=None):
             return str(e)
 
    
-
 @route(PREFIX + '/restart')
 def restart():
     try:
@@ -418,7 +418,8 @@ def ValidatePrefs():
 @indirect
 @route(PREFIX + '/complete')
 def complete(title=''):
-    ''' Export Complete. '''
+    ''' Export Complete. '''    
+    fileName = EXPORTPATH.split('.tmp-Wait-Please')[0]    
     global bScanStatus
     Log.Debug("*******  All done, tell my Master  ***********")
     title = ('Export Completed for %s' % title)
@@ -491,13 +492,14 @@ def backgroundScan(title='', key='', sectiontype='', random=0, statusCheck=0):
                 if bScanStatus == 2:
                     Log.Debug(
                         "******** Scan Done, stopping wait ********")
-                    Log.Debug("*******  All done, tell my Master  ***********")                    
-                    title = ('Export Completed for %s' % title)
+                    Log.Debug("*******  All done, tell my Master  ***********")                                     
+                    fileName = EXPORTPATH.split('.tmp-Wait-Please')[0]                                       
+                    title = ('Export Completed for %s as %s' %(title, fileName))
                     try:
                         title = unicode(title, 'utf-8', 'replace')
                     except TypeError:
                         pass
-                    message = 'Check the file: %s' % EXPORTPATH
+                    message = 'Check the file: %s' % fileName
                     try:
                         message = unicode(message, 'utf-8', 'replace')
                     except TypeError:
