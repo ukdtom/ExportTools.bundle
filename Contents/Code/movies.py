@@ -93,11 +93,11 @@ def getMovieHeader(PrefsLevel):
     return fieldnames
 
 
-def getMovieInfo(myMedia, myRow):
+def getMovieInfo(myMedia, myRow, prefsLevel):
     '''
     This function will return the info for movies
     '''
-    prefsLevel = Prefs['Movie_Level']
+    #prefsLevel = Prefs['Movie_Level']
     if 'Special' in prefsLevel:
         if prefsLevel == 'Special Level 1':
             myRow = misc.getItemInfo(myMedia, myRow, moviefields.SLevel_1)

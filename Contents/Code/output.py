@@ -167,12 +167,11 @@ def createHeader(outFile, sectionType, playListType='', level=None):
     global fieldnames
     global columnwidth
 
-    columnwidth = {}
-    if sectionType == 'movies':        
-        if level:
-            fieldnames = movies.getMovieHeader(level)            
-        else:
-            fieldnames = movies.getMovieHeader(Prefs['Movie_Level'])            
+    columnwidth = {}        
+    if sectionType == 'movies':
+        if not level:
+            level = Prefs['Movie_Level']
+        fieldnames = movies.getMovieHeader(level)         
     elif sectionType == 'tvseries':
         fieldnames = tvseries.getTVHeader(Prefs['TV_Level'])
     elif sectionType == 'audio':

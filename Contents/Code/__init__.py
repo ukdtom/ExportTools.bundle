@@ -141,7 +141,7 @@ def genParam(url):
 
 
 @route(PREFIX + '/genExtParam')
-def genExtParam(sectionType=''):
+def genExtParam(sectionType='', level=None):
     '''
     Generate extended params to WebCalls, based on section type and level
     '''
@@ -149,8 +149,10 @@ def genExtParam(sectionType=''):
     EXTENDEDPARAMS = ''
     # Movies
     if sectionType == 'movie':
-        if Prefs['Check_Files']:
-            if Prefs['Movie_Level'] in [
+        if not level:
+            level = Prefs['Movie_Level']
+        if Prefs['Check_Files']:            
+            if level in [
                     "Level 3",
                     "Level 4",
                     "Level 5",
@@ -160,7 +162,7 @@ def genExtParam(sectionType=''):
                     "Level 666"
                     ]:
                 EXTENDEDPARAMS += '&checkFiles=1'
-        if Prefs['Movie_Level'] in [
+        if level in [
                 "Level 5",
                 "Level 6",
                 "Special Level 1",
@@ -168,7 +170,7 @@ def genExtParam(sectionType=''):
                 "Level 666"
                 ]:
             EXTENDEDPARAMS += '&includeBandwidths=1'
-        if Prefs['Movie_Level'] in [
+        if level in [
                 "Level 3",
                 "Level 4",
                 "Level 5",
@@ -178,7 +180,7 @@ def genExtParam(sectionType=''):
                 "Level 666"
                 ]:
             EXTENDEDPARAMS += '&includeExtras=1'
-        if Prefs['Movie_Level'] in [
+        if level in [
                 "Level 3",
                 "Level 4",
                 "Level 5",
@@ -668,7 +670,7 @@ def backgroundScanThread(title, key, sectiontype, skipts=False, level=None):
         bScanStatus = 1
         Log.Debug("Section type is %s" % sectiontype)
         # Generate parameters
-        genExtParam(sectiontype)
+        genExtParam(sectiontype, level)
         # Get level        
         if level:
             myLevel = level            
@@ -717,7 +719,7 @@ def backgroundScanThread(title, key, sectiontype, skipts=False, level=None):
 
 
 @route(PREFIX + '/scanMovieDB')
-def scanMovieDB(myMediaURL, outFile, level):
+def scanMovieDB(myMediaURL, outFile, level=None):
     ''' This function will scan a movie section. '''
     Log.Debug("*** Starting scanMovieDB with an URL of %s ***" % myMediaURL)
     Log.Debug('Movie Export level is %s' % level)
@@ -727,9 +729,9 @@ def scanMovieDB(myMediaURL, outFile, level):
     bScanStatusCount = 0
     bScanStatusCountOf = 0
     iCurrent = 0
-    try:
+    try:   
         Log.Debug("About to open file %s" % outFile)
-        output.createHeader(outFile, 'movies', level)
+        output.createHeader(outFile=outFile, sectionType='movies', level=level)
         if level in moviefields.singleCall:
             bExtraInfo = False
         else:
@@ -773,7 +775,7 @@ def scanMovieDB(myMediaURL, outFile, level):
                         myExtendedInfoURL,
                         timeout=float(PMSTIMEOUT)).xpath('//Video')[0]
                 # Export the info
-                myRow = movies.getMovieInfo(media, myRow)
+                myRow = movies.getMovieInfo(media, myRow, prefsLevel=level)
                 output.writerow(myRow)
                 iCurrent += 1
                 bScanStatusCount += 1
