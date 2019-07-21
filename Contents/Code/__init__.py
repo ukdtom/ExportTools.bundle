@@ -198,15 +198,15 @@ def genExtParam(sectionType='', level=None):
     # Shows
     elif sectionType == "show":
         if Prefs['Check_Files']:
-            if Prefs['TV_Level'] in [
+            if level in [
                     "Level 4",
                     "Level 5",
                     "Level 6",
                     "Level 666"]:
                 EXTENDEDPARAMS += '&checkFiles=1'
-        if Prefs['TV_Level'] in ["Level 4", "Level 5", "Level 6", "Level 666"]:
+        if level in ["Level 4", "Level 5", "Level 6", "Level 666"]:
             EXTENDEDPARAMS += '&includeExtras=1'
-        if Prefs['TV_Level'] in ["Level 4", "Level 5", "Level 6", "Level 666"]:
+        if level in ["Level 4", "Level 5", "Level 6", "Level 666"]:
             EXTENDEDPARAMS += '&includeBandwidths=1'
     # Playlists
     elif sectionType == "playlists":
@@ -696,7 +696,7 @@ def backgroundScanThread(title, key, sectiontype, skipts=False, level=None):
         elif sectiontype == "artist":
             scanArtistDB(myMediaURL, outFile)
         elif sectiontype == "show":
-            scanShowDB(myMediaURL, outFile)
+            scanShowDB(myMediaURL, outFile, level=myLevel)
         elif sectiontype == "playlists":
             scanPList(myMediaURL, outFile)
         elif sectiontype == "photo":
@@ -796,7 +796,7 @@ def scanMovieDB(myMediaURL, outFile, level=None):
 
 
 @route(PREFIX + '/scanShowDB')
-def scanShowDB(myMediaURL, outFile):
+def scanShowDB(myMediaURL, outFile, level=None):
     ''' This function will scan a TV-Show section '''
     Log.Debug(''.join((
         '******* Starting scanShowDB with',
@@ -808,8 +808,8 @@ def scanShowDB(myMediaURL, outFile):
     bScanStatusCountOf = 0
     try:
         Log.Debug("About to open file %s" % outFile)
-        output.createHeader(outFile, 'tvseries')
-        if Prefs['TV_Level'] in tvfields.singleCall:
+        output.createHeader(outFile=outFile, sectionType='tvseries', level=level)        
+        if level in tvfields.singleCall:
             bExtraInfo = False
         else:
             bExtraInfo = True
@@ -817,7 +817,7 @@ def scanShowDB(myMediaURL, outFile):
         while True:
             Log.Debug("Walking medias")
             iCount = bScanStatusCount
-            if 'Show Only' in Prefs['TV_Level']:
+            if 'Show Only' in level:
                 fetchURL = ''.join((
                     myMediaURL,
                     '?X-Plex-Container-Start=',
@@ -835,6 +835,7 @@ def scanShowDB(myMediaURL, outFile):
                 timeout=float(PMSTIMEOUT))
             if bScanStatusCount == 0:
                 bScanStatusCountOf = partMedias.get('totalSize')
+                output.setMax(int(bScanStatusCountOf))
                 Log.Debug(''.join((
                     'Amount of items in this section is ',
                     '%s' % bScanStatusCountOf)))
@@ -846,13 +847,13 @@ def scanShowDB(myMediaURL, outFile):
                 iCount += 1
                 ratingKey = TVShow.get("ratingKey")
                 title = TVShow.get("title")
-                if 'Show Only' in Prefs['TV_Level']:
+                if 'Show Only' in level:
                     myRow = {}
                     # Export the info
                     myRow = tvseries.getShowOnly(
                         TVShow,
                         myRow,
-                        Prefs['TV_Level'])
+                        level)
                     try:
                         output.writerow(myRow)
                     except Exception, e:
@@ -860,7 +861,7 @@ def scanShowDB(myMediaURL, outFile):
                             'Exception happend in ScanShowDB: %s' % str(e))
                     continue
                 else:
-                    if Prefs['TV_Level'] in [
+                    if level in [
                             'Level 2',
                             'Level 3',
                             'Level 4',
@@ -949,8 +950,8 @@ def scanShowDB(myMediaURL, outFile):
                                     timeout=float(
                                         PMSTIMEOUT)).xpath('//Video')[0]
                             # Export the info
-                            myRow = tvseries.getTvInfo(Episode, myRow)
-                            if Prefs['TV_Level'] in [
+                            myRow = tvseries.getTvInfo(Episode, myRow, level=level)
+                            if level in [
                                     'Level 2',
                                     'Level 3',
                                     'Level 4',
