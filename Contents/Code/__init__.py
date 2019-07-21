@@ -62,10 +62,10 @@ def launch(title='', skipts='False', level=None):
     http://IP-OF-PMS:32400/applications/ExportTools/launch?title=TITLE-OF-SECTION&skipts=False&level=Level%203&X-Plex-Token=MY-TOKEN
     '''
     skipts = (skipts.upper() == 'TRUE')     
-    Log.Debug('I was asked via url to scan section: %s with skip timestamp set to %s and with a level of %s' %(title, str(skipts), level))
+    Log.Debug('I was asked via url to scan section: "%s" with skip timestamp set to "%s" and with a level of "%s"' %(title, str(skipts), level))
     try:
         ScanLib(title=title, skipts=skipts, level=level)
-        return 'Export started'
+        return 'I was asked via url to scan section: "%s" with skip timestamp set to "%s" and with a level of "%s"' %(title, str(skipts), level)
     except Exception, e:
         if str(e) == 'list index out of range':
             return 'Library not found'
@@ -358,7 +358,6 @@ def ResetToIdle():
     '''
     Reset Library Prefs to idle
     '''
-
     pFile = Core.storage.join_path(
         Core.app_support_path,
         Core.config.bundles_dir_name,
