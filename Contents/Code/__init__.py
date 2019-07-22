@@ -1040,7 +1040,7 @@ def scanPList(key, outFile):
     global bScanStatusCount
     global bScanStatusCountOf
     global bScanStatus
-    bScanStatusCount = 0
+    bScanStatusCount = 0    
     try:
         # Get playlist type once more
         playListType = XML.ElementFromURL(
@@ -1107,6 +1107,7 @@ def scanArtistDB(myMediaURL, outFile):
         medias = XML.ElementFromURL(fetchURL, timeout=float(PMSTIMEOUT))
         if bScanStatusCount == 0:
             bScanStatusCountOf = medias.get('totalSize')
+            output.setMax(int(bScanStatusCountOf))
             Log.Debug(
                 'Amount of items in this section is %s' % bScanStatusCountOf)
         Log.Debug("Walking medias")
@@ -1172,7 +1173,7 @@ def scanPhotoDB(myMediaURL, outFile):
             str(iLocalCounter),
             '&X-Plex-Container-Size=0'))
         medias = XML.ElementFromURL(fetchURL, timeout=float(PMSTIMEOUT))
-        bScanStatusCountOf = 'N/A'
+        bScanStatusCountOf = 'N/A'        
         Log.Debug("Walking medias")
         while True:
             fetchURL = ''.join((

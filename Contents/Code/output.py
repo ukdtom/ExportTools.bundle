@@ -29,7 +29,7 @@ def getStatusFileName():
     global StatusFile
     StatusFile = os.path.join(
         os.path.dirname(outFile),
-        'ExportTools-Status_IDLE')    
+        outFile + '.ExportTools-Status_IDLE')        
     return StatusFile
 
 def setMax(Max):
@@ -223,10 +223,12 @@ def writerow(rowentry):
         global CurStatusFile
         global iCurrent
         if (iCurrent % 10 == 0):
-            StatusTekst = 'ExportTools-Status_Exporting_%s-of-%s' %(str(iCurrent), str(iMax))
+            # Get filename of outFile
+            
+            StatusTekst = os.path.basename(outFile) + '.ExportTools-Status_Exporting_%s-of-%s' %(str(iCurrent), str(iMax))
             NewStatusFile = os.path.join(
                 os.path.dirname(StatusFile),
-                StatusTekst)
+                StatusTekst)            
             os.rename(CurStatusFile, NewStatusFile)
             CurStatusFile = NewStatusFile
         iCurrent += 1
