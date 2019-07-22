@@ -693,7 +693,7 @@ def backgroundScanThread(title, key, sectiontype, skipts=False, level=None):
         if sectiontype == "movie":
             scanMovieDB(myMediaURL, outFile, level=myLevel)
         elif sectiontype == "artist":
-            scanArtistDB(myMediaURL, outFile)
+            scanArtistDB(myMediaURL, outFile, level=myLevel)
         elif sectiontype == "show":
             scanShowDB(myMediaURL, outFile, level=myLevel)
         elif sectiontype == "playlists":
@@ -1083,7 +1083,7 @@ def scanPList(key, outFile):
 
 
 @route(PREFIX + '/scanArtistDB')
-def scanArtistDB(myMediaURL, outFile):
+def scanArtistDB(myMediaURL, outFile, level=None):
     ''' This function will scan a Music section.'''
     Log.Debug(
         "*** Starting scanArtistDB with an URL of %s ***" % myMediaURL)
@@ -1092,9 +1092,9 @@ def scanArtistDB(myMediaURL, outFile):
     global bScanStatus
     bScanStatusCount = 0
     try:
-        Log.Debug('Writing headers for Audio Export')
-        output.createHeader(outFile, 'audio')
-        if Prefs['Artist_Level'] in audiofields.singleCall:
+        Log.Debug('Writing headers for Audio Export')        
+        output.createHeader(outFile=outFile, sectionType='audio', level=level)
+        if level in audiofields.singleCall:
             bExtraInfo = False
         else:
             bExtraInfo = True
@@ -1138,7 +1138,7 @@ def scanArtistDB(myMediaURL, outFile):
                     track = XML.ElementFromURL(
                         myExtendedInfoURL,
                         timeout=float(PMSTIMEOUT)).xpath('//Track')[0]
-                audio.getAudioInfo(track, myRow)
+                audio.getAudioInfo(track, myRow, level=level)
                 output.writerow(myRow)
         output.closefile()
     except Exception, e:

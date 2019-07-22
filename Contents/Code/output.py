@@ -177,7 +177,9 @@ def createHeader(outFile, sectionType, playListType='', level=None):
             level = Prefs['TV_Level']        
         fieldnames = tvseries.getTVHeader(level)
     elif sectionType == 'audio':
-        fieldnames = audio.getMusicHeader(Prefs['Artist_Level'])
+        if not level:
+            level = Prefs['Artist_Level']
+        fieldnames = audio.getMusicHeader(level)
     elif sectionType == 'photo':
         fieldnames = photo.getHeader(Prefs['Photo_Level'])
     elif sectionType == 'playlist':
