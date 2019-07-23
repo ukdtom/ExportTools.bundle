@@ -699,7 +699,7 @@ def backgroundScanThread(title, key, sectiontype, skipts=False, level=None):
         elif sectiontype == "playlists":
             scanPList(myMediaURL, outFile)
         elif sectiontype == "photo":
-            scanPhotoDB(myMediaURL, outFile)
+            scanPhotoDB(myMediaURL, outFile, level=myLevel)
         else:
             Log.Debug("Error: unknown section type: %s" % sectiontype)
             bScanStatus = 91
@@ -1150,7 +1150,7 @@ def scanArtistDB(myMediaURL, outFile, level=None):
 
 
 @route(PREFIX + '/scanPhotoDB')
-def scanPhotoDB(myMediaURL, outFile):
+def scanPhotoDB(myMediaURL, outFile, level=None):
     ''' This function will scan a Photo section. '''
     Log.Debug("*** Starting scanPhotoDB with an URL of %s ***" % myMediaURL)
     global bScanStatusCount
@@ -1161,8 +1161,9 @@ def scanPhotoDB(myMediaURL, outFile):
     try:
         mySepChar = Prefs['Seperator']
         Log.Debug('Writing headers for Photo Export')
-        output.createHeader(outFile, 'photo')
-        if Prefs['Photo_Level'] in photofields.singleCall:
+        print 'Ged level', level
+        output.createHeader(outFile=outFile, sectionType='photo', level=level)
+        if level in photofields.singleCall:
             bExtraInfo = False
         else:
             bExtraInfo = True
@@ -1185,7 +1186,7 @@ def scanPhotoDB(myMediaURL, outFile):
             medias = XML.ElementFromURL(fetchURL, timeout=float(PMSTIMEOUT))
             if medias.get('size') == '0':
                 break
-            getPhotoItems(medias, bExtraInfo)
+            getPhotoItems(medias=medias, bExtraInfo=bExtraInfo, level=level)
             iLocalCounter += int(CONTAINERSIZEPHOTO)
         output.closefile()
     except:
@@ -1198,7 +1199,7 @@ def scanPhotoDB(myMediaURL, outFile):
 
 
 @route(PREFIX + '/getPhotoItems')
-def getPhotoItems(medias, bExtraInfo):
+def getPhotoItems(medias, bExtraInfo, level=None):
     ''' This function will walk directories in a photo section '''
     global bScanStatusCount
     try:
@@ -1206,7 +1207,7 @@ def getPhotoItems(medias, bExtraInfo):
         et = medias.xpath('.//Photo')
         for element in et:
             myRow = {}
-            myRow = photo.getInfo(element, myRow)
+            myRow = photo.getInfo(element, myRow, level=level)
             bScanStatusCount += 1
             output.writerow(myRow)
         # Elements that are directories
@@ -1218,7 +1219,7 @@ def getPhotoItems(medias, bExtraInfo):
             elements = XML.ElementFromURL(
                 myExtendedInfoURL,
                 timeout=float(PMSTIMEOUT))
-            getPhotoItems(elements, bExtraInfo)
+            getPhotoItems(medias=elements, bExtraInfo=bExtraInfo, level=level)
     except Exception, e:
         Log.Debug('Exception in getPhotoItems was %s' % str(e))
         pass
