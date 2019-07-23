@@ -1160,9 +1160,8 @@ def scanPhotoDB(myMediaURL, outFile, level=None):
     iLocalCounter = 0
     try:
         mySepChar = Prefs['Seperator']
-        Log.Debug('Writing headers for Photo Export')
-        print 'Ged level', level
-        output.createHeader(outFile=outFile, sectionType='photo', level=level)
+        Log.Debug('Writing headers for Photo Export')        
+        output.createHeader(outFile=outFile, sectionType='photo', level=level)        
         if level in photofields.singleCall:
             bExtraInfo = False
         else:
@@ -1174,7 +1173,8 @@ def scanPhotoDB(myMediaURL, outFile, level=None):
             str(iLocalCounter),
             '&X-Plex-Container-Size=0'))
         medias = XML.ElementFromURL(fetchURL, timeout=float(PMSTIMEOUT))
-        bScanStatusCountOf = 'N/A'        
+        bScanStatusCountOf = 'N/A'  
+        output.setMax(int(0))      
         Log.Debug("Walking medias")
         while True:
             fetchURL = ''.join((
