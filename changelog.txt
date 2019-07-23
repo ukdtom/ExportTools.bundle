@@ -2,6 +2,9 @@ V2.0.0.4:
 	- Fix:
 		-  #93 Splash screen when finished shows name of tmp file
 		-  #97 URL Status file should be named like the output file
+		-  #95 Internal Error Detected.
+	- New:
+		-  #89 Make URL export use a fixed level
 
 V2.0.0.3:
 	- General
