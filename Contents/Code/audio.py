@@ -84,9 +84,12 @@ def getMusicHeader(PrefsLevel):
     return fieldnames
 
 
-def getAudioInfo(myMedia, myRow):
+def getAudioInfo(myMedia, myRow, level=None):
     ''' return the info for audio '''
-    prefsLevel = Prefs['Artist_Level']
+    if level:
+        prefsLevel = level
+    else:
+        prefsLevel = Prefs['Artist_Level']    
     if 'Special' in prefsLevel:
         if prefsLevel == 'Special Level 1':
             myRow = misc.getItemInfo(myMedia, myRow, audiofields.SLevel_1)

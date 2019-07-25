@@ -53,6 +53,7 @@ bScanStatusCount = 0
 # Path to export file
 EXPORTPATH = ''
 
+
 @route(PREFIX + '/launch')
 def launch(title='', skipts='False', level=None):
     '''
@@ -61,10 +62,10 @@ def launch(title='', skipts='False', level=None):
     http://IP-OF-PMS:32400/applications/ExportTools/launch?title=TITLE-OF-SECTION&skipts=False&level=Level%203&X-Plex-Token=MY-TOKEN
     '''
     skipts = (skipts.upper() == 'TRUE')     
-    Log.Debug('I was asked via url to scan section: %s with skip timestamp set to %s and with a level of %s' %(title, str(skipts), level))
+    Log.Debug('I was asked via url to scan section: "%s" with skip timestamp set to "%s" and with a level of "%s"' %(title, str(skipts), level))
     try:
         ScanLib(title=title, skipts=skipts, level=level)
-        return 'Export started'
+        return 'I was asked via url to scan section: "%s" with skip timestamp set to "%s" and with a level of "%s"' %(title, str(skipts), level)
     except Exception, e:
         if str(e) == 'list index out of range':
             return 'Library not found'
@@ -72,7 +73,6 @@ def launch(title='', skipts='False', level=None):
             return str(e)
 
    
-
 @route(PREFIX + '/restart')
 def restart():
     try:
@@ -141,7 +141,7 @@ def genParam(url):
 
 
 @route(PREFIX + '/genExtParam')
-def genExtParam(sectionType=''):
+def genExtParam(sectionType='', level=None):
     '''
     Generate extended params to WebCalls, based on section type and level
     '''
@@ -149,8 +149,10 @@ def genExtParam(sectionType=''):
     EXTENDEDPARAMS = ''
     # Movies
     if sectionType == 'movie':
-        if Prefs['Check_Files']:
-            if Prefs['Movie_Level'] in [
+        if not level:
+            level = Prefs['Movie_Level']
+        if Prefs['Check_Files']:            
+            if level in [
                     "Level 3",
                     "Level 4",
                     "Level 5",
@@ -160,7 +162,7 @@ def genExtParam(sectionType=''):
                     "Level 666"
                     ]:
                 EXTENDEDPARAMS += '&checkFiles=1'
-        if Prefs['Movie_Level'] in [
+        if level in [
                 "Level 5",
                 "Level 6",
                 "Special Level 1",
@@ -168,7 +170,7 @@ def genExtParam(sectionType=''):
                 "Level 666"
                 ]:
             EXTENDEDPARAMS += '&includeBandwidths=1'
-        if Prefs['Movie_Level'] in [
+        if level in [
                 "Level 3",
                 "Level 4",
                 "Level 5",
@@ -178,7 +180,7 @@ def genExtParam(sectionType=''):
                 "Level 666"
                 ]:
             EXTENDEDPARAMS += '&includeExtras=1'
-        if Prefs['Movie_Level'] in [
+        if level in [
                 "Level 3",
                 "Level 4",
                 "Level 5",
@@ -196,15 +198,15 @@ def genExtParam(sectionType=''):
     # Shows
     elif sectionType == "show":
         if Prefs['Check_Files']:
-            if Prefs['TV_Level'] in [
+            if level in [
                     "Level 4",
                     "Level 5",
                     "Level 6",
                     "Level 666"]:
                 EXTENDEDPARAMS += '&checkFiles=1'
-        if Prefs['TV_Level'] in ["Level 4", "Level 5", "Level 6", "Level 666"]:
+        if level in ["Level 4", "Level 5", "Level 6", "Level 666"]:
             EXTENDEDPARAMS += '&includeExtras=1'
-        if Prefs['TV_Level'] in ["Level 4", "Level 5", "Level 6", "Level 666"]:
+        if level in ["Level 4", "Level 5", "Level 6", "Level 666"]:
             EXTENDEDPARAMS += '&includeBandwidths=1'
     # Playlists
     elif sectionType == "playlists":
@@ -356,7 +358,6 @@ def ResetToIdle():
     '''
     Reset Library Prefs to idle
     '''
-
     pFile = Core.storage.join_path(
         Core.app_support_path,
         Core.config.bundles_dir_name,
@@ -418,7 +419,8 @@ def ValidatePrefs():
 @indirect
 @route(PREFIX + '/complete')
 def complete(title=''):
-    ''' Export Complete. '''
+    ''' Export Complete. '''    
+    fileName = EXPORTPATH.split('.tmp-Wait-Please')[0]    
     global bScanStatus
     Log.Debug("*******  All done, tell my Master  ***********")
     title = ('Export Completed for %s' % title)
@@ -491,13 +493,14 @@ def backgroundScan(title='', key='', sectiontype='', random=0, statusCheck=0):
                 if bScanStatus == 2:
                     Log.Debug(
                         "******** Scan Done, stopping wait ********")
-                    Log.Debug("*******  All done, tell my Master  ***********")                    
-                    title = ('Export Completed for %s' % title)
+                    Log.Debug("*******  All done, tell my Master  ***********")                                     
+                    fileName = EXPORTPATH.split('.tmp-Wait-Please')[0]                                       
+                    title = ('Export Completed for %s as %s' %(title, fileName))
                     try:
                         title = unicode(title, 'utf-8', 'replace')
                     except TypeError:
                         pass
-                    message = 'Check the file: %s' % EXPORTPATH
+                    message = 'Check the file: %s' % fileName
                     try:
                         message = unicode(message, 'utf-8', 'replace')
                     except TypeError:
@@ -666,7 +669,7 @@ def backgroundScanThread(title, key, sectiontype, skipts=False, level=None):
         bScanStatus = 1
         Log.Debug("Section type is %s" % sectiontype)
         # Generate parameters
-        genExtParam(sectiontype)
+        genExtParam(sectiontype, level)
         # Get level        
         if level:
             myLevel = level            
@@ -690,13 +693,13 @@ def backgroundScanThread(title, key, sectiontype, skipts=False, level=None):
         if sectiontype == "movie":
             scanMovieDB(myMediaURL, outFile, level=myLevel)
         elif sectiontype == "artist":
-            scanArtistDB(myMediaURL, outFile)
+            scanArtistDB(myMediaURL, outFile, level=myLevel)
         elif sectiontype == "show":
-            scanShowDB(myMediaURL, outFile)
+            scanShowDB(myMediaURL, outFile, level=myLevel)
         elif sectiontype == "playlists":
             scanPList(myMediaURL, outFile)
         elif sectiontype == "photo":
-            scanPhotoDB(myMediaURL, outFile)
+            scanPhotoDB(myMediaURL, outFile, level=myLevel)
         else:
             Log.Debug("Error: unknown section type: %s" % sectiontype)
             bScanStatus = 91
@@ -715,7 +718,7 @@ def backgroundScanThread(title, key, sectiontype, skipts=False, level=None):
 
 
 @route(PREFIX + '/scanMovieDB')
-def scanMovieDB(myMediaURL, outFile, level):
+def scanMovieDB(myMediaURL, outFile, level=None):
     ''' This function will scan a movie section. '''
     Log.Debug("*** Starting scanMovieDB with an URL of %s ***" % myMediaURL)
     Log.Debug('Movie Export level is %s' % level)
@@ -725,9 +728,9 @@ def scanMovieDB(myMediaURL, outFile, level):
     bScanStatusCount = 0
     bScanStatusCountOf = 0
     iCurrent = 0
-    try:
+    try:   
         Log.Debug("About to open file %s" % outFile)
-        output.createHeader(outFile, 'movies', level)
+        output.createHeader(outFile=outFile, sectionType='movies', level=level)
         if level in moviefields.singleCall:
             bExtraInfo = False
         else:
@@ -771,7 +774,7 @@ def scanMovieDB(myMediaURL, outFile, level):
                         myExtendedInfoURL,
                         timeout=float(PMSTIMEOUT)).xpath('//Video')[0]
                 # Export the info
-                myRow = movies.getMovieInfo(media, myRow)
+                myRow = movies.getMovieInfo(media, myRow, prefsLevel=level)
                 output.writerow(myRow)
                 iCurrent += 1
                 bScanStatusCount += 1
@@ -792,7 +795,7 @@ def scanMovieDB(myMediaURL, outFile, level):
 
 
 @route(PREFIX + '/scanShowDB')
-def scanShowDB(myMediaURL, outFile):
+def scanShowDB(myMediaURL, outFile, level=None):
     ''' This function will scan a TV-Show section '''
     Log.Debug(''.join((
         '******* Starting scanShowDB with',
@@ -804,8 +807,8 @@ def scanShowDB(myMediaURL, outFile):
     bScanStatusCountOf = 0
     try:
         Log.Debug("About to open file %s" % outFile)
-        output.createHeader(outFile, 'tvseries')
-        if Prefs['TV_Level'] in tvfields.singleCall:
+        output.createHeader(outFile=outFile, sectionType='tvseries', level=level)        
+        if level in tvfields.singleCall:
             bExtraInfo = False
         else:
             bExtraInfo = True
@@ -813,7 +816,7 @@ def scanShowDB(myMediaURL, outFile):
         while True:
             Log.Debug("Walking medias")
             iCount = bScanStatusCount
-            if 'Show Only' in Prefs['TV_Level']:
+            if 'Show Only' in level:
                 fetchURL = ''.join((
                     myMediaURL,
                     '?X-Plex-Container-Start=',
@@ -831,6 +834,7 @@ def scanShowDB(myMediaURL, outFile):
                 timeout=float(PMSTIMEOUT))
             if bScanStatusCount == 0:
                 bScanStatusCountOf = partMedias.get('totalSize')
+                output.setMax(int(bScanStatusCountOf))
                 Log.Debug(''.join((
                     'Amount of items in this section is ',
                     '%s' % bScanStatusCountOf)))
@@ -842,13 +846,13 @@ def scanShowDB(myMediaURL, outFile):
                 iCount += 1
                 ratingKey = TVShow.get("ratingKey")
                 title = TVShow.get("title")
-                if 'Show Only' in Prefs['TV_Level']:
+                if 'Show Only' in level:
                     myRow = {}
                     # Export the info
                     myRow = tvseries.getShowOnly(
                         TVShow,
                         myRow,
-                        Prefs['TV_Level'])
+                        level)
                     try:
                         output.writerow(myRow)
                     except Exception, e:
@@ -856,7 +860,7 @@ def scanShowDB(myMediaURL, outFile):
                             'Exception happend in ScanShowDB: %s' % str(e))
                     continue
                 else:
-                    if Prefs['TV_Level'] in [
+                    if level in [
                             'Level 2',
                             'Level 3',
                             'Level 4',
@@ -945,8 +949,8 @@ def scanShowDB(myMediaURL, outFile):
                                     timeout=float(
                                         PMSTIMEOUT)).xpath('//Video')[0]
                             # Export the info
-                            myRow = tvseries.getTvInfo(Episode, myRow)
-                            if Prefs['TV_Level'] in [
+                            myRow = tvseries.getTvInfo(Episode, myRow, level=level)
+                            if level in [
                                     'Level 2',
                                     'Level 3',
                                     'Level 4',
@@ -1036,7 +1040,7 @@ def scanPList(key, outFile):
     global bScanStatusCount
     global bScanStatusCountOf
     global bScanStatus
-    bScanStatusCount = 0
+    bScanStatusCount = 0    
     try:
         # Get playlist type once more
         playListType = XML.ElementFromURL(
@@ -1079,7 +1083,7 @@ def scanPList(key, outFile):
 
 
 @route(PREFIX + '/scanArtistDB')
-def scanArtistDB(myMediaURL, outFile):
+def scanArtistDB(myMediaURL, outFile, level=None):
     ''' This function will scan a Music section.'''
     Log.Debug(
         "*** Starting scanArtistDB with an URL of %s ***" % myMediaURL)
@@ -1088,9 +1092,9 @@ def scanArtistDB(myMediaURL, outFile):
     global bScanStatus
     bScanStatusCount = 0
     try:
-        Log.Debug('Writing headers for Audio Export')
-        output.createHeader(outFile, 'audio')
-        if Prefs['Artist_Level'] in audiofields.singleCall:
+        Log.Debug('Writing headers for Audio Export')        
+        output.createHeader(outFile=outFile, sectionType='audio', level=level)
+        if level in audiofields.singleCall:
             bExtraInfo = False
         else:
             bExtraInfo = True
@@ -1103,6 +1107,7 @@ def scanArtistDB(myMediaURL, outFile):
         medias = XML.ElementFromURL(fetchURL, timeout=float(PMSTIMEOUT))
         if bScanStatusCount == 0:
             bScanStatusCountOf = medias.get('totalSize')
+            output.setMax(int(bScanStatusCountOf))
             Log.Debug(
                 'Amount of items in this section is %s' % bScanStatusCountOf)
         Log.Debug("Walking medias")
@@ -1133,7 +1138,7 @@ def scanArtistDB(myMediaURL, outFile):
                     track = XML.ElementFromURL(
                         myExtendedInfoURL,
                         timeout=float(PMSTIMEOUT)).xpath('//Track')[0]
-                audio.getAudioInfo(track, myRow)
+                audio.getAudioInfo(track, myRow, level=level)
                 output.writerow(myRow)
         output.closefile()
     except Exception, e:
@@ -1145,7 +1150,7 @@ def scanArtistDB(myMediaURL, outFile):
 
 
 @route(PREFIX + '/scanPhotoDB')
-def scanPhotoDB(myMediaURL, outFile):
+def scanPhotoDB(myMediaURL, outFile, level=None):
     ''' This function will scan a Photo section. '''
     Log.Debug("*** Starting scanPhotoDB with an URL of %s ***" % myMediaURL)
     global bScanStatusCount
@@ -1155,9 +1160,9 @@ def scanPhotoDB(myMediaURL, outFile):
     iLocalCounter = 0
     try:
         mySepChar = Prefs['Seperator']
-        Log.Debug('Writing headers for Photo Export')
-        output.createHeader(outFile, 'photo')
-        if Prefs['Photo_Level'] in photofields.singleCall:
+        Log.Debug('Writing headers for Photo Export')        
+        output.createHeader(outFile=outFile, sectionType='photo', level=level)        
+        if level in photofields.singleCall:
             bExtraInfo = False
         else:
             bExtraInfo = True
@@ -1168,7 +1173,8 @@ def scanPhotoDB(myMediaURL, outFile):
             str(iLocalCounter),
             '&X-Plex-Container-Size=0'))
         medias = XML.ElementFromURL(fetchURL, timeout=float(PMSTIMEOUT))
-        bScanStatusCountOf = 'N/A'
+        bScanStatusCountOf = 'N/A'  
+        output.setMax(int(0))      
         Log.Debug("Walking medias")
         while True:
             fetchURL = ''.join((
@@ -1180,7 +1186,7 @@ def scanPhotoDB(myMediaURL, outFile):
             medias = XML.ElementFromURL(fetchURL, timeout=float(PMSTIMEOUT))
             if medias.get('size') == '0':
                 break
-            getPhotoItems(medias, bExtraInfo)
+            getPhotoItems(medias=medias, bExtraInfo=bExtraInfo, level=level)
             iLocalCounter += int(CONTAINERSIZEPHOTO)
         output.closefile()
     except:
@@ -1193,7 +1199,7 @@ def scanPhotoDB(myMediaURL, outFile):
 
 
 @route(PREFIX + '/getPhotoItems')
-def getPhotoItems(medias, bExtraInfo):
+def getPhotoItems(medias, bExtraInfo, level=None):
     ''' This function will walk directories in a photo section '''
     global bScanStatusCount
     try:
@@ -1201,7 +1207,7 @@ def getPhotoItems(medias, bExtraInfo):
         et = medias.xpath('.//Photo')
         for element in et:
             myRow = {}
-            myRow = photo.getInfo(element, myRow)
+            myRow = photo.getInfo(element, myRow, level=level)
             bScanStatusCount += 1
             output.writerow(myRow)
         # Elements that are directories
@@ -1213,7 +1219,7 @@ def getPhotoItems(medias, bExtraInfo):
             elements = XML.ElementFromURL(
                 myExtendedInfoURL,
                 timeout=float(PMSTIMEOUT))
-            getPhotoItems(elements, bExtraInfo)
+            getPhotoItems(medias=elements, bExtraInfo=bExtraInfo, level=level)
     except Exception, e:
         Log.Debug('Exception in getPhotoItems was %s' % str(e))
         pass

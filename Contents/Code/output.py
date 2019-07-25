@@ -29,7 +29,7 @@ def getStatusFileName():
     global StatusFile
     StatusFile = os.path.join(
         os.path.dirname(outFile),
-        'ExportTools-Status_IDLE')    
+        outFile + '.ExportTools-Status_IDLE')        
     return StatusFile
 
 def setMax(Max):
@@ -167,18 +167,23 @@ def createHeader(outFile, sectionType, playListType='', level=None):
     global fieldnames
     global columnwidth
 
-    columnwidth = {}
-    if sectionType == 'movies':        
-        if level:
-            fieldnames = movies.getMovieHeader(level)            
-        else:
-            fieldnames = movies.getMovieHeader(Prefs['Movie_Level'])            
+    columnwidth = {}        
+    if sectionType == 'movies':
+        if not level:
+            level = Prefs['Movie_Level']
+        fieldnames = movies.getMovieHeader(level)         
     elif sectionType == 'tvseries':
-        fieldnames = tvseries.getTVHeader(Prefs['TV_Level'])
+        if not level:
+            level = Prefs['TV_Level']        
+        fieldnames = tvseries.getTVHeader(level)
     elif sectionType == 'audio':
-        fieldnames = audio.getMusicHeader(Prefs['Artist_Level'])
+        if not level:
+            level = Prefs['Artist_Level']
+        fieldnames = audio.getMusicHeader(level)
     elif sectionType == 'photo':
-        fieldnames = photo.getHeader(Prefs['Photo_Level'])
+        if not level:
+            level = Prefs['Photo_Level']
+        fieldnames = photo.getHeader(level)
     elif sectionType == 'playlist':
         fieldnames = playlists.getPlayListHeader(
             playListType, Prefs['PlayList_Level'])
@@ -222,10 +227,12 @@ def writerow(rowentry):
         global CurStatusFile
         global iCurrent
         if (iCurrent % 10 == 0):
-            StatusTekst = 'ExportTools-Status_Exporting_%s-of-%s' %(str(iCurrent), str(iMax))
+            # Get filename of outFile
+            
+            StatusTekst = os.path.basename(outFile) + '.ExportTools-Status_Exporting_%s-of-%s' %(str(iCurrent), str(iMax))
             NewStatusFile = os.path.join(
                 os.path.dirname(StatusFile),
-                StatusTekst)
+                StatusTekst)            
             os.rename(CurStatusFile, NewStatusFile)
             CurStatusFile = NewStatusFile
         iCurrent += 1

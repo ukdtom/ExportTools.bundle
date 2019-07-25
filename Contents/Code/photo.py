@@ -85,11 +85,14 @@ def getHeader(PrefsLevel):
     return fieldnames
 
 
-def getInfo(myMedia, myRow):
+def getInfo(myMedia, myRow, level=None):
     '''
     This function will return the info for photo
     '''
-    prefsLevel = Prefs['Photo_Level']
+    if level:
+        prefsLevel = level
+    else:
+        prefsLevel = Prefs['Photo_Level']      
     if 'Special' in prefsLevel:
         if prefsLevel == 'Special Level 1':
             myRow = misc.getItemInfo(myMedia, myRow, photofields.SLevel_1)
