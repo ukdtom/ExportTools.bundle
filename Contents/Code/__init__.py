@@ -695,7 +695,7 @@ def backgroundScanThread(title, key, sectiontype, skipts=False, level=None):
         elif sectiontype == "artist":
             scanArtistDB(myMediaURL, outFile, level=myLevel)
         elif sectiontype == "show":
-            scanShowDB(myMediaURL, outFile, level=myLevel)
+            scanShowDB(myMediaURL, outFile, level=myLevel, key=key)
         elif sectiontype == "playlists":
             scanPList(myMediaURL, outFile)
         elif sectiontype == "photo":
@@ -795,11 +795,17 @@ def scanMovieDB(myMediaURL, outFile, level=None):
 
 
 @route(PREFIX + '/scanShowDB')
-def scanShowDB(myMediaURL, outFile, level=None):
+def scanShowDB(myMediaURL, outFile, level=None, key=None):
     ''' This function will scan a TV-Show section '''
     Log.Debug(''.join((
         '******* Starting scanShowDB with',
         ' an URL of % s ***********' % myMediaURL)))
+
+    #if 'Level' in level:
+        #tvseries.getEpisodes(sectionKey=key, level=level)
+    #else:
+        #tvseries.getShows(sectionKey=key, level=level)
+
     global bScanStatusCount
     global bScanStatusCountOf
     global bScanStatus

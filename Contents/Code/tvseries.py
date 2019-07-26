@@ -10,6 +10,21 @@ from lxml import etree as ET
 
 STACKEDLABELS = ['cd', 'disc', 'disk', 'dvd', 'part', 'pt']
 
+def getSeries(sectionKey, level=None):
+    # TODO: Make shows only levels
+
+    print 'Ged tvseries Shows', sectionKey, level
+
+
+def getEpisodes(sectionKey, level=None):
+    ''' Export Episodes only '''
+
+    # TODO: Make episodes only levels
+    print 'Ged tvseries episodes', sectionKey, level
+
+
+
+    return
 
 def getTVHeader(PrefsLevel):
     '''
