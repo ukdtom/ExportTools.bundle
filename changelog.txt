@@ -1,4 +1,6 @@
 V2.0.0.5:
+	- Fix:
+		- #99 Missing hash causes exception
 
 V2.0.0.4:
 	- Fix:

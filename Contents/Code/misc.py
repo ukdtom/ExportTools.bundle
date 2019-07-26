@@ -337,19 +337,24 @@ def getItemInfo(et, myRow, fieldList):
 def getMediaPath(myMedia, myRow):
     ''' return the media path info for movies '''
     # Get tree info for media
-    myMediaTreeInfoURL = GetLoopBack() + '/library/metadata/' + \
-        GetRegInfo(myMedia, 'ratingKey') + '/tree'
-    TreeInfo = XML.ElementFromURL(myMediaTreeInfoURL).xpath('//MediaPart')
-    for myPart in TreeInfo:
-        MediaHash = GetRegInfo(myPart, 'hash')
-        PMSMediaPath = os.path.join(
-            Core.app_support_path,
-            'Media',
-            'localhost',
-            MediaHash[0], MediaHash[1:] + '.bundle',
-            'Contents')
-        myRow['PMS Media Path'] = PMSMediaPath.encode('utf8')
-    return myRow
+    try:
+        myMediaTreeInfoURL = GetLoopBack() + '/library/metadata/' + \
+            GetRegInfo(myMedia, 'ratingKey') + '/tree'
+        TreeInfo = XML.ElementFromURL(myMediaTreeInfoURL).xpath('//MediaPart')
+        for myPart in TreeInfo:
+            MediaHash = GetRegInfo(myPart, 'hash')
+            PMSMediaPath = os.path.join(
+                Core.app_support_path,
+                'Media',
+                'localhost',
+                MediaHash[0], MediaHash[1:] + '.bundle',
+                'Contents')
+            myRow['PMS Media Path'] = PMSMediaPath.encode('utf8')
+        return myRow
+    except Exception, e:
+        Log.Exception('Bad Media Path with error: %s' %(str(e)))
+        myRow['PMS Media Path'] = 'Error'
+        return myRow
 
 
 def ConvertSize(SizeAsString):
