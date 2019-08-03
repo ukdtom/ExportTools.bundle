@@ -25,10 +25,6 @@ def getMovieHeader(PrefsLevel):
             fieldnames = misc.getLevelFields(
                 moviefields.SLevel_3,
                 fieldnames)
-        if PrefsLevel == 'Special Level 4':
-            fieldnames = misc.getLevelFields(
-                moviefields.SLevel_4,
-                fieldnames)
         if PrefsLevel == 'Special Level 666':
             fieldnames = misc.getLevelFields(
                 moviefields.SLevel_666,
@@ -40,6 +36,11 @@ def getMovieHeader(PrefsLevel):
         # Do we need the PMS path?
         if '666' in PrefsLevel:
             fieldnames.append('PMS Media Path')
+        return fieldnames
+    elif PrefsLevel == 'PlayCount 1':
+        fieldnames = misc.getLevelFields(
+                moviefields.PlayCount_1,
+                fieldnames)
         return fieldnames
     # Level 1 fields
     fieldnames = misc.getLevelFields(
@@ -97,7 +98,6 @@ def getMovieInfo(myMedia, myRow, prefsLevel):
     '''
     This function will return the info for movies
     '''
-    #prefsLevel = Prefs['Movie_Level']
     if 'Special' in prefsLevel:
         if prefsLevel == 'Special Level 1':
             myRow = misc.getItemInfo(myMedia, myRow, moviefields.SLevel_1)

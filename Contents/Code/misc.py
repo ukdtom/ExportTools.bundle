@@ -316,6 +316,14 @@ def getItemInfo(et, myRow, fieldList):
                         element = element[element.index('?lang=') + 6:]
                     if element == '':
                         element = consts.DEFAULT
+                elif key == 'Total Playcount':
+                    element = consts.DEFAULT
+                    url = ''.join((
+                         GetLoopBack(),
+                         '/status/sessions/history/all?metadataItemID=',
+                         myRow['Media ID'],
+                         '&X-Plex-Container-Start=0&X-Plex-Container-Size=0'))
+                    element = XML.ElementFromURL(url).get('totalSize')
                 else:
                     element = GetRegInfo2(et, value, consts.DEFAULT, key=key)
                 # Empty fields are still present, but with a length of 0
@@ -352,8 +360,21 @@ def getMediaPath(myMedia, myRow):
             myRow['PMS Media Path'] = PMSMediaPath.encode('utf8')
         return myRow
     except Exception, e:
-        Log.Exception('Bad Media Path with error: %s' %(str(e)))
+        Log.Exception('Bad Media Path with error: %s' % (str(e)))
         myRow['PMS Media Path'] = 'Error'
+        return myRow
+
+
+def getPlayCountLevel(myMedia, fieldlist):
+    ''' return the playcount info for media '''
+    # Playcount level selected
+    try:
+        myRow = {}
+        myRow = getItemInfo(myMedia, myRow, fieldlist)
+        return myRow
+    except Exception, e:
+        Log.Exception('Bad Media Path with error: %s' % (str(e)))
+        myRow['Total Playcount'] = 'N/A'
         return myRow
 
 
