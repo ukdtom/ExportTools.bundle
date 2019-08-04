@@ -24,3 +24,19 @@ CONTAINERSIZEPHOTO = 20
 
 # For slow PMS HW, we might need to wait some time here
 PMSTIMEOUT = Prefs['TimeOut']
+
+PLAYCOUNTEXCLUDE = ''.join((
+    '&excludeElements=Actor',
+    ',Collection',
+    ',Country',
+    ',Director',
+    ',Genre',
+    ',Label',
+    ',Mood',
+    ',Producer',
+    ',Similar',
+    ',Writer',
+    ',Role',
+    '&excludeFields=',
+    'summary',
+    ',tagline'))

@@ -1,21 +1,21 @@
 [
     {
         "default": "*** Idle ***", 
+        "type": "enum", 
         "values": [
             "*** Idle ***", 
             "*** Reload Library List ***"
         ], 
-        "type": "enum", 
         "id": "Libraries", 
         "label": "Select Library to export, and click Save "
     }, 
     {
         "default": "csv", 
+        "type": "enum", 
         "values": [
             "csv", 
             "xlsx"
         ], 
-        "type": "enum", 
         "id": "Output_Format", 
         "label": "Output format (If on Windows, use latest version of Plex Media Server)"
     }, 
@@ -83,7 +83,7 @@
         "default": " - ", 
         "type": "text", 
         "id": "Seperator", 
-        "label": "Seperator, with multiple info in same field"
+        "label": "Separator, with multiple info in same field"
     }, 
     {
         "default": "true", 
@@ -99,6 +99,7 @@
     }, 
     {
         "default": "Level 2", 
+        "type": "enum", 
         "values": [
             "Level 1", 
             "Level 2", 
@@ -108,16 +109,16 @@
             "Level 6", 
             "Special Level 1", 
             "Special Level 2", 
-            "Special Level 3",            
-            "Level 666",
+            "Special Level 3", 
+            "Level 666", 
             "PlayCount 1"
         ], 
-        "type": "enum", 
         "id": "Movie_Level", 
         "label": "Movie Export Level......."
     }, 
     {
         "default": "Level 2", 
+        "type": "enum", 
         "values": [
             "Level 1", 
             "Level 2", 
@@ -131,12 +132,12 @@
             "Show Only 3", 
             "Special Level 1"
         ], 
-        "type": "enum", 
         "id": "TV_Level", 
         "label": "TV Export Level.........."
     }, 
     {
         "default": "Level 2", 
+        "type": "enum", 
         "values": [
             "Level 1", 
             "Level 2", 
@@ -145,39 +146,38 @@
             "Level 5", 
             "Level 666"
         ], 
-        "type": "enum", 
         "id": "Artist_Level", 
         "label": "Audio Export Level......."
     }, 
     {
         "default": "Level 1", 
+        "type": "enum", 
         "values": [
             "Level 1", 
             "Level 2", 
             "Level 3"
         ], 
-        "type": "enum", 
         "id": "Photo_Level", 
         "label": "Photo Export Level......."
     }, 
     {
         "default": "Simple", 
+        "type": "enum", 
         "values": [
             "Simple", 
             "Basic"
         ], 
-        "type": "enum", 
         "id": "PlayList_Level", 
         "label": "PlayList Export Level...."
     }, 
     {
         "default": "Disabled", 
+        "type": "enum", 
         "values": [
             "Disabled", 
             "Simple", 
             "Enhanced"
         ], 
-        "type": "enum", 
         "id": "mu_Level", 
         "label": "create m3u8 playlist file"
     }, 

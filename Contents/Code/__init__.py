@@ -35,7 +35,7 @@ import photofields
 from consts import NAME, VERSION, PREFIX, ICON, ART, PLAYLIST, APPNAME
 from consts import CONTAINERSIZEMOVIES, PMSTIMEOUT, CONTAINERSIZETV
 from consts import CONTAINERSIZEEPISODES, CONTAINERSIZEPHOTO
-from consts import CONTAINERSIZEAUDIO
+from consts import CONTAINERSIZEAUDIO, PLAYCOUNTEXCLUDE
 
 
 import output
@@ -748,6 +748,12 @@ def scanMovieDB(myMediaURL, outFile, level=None):
                 str(iCurrent),
                 '&X-Plex-Container-Size=',
                 str(CONTAINERSIZEMOVIES)))
+            if level in moviefields.playCountCall:
+                print 'Ged22 hit'
+                fetchURL = ''.join((
+                    fetchURL,
+                    PLAYCOUNTEXCLUDE))
+            print 'Ged33', level, fetchURL
             iCount = bScanStatusCount
             partMedias = XML.ElementFromURL(
                 fetchURL,
@@ -765,7 +771,12 @@ def scanMovieDB(myMediaURL, outFile, level=None):
             medias = partMedias.xpath('.//Video')
             for media in medias:
                 myRow = {}
-                if level != 'PlayCount 1':
+                if level in moviefields.playCountCall:
+                    if level == 'PlayCount 1':
+                        fieldlist = moviefields.PlayCount_1
+                    myRow = misc.getPlayCountLevel(
+                        myMedia=media, fieldlist=fieldlist)
+                else:
                     # Was extra info needed here?
                     if bExtraInfo:
                         myExtendedInfoURL = genParam(
@@ -782,9 +793,6 @@ def scanMovieDB(myMediaURL, outFile, level=None):
                             timeout=float(PMSTIMEOUT)).xpath('//Video')[0]
                     # Export the info
                     myRow = movies.getMovieInfo(media, myRow, prefsLevel=level)
-                else:
-                    myRow = misc.getPlayCountLevel(
-                        media, moviefields.PlayCount_1)
                 output.writerow(myRow)
                 iCurrent += 1
                 bScanStatusCount += 1

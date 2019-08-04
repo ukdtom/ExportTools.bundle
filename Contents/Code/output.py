@@ -23,14 +23,14 @@ muFile = ''
 writer3muFile = ''
 
 
-
 def getStatusFileName():
     ''' Get name of status file '''
     global StatusFile
     StatusFile = os.path.join(
         os.path.dirname(outFile),
-        outFile + '.ExportTools-Status_IDLE')        
+        outFile + '.ExportTools-Status_IDLE')
     return StatusFile
+
 
 def setMax(Max):
     ''' Set vars and file for status '''
@@ -48,7 +48,7 @@ def createFile(sectionKey, sectionType, title, skipts=False, level=None):
     Create the output file,
     based on section title, timestamp and output type
     '''
-    myLevel = level    
+    myLevel = level
     global newtitle
     # Type of export
     global extension
@@ -77,12 +77,12 @@ def createFile(sectionKey, sectionType, title, skipts=False, level=None):
     # Get current date and time
     if skipts:
         timestr = ''
-    else:        
+    else:
         timestr = '-' + time.strftime("%Y%m%d-%H%M%S")
     # Generate Output FileName
 
     # Remove invalid caracters, if on Windows......
-    newtitle = re.sub('[\/[:#*?"<>|]', '_', title).strip()    
+    newtitle = re.sub('[\/[:#*?"<>|]', '_', title).strip()
     if sectionType == 'playlists':
         outFile = os.path.join(
             Prefs['Export_Path'],
@@ -96,7 +96,7 @@ def createFile(sectionKey, sectionType, title, skipts=False, level=None):
                     'Playlist-',
                     newtitle,
                     '-',
-                    Prefs['mu_Level'],                    
+                    Prefs['mu_Level'],
                     timestr,
                     '.m3u8')))
             writer3muFile = codecs.open(muFile, 'w', encoding='utf8')
@@ -132,8 +132,8 @@ def createFile(sectionKey, sectionType, title, skipts=False, level=None):
                 Prefs['Export_Path'],
                 APPNAME,
                 newtitle + '-' + myLevel + timestr + extension)
-    # Add what we got to the return array    
-    outFile = outFile + '.tmp-Wait-Please' 
+    # Add what we got to the return array
+    outFile = outFile + '.tmp-Wait-Please'
     retVal.append(outFile)
     retVal.append(myMediaURL)
     # Posters ?
@@ -167,14 +167,14 @@ def createHeader(outFile, sectionType, playListType='', level=None):
     global fieldnames
     global columnwidth
 
-    columnwidth = {}        
+    columnwidth = {}
     if sectionType == 'movies':
         if not level:
             level = Prefs['Movie_Level']
-        fieldnames = movies.getMovieHeader(level)         
+        fieldnames = movies.getMovieHeader(level)
     elif sectionType == 'tvseries':
         if not level:
-            level = Prefs['TV_Level']        
+            level = Prefs['TV_Level']
         fieldnames = tvseries.getTVHeader(level)
     elif sectionType == 'audio':
         if not level:
@@ -223,16 +223,15 @@ def writerow(rowentry):
     ''' Write row entry '''
     global row
     global columnwidth
-    try:        
+    try:
         global CurStatusFile
         global iCurrent
         if (iCurrent % 10 == 0):
             # Get filename of outFile
-            
-            StatusTekst = os.path.basename(outFile) + '.ExportTools-Status_Exporting_%s-of-%s' %(str(iCurrent), str(iMax))
+            StatusTekst = os.path.basename(outFile) + '.ExportTools-Status_Exporting_%s-of-%s' % (str(iCurrent), str(iMax))
             NewStatusFile = os.path.join(
                 os.path.dirname(StatusFile),
-                StatusTekst)            
+                StatusTekst)
             os.rename(CurStatusFile, NewStatusFile)
             CurStatusFile = NewStatusFile
         iCurrent += 1
@@ -381,8 +380,8 @@ def closefile():
     if muFile != '':
         writer3muFile.close()
     # Rename output to real file
-    FinalFile = outFile.split('.tmp-Wait-')[0]    
-    os.rename(outFile, FinalFile)    
+    FinalFile = outFile.split('.tmp-Wait-')[0]
+    os.rename(outFile, FinalFile)
     if os.path.exists(CurStatusFile):
         os.remove(CurStatusFile)
 
