@@ -3,6 +3,7 @@ V2.0.0.5:
 		- #99 Missing hash causes exception
 	- New:
 		- # 100 Movies: New level named "PlayCount 1"
+		- # 100 Episodes: New level named "PlayCount 1"
 
 V2.0.0.4:
 	- Fix:

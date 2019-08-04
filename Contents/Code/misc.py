@@ -373,7 +373,7 @@ def getPlayCountLevel(myMedia, fieldlist):
         myRow = getItemInfo(myMedia, myRow, fieldlist)
         return myRow
     except Exception, e:
-        Log.Exception('Bad Media Path with error: %s' % (str(e)))
+        Log.Exception('getPlayCountLevel error: %s' % (str(e)))
         myRow['Total Playcount'] = 'N/A'
         return myRow
 

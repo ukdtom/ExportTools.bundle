@@ -21,7 +21,10 @@ dateTimeFields = ['addedAt', 'updatedAt',
 timeFields = ['duration']
 
 # Levels that only req. a single call towards PMS
-singleCall = ['Level 1', 'Level 2', 'Level 3']
+singleCall = ['Level 1', 'Level 2', 'Level 3', 'PlayCount 1']
+
+# Levels for PlayCount
+playCountCall = ['PlayCount 1']
 
 # Define rows and element name for level 1 (Single call)
 Level_1 = [
@@ -35,7 +38,7 @@ Level_1 = [
     ('Content Rating', '@contentRating'),
     ('Summary', '@summary'),
     ('Rating', '@rating'),
-    ('User Rating', '@userRating')    
+    ('User Rating', '@userRating')
 ]
 
 Level_2 = [
@@ -198,7 +201,7 @@ Show_1 = [
     ('Poster url', '@thumb'),
     ('Amount of Episodes', '@leafCount'),
     ('Amount of Seasons', '@childCount'),
-    ('User Rating', '@userRating')    
+    ('User Rating', '@userRating')
 ]
 
 # Define rows and element name for Show Only level 2
@@ -219,4 +222,16 @@ Show_3 = [
     ('MetaDB Link', '@guid'),
     ('Labels', '//Label/@tag'),
     ('Collection', '')
+]
+
+# Define rows and element name for PlayCount 1 (one calls pr. episode)
+PlayCount_1 = [
+    ('Media ID', '@ratingKey'),
+    ('Series Title', '@grandparentTitle'),
+    ('Episode Title', '@title'),
+    ('Season', '@parentIndex'),
+    ('Episode', '@index'),
+    ('Total Playcount', None),
+    ('Added', '@addedAt'),
+    ('File Path', 'Media/Part/@file')
 ]

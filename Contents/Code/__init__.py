@@ -749,11 +749,10 @@ def scanMovieDB(myMediaURL, outFile, level=None):
                 '&X-Plex-Container-Size=',
                 str(CONTAINERSIZEMOVIES)))
             if level in moviefields.playCountCall:
-                print 'Ged22 hit'
                 fetchURL = ''.join((
                     fetchURL,
-                    PLAYCOUNTEXCLUDE))
-            print 'Ged33', level, fetchURL
+                    PLAYCOUNTEXCLUDE,
+                    '&type=1'))
             iCount = bScanStatusCount
             partMedias = XML.ElementFromURL(
                 fetchURL,
@@ -848,6 +847,11 @@ def scanShowDB(myMediaURL, outFile, level=None, key=None):
                     str(iCount),
                     '&X-Plex-Container-Size=',
                     str(CONTAINERSIZETV)))
+            if level in tvfields.playCountCall:
+                fetchURL = ''.join((
+                    fetchURL,
+                    PLAYCOUNTEXCLUDE,
+                    '&type=4'))
             partMedias = XML.ElementFromURL(
                 fetchURL,
                 timeout=float(PMSTIMEOUT))
@@ -872,6 +876,17 @@ def scanShowDB(myMediaURL, outFile, level=None, key=None):
                         TVShow,
                         myRow,
                         level)
+                    try:
+                        output.writerow(myRow)
+                    except Exception, e:
+                        Log.Exception(
+                            'Exception happend in ScanShowDB: %s' % str(e))
+                    continue
+                elif level in tvfields.playCountCall:
+                    if level == 'PlayCount 1':
+                        fieldlist = tvfields.PlayCount_1
+                    myRow = misc.getPlayCountLevel(
+                        myMedia=TVShow, fieldlist=fieldlist)
                     try:
                         output.writerow(myRow)
                     except Exception, e:

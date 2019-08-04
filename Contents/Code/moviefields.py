@@ -386,6 +386,14 @@ SLevel_3 = [
         '@guid')
     ]
 
+# Define rows and element name for Special level 4 (two call pr. movie)
+SLevel_666 = [
+    ]
+
+# Define rows and element name for Special level 4 (two call pr. movie)
+SLevel_666_2 = [
+    ]
+
 # Define rows and element name for PlayCount 1 (one calls pr. movie)
 PlayCount_1 = [
     ('Media ID',
@@ -399,11 +407,3 @@ PlayCount_1 = [
     ('File Path',
         'Media/Part/@file')
 ]
-
-# Define rows and element name for Special level 4 (two call pr. movie)
-SLevel_666 = [
-    ]
-
-# Define rows and element name for Special level 4 (two call pr. movie)
-SLevel_666_2 = [
-    ]
