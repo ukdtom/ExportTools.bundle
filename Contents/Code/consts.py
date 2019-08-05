@@ -4,7 +4,7 @@
 ########################################################################
 
 # APP specific stuff
-VERSION = ' V2.0.0.4'
+VERSION = ' V2.0.0.5'
 APPNAME = 'ExportTools'
 NAME = APPNAME + VERSION
 DESCRIPTION = 'Export Plex libraries to csv-files or xlsx-files'
@@ -24,3 +24,19 @@ CONTAINERSIZEPHOTO = 20
 
 # For slow PMS HW, we might need to wait some time here
 PMSTIMEOUT = Prefs['TimeOut']
+
+PLAYCOUNTEXCLUDE = ''.join((
+    '&excludeElements=Actor',
+    ',Collection',
+    ',Country',
+    ',Director',
+    ',Genre',
+    ',Label',
+    ',Mood',
+    ',Producer',
+    ',Similar',
+    ',Writer',
+    ',Role',
+    '&excludeFields=',
+    'summary',
+    ',tagline'))

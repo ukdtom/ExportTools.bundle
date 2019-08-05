@@ -20,7 +20,10 @@ dateTimeFields = ['addedAt', 'updatedAt', 'lastViewedAt']
 timeFields = ['duration']
 
 # Levels that only req. a single call towards PMS
-singleCall = ['Level 1', 'Level 2']
+singleCall = ['Level 1', 'Level 2', 'PlayCount 1']
+
+# Levels for PlayCount
+playCountCall = ['PlayCount 1']
 
 # Define rows and element name for level 1 (Single call)
 Level_1 = [
@@ -383,10 +386,6 @@ SLevel_3 = [
         '@guid')
     ]
 
-# Define rows and element name for Special level 4 (one call pr. movie)
-SLevel_4 = [
-    ]
-
 # Define rows and element name for Special level 4 (two call pr. movie)
 SLevel_666 = [
     ]
@@ -394,3 +393,17 @@ SLevel_666 = [
 # Define rows and element name for Special level 4 (two call pr. movie)
 SLevel_666_2 = [
     ]
+
+# Define rows and element name for PlayCount 1 (one calls pr. movie)
+PlayCount_1 = [
+    ('Media ID',
+        '@ratingKey'),
+    ('Title',
+        '@title'),
+    ('Total Playcount',
+        None),
+    ('Added',
+        '@addedAt'),
+    ('File Path',
+        'Media/Part/@file')
+]

@@ -11,6 +11,20 @@ from lxml import etree as ET
 STACKEDLABELS = ['cd', 'disc', 'disk', 'dvd', 'part', 'pt']
 
 
+def getSeries(sectionKey, level=None):
+    # TODO: Make shows only levels
+
+    print 'Ged tvseries Shows', sectionKey, level
+
+
+def getEpisodes(sectionKey, level=None):
+    ''' Export Episodes only '''
+
+    # TODO: Make episodes only levels
+    print 'Ged tvseries episodes', sectionKey, level
+    return
+
+
 def getTVHeader(PrefsLevel):
     '''
     This function will return the header for the CSV file for TV-Shows
@@ -42,6 +56,11 @@ def getTVHeader(PrefsLevel):
         if '666' in PrefsLevel:
             fieldnames.append('PMS Media Path')
         return fieldnames
+    if PrefsLevel == 'PlayCount 1':
+        fieldnames = misc.getLevelFields(
+                tvfields.PlayCount_1,
+                fieldnames)
+        return fieldnames
     # Level 1 fields
     fieldnames = misc.getLevelFields(tvfields.Level_1, fieldnames)
     # Basic fields
@@ -54,7 +73,7 @@ def getTVHeader(PrefsLevel):
             'Level 7',
             'Level 8',
             'Level 666']:
-        fieldnames = misc.getLevelFields(tvfields.Level_2, fieldnames)        
+        fieldnames = misc.getLevelFields(tvfields.Level_2, fieldnames)
     # Extended fields
     if PrefsLevel in [
             'Level 3',
@@ -64,7 +83,7 @@ def getTVHeader(PrefsLevel):
             'Level 7',
             'Level 8',
             'Level 666']:
-        fieldnames = misc.getLevelFields(tvfields.Level_3, fieldnames)        
+        fieldnames = misc.getLevelFields(tvfields.Level_3, fieldnames)
     # Extreme fields
     if PrefsLevel in [
             'Level 4',
@@ -72,7 +91,7 @@ def getTVHeader(PrefsLevel):
             'Level 6',
             'Level 7',
             'Level 8',
-            'Level 666']:        
+            'Level 666']:
         fieldnames = misc.getLevelFields(tvfields.Level_4, fieldnames)
     # Extreme 2 (Part) level
     if PrefsLevel in ['Level 5', 'Level 6', 'Level 7', 'Level 8', 'Level 666']:
@@ -92,11 +111,11 @@ def getTVHeader(PrefsLevel):
 def getTvInfo(myMedia, myRow, level=None):
     '''
     This function will return the info for tv-shows
-    '''   
+    '''
     if level:
         prefsLevel = level
     else:
-        prefsLevel = Prefs['TV_Level']        
+        prefsLevel = Prefs['TV_Level']
     if prefsLevel in ['Show Only 1', 'Show Only 2']:
         myRow = misc.getItemInfo(myMedia, myRow, tvfields.Show_1)
         if prefsLevel == 'Show Only 2':
