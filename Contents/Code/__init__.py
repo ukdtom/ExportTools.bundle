@@ -73,6 +73,26 @@ def launch(title='', skipts='False', level=None):
             return str(e)
 
 
+@route(PREFIX + '/scanPListFromPrefsOrURL')
+def scanPListFromPrefsOrURL(title='', skipts=False, level=None):
+    Log.Debug('Starting to scan Playlist from prefs: %s' % title)
+    # Get list of Playlists
+    PlayListsURL = misc.GetLoopBack() + '/playlists'
+    PlayLists = XML.ElementFromURL(PlayListsURL).xpath(
+        '//Playlist[@title="' + title + '"]')
+    key = PlayLists[0].get('ratingKey').decode('utf-8')
+    PlayListType = PlayLists[0].get('playlistType').decode('utf-8')
+    Log.Debug('Key detected as %s and type as %s' % (key, PlayListType))
+    return
+
+    # scanPList
+
+
+
+
+    return
+
+
 @route(PREFIX + '/restart')
 def restart():
     try:
@@ -122,6 +142,18 @@ def sectionList():
         if item['id'] == 'Libraries':
             item['values'] = LibraryValues
             break
+    PlayListValues = []
+    PlayListValues.append('*** Idle ***'.decode('utf-8'))
+    PlayListValues.append('*** Reload Playlists ***'.decode('utf-8'))
+    PlayListURL = misc.GetLoopBack() + '/playlists'
+    PlayLists = XML.ElementFromURL(PlayListURL).xpath('//Playlist')
+    for PlayList in PlayLists:
+        PlayListValues.append(PlayList.get('title').decode('utf-8'))
+    for item in data:
+        if item['id'] == 'Playlists':
+            item['values'] = PlayListValues
+            break
+
     with io.open(prefsFile, 'wb') as outfile:
         json.dump(data, outfile, indent=4)
     restart()
@@ -355,7 +387,7 @@ def ValidateExportPath():
 @route(PREFIX + '/ResetToIdle')
 def ResetToIdle():
     '''
-    Reset Library Prefs to idle
+    Reset Library and PlayList Prefs to idle
     '''
     pFile = Core.storage.join_path(
         Core.app_support_path,
@@ -369,7 +401,7 @@ def ResetToIdle():
         misc.GetLoopBack(),
         '/:/plugins/',
         CFBundleIdentifier,
-        '/prefs/set?Libraries=***%20Idle%20***'))
+        '/prefs/set?Libraries=&Playlists='))
     HTTP.Request(url, cacheTime=0, immediate=True)
     return
 
@@ -401,17 +433,29 @@ def ValidatePrefs():
     '''
     Called by the framework every time a user changes the prefs
     '''
+    # Handle Playlists
+    SelectedPList = Prefs['Playlists']
+    if SelectedPList == '*** Reload Playlists ***':
+        # Start by flipping prefs back to idle
+        ResetToIdle()
+        Thread.Create(sectionList(), globalize=True)
+        return
+    if SelectedPList not in ['*** Reload Playlists ***', '*** Idle ***', None]:
+        print 'Ged Exporterer playlists', SelectedPList
+        ResetToIdle()
+        scanPListFromPrefsOrURL(title=SelectedPList)        
+        return
     SelectedLib = Prefs['Libraries']
+    print 'Ged2 Library', SelectedLib
     if SelectedLib == '*** Reload Library List ***':
         # Start by flipping prefs back to idle
         ResetToIdle()
         Thread.Create(sectionList(), globalize=True)
         return
-    elif SelectedLib == '*** Idle ***':
-        return
-    elif SelectedLib is None:
-        return
-    else:
+    if SelectedLib not in [
+        '*** Reload Library List ***',
+            '*** Idle ***',
+            None]:
         ScanLib(title=SelectedLib)
         ResetToIdle()
         return

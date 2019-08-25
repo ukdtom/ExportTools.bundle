@@ -4,7 +4,7 @@
 ########################################################################
 
 # APP specific stuff
-VERSION = ' V2.0.0.5'
+VERSION = ' V2.0.0.6'
 APPNAME = 'ExportTools'
 NAME = APPNAME + VERSION
 DESCRIPTION = 'Export Plex libraries to csv-files or xlsx-files'
