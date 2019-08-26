@@ -55,17 +55,27 @@ EXPORTPATH = ''
 
 
 @route(PREFIX + '/launch')
-def launch(title='', skipts='False', level=None):
+def launch(title='', skipts='False', level=None, playlist='False'):
     '''
     Used to launch an export from an url
     Syntax is:
-    http://IP-OF-PMS:32400/applications/ExportTools/launch?title=TITLE-OF-SECTION&skipts=False&level=Level%203&X-Plex-Token=MY-TOKEN
+    http://IP-OF-PMS:32400/applications/ExportTools/launch?title=TITLE-OF-SECTION&skipts=False&level=Level%203&playlist=False&X-Plex-Token=MY-TOKEN
     '''
     skipts = (skipts.upper() == 'TRUE')
-    Log.Debug('I was asked via url to scan section: "%s" with skip timestamp set to "%s" and with a level of "%s"' % (title, str(skipts), level))
+    playlist = (playlist.upper() == 'TRUE')
+    strFeedback = ''.join((
+        'I was asked via url to scan section: "%s" ' % (title),
+        'with skip timestamp set to "%s" ' % (str(skipts)),
+        'and with a level of "%s". ' % (level),
+        'PlayList is set to %s' % (playlist)
+    ))
+    Log.Debug(strFeedback)
     try:
-        ScanLib(title=title, skipts=skipts, level=level)
-        return 'I was asked via url to scan section: "%s" with skip timestamp set to "%s" and with a level of "%s"' % (title, str(skipts), level)
+        if playlist:
+            scanPListFromPrefsOrURL(title=title, skipts=skipts, level=level)
+        else:
+            ScanLib(title=title, skipts=skipts, level=level)
+        return strFeedback
     except Exception, e:
         if str(e) == 'list index out of range':
             return 'Library not found'
@@ -442,11 +452,11 @@ def ValidatePrefs():
         ResetToIdle()
         Thread.Create(sectionList(), globalize=True)
         return
-    if SelectedPList not in ['*** Reload Playlists ***', '*** Idle ***', None]:        
+    if SelectedPList not in ['*** Reload Playlists ***', '*** Idle ***', None]:
         ResetToIdle()
         scanPListFromPrefsOrURL(title=SelectedPList)
         return
-    SelectedLib = Prefs['Libraries']    
+    SelectedLib = Prefs['Libraries']
     if SelectedLib == '*** Reload Library List ***':
         # Start by flipping prefs back to idle
         ResetToIdle()
@@ -711,7 +721,7 @@ def backgroundScanThread(title, key, sectiontype, skipts=False, level=None):
     global bScanStatusCount
     global bScanStatusCountOf
     global EXPORTPATH
-    try:        
+    try:
         bScanStatus = 1
         Log.Debug("Section type is %s" % sectiontype)
         # Generate parameters
@@ -730,7 +740,7 @@ def backgroundScanThread(title, key, sectiontype, skipts=False, level=None):
         elif sectiontype == 'playlists':
             myLevel = Prefs['PlayList_Level']
         else:
-            myLevel = ''        
+            myLevel = ''
         # Create the output file
         [outFile, myMediaURL] = output.createFile(
             key, sectiontype,
@@ -745,7 +755,7 @@ def backgroundScanThread(title, key, sectiontype, skipts=False, level=None):
         elif sectiontype == "show":
             scanShowDB(myMediaURL, outFile, level=myLevel, key=key)
         elif sectiontype == "playlists":
-            scanPList(myMediaURL, outFile)
+            scanPList(myMediaURL, outFile, level=myLevel)
         elif sectiontype == "photo":
             scanPhotoDB(myMediaURL, outFile, level=myLevel)
         else:
@@ -1007,7 +1017,15 @@ def scanShowDB(myMediaURL, outFile, level=None, key=None):
                             str(episodeCounter),
                             '&X-Plex-Container-Size=',
                             str(CONTAINERSIZEEPISODES)))
-                        Log.Debug('Show %s of %s with a RatingKey of %s at myURL: %s with a title of "%s" episode %s of %s' % (iCount, bScanStatusCountOf, ratingKey, myURL, title, episodeCounter, episodeTotalSize))
+                        strLog = ''.join((
+                            'Show %s of ' % (iCount),
+                            '%s with a RatingKey of ' % (bScanStatusCountOf),
+                            '%s at myURL: ' % (ratingKey),
+                            '%s with a title of "%s" ' % (myURL, title),
+                            'episode %s ' % (episodeCounter),
+                            'of %s' % (episodeTotalSize)
+                        ))
+                        Log.Debug(strLog)
                         MainEpisodes = XML.ElementFromURL(
                             myURL,
                             timeout=float(PMSTIMEOUT))
@@ -1113,7 +1131,7 @@ def selectPList():
 
 
 @route(PREFIX + '/getPListContents')
-def scanPList(key, outFile):
+def scanPList(key, outFile, level=None):
     ''' Here we go for the actual playlist '''
     Log.Debug("******* Starting scanPList with an URL of: %s" % key)
     global bScanStatusCount
@@ -1127,8 +1145,8 @@ def scanPList(key, outFile):
             timeout=float(PMSTIMEOUT))
         playListType = playListXML.get('playlistType')
         Log.Debug('Writing headers for Playlist Export')
-        output.createHeader(outFile, 'playlist', playListType)
-        bScanStatusCountOf = playListXML.get('leafCount')                
+        output.createHeader(outFile, 'playlist', playListType, level=level)
+        bScanStatusCountOf = playListXML.get('leafCount')
         iCount = bScanStatusCount
         output.setMax(int(bScanStatusCountOf))
         Log.Debug('Starting to fetch the list of items in this section')
@@ -1146,7 +1164,11 @@ def scanPList(key, outFile):
                 key,
                 timeout=float(PMSTIMEOUT)).xpath('//Photo')
         for playListItem in playListItems:
-            playlists.getPlayListInfo(playListItem, myRow, playListType)
+            playlists.getPlayListInfo(
+                playListItem,
+                myRow,
+                playListType,
+                level=level)
             output.writerow(myRow)
         output.closefile()
     except:

@@ -62,7 +62,7 @@ def createFile(sectionKey, sectionType, title, skipts=False, level=None):
     # Placeholder for return array
     retVal = []
     if sectionType == 'playlists':
-        myMediaURL = misc.GetLoopBack() + sectionKey        
+        myMediaURL = misc.GetLoopBack() + sectionKey
         playListType = title
         title = XML.ElementFromURL(
             myMediaURL,
@@ -185,8 +185,10 @@ def createHeader(outFile, sectionType, playListType='', level=None):
             level = Prefs['Photo_Level']
         fieldnames = photo.getHeader(level)
     elif sectionType == 'playlist':
+        if not level:
+            level = Prefs['PlayList_Level']
         fieldnames = playlists.getPlayListHeader(
-            playListType, Prefs['PlayList_Level'])
+            playListType, level)
     # Do we have an csv output here?
     if extension == '.csv':
         targetfile = io.open(outFile, 'wb')
@@ -228,7 +230,11 @@ def writerow(rowentry):
         global iCurrent
         if (iCurrent % 10 == 0):
             # Get filename of outFile
-            StatusTekst = os.path.basename(outFile) + '.ExportTools-Status_Exporting_%s-of-%s' % (str(iCurrent), str(iMax))
+            StatusTekst = ''.join((
+                os.path.basename(outFile),
+                '.ExportTools-Status_Exporting_%s' % (str(iCurrent)),
+                '-of-%s' % (str(iMax))
+            ))
             NewStatusFile = os.path.join(
                 os.path.dirname(StatusFile),
                 StatusTekst)
