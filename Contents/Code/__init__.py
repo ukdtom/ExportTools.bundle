@@ -80,16 +80,18 @@ def scanPListFromPrefsOrURL(title='', skipts=False, level=None):
     PlayListsURL = misc.GetLoopBack() + '/playlists'
     PlayLists = XML.ElementFromURL(PlayListsURL).xpath(
         '//Playlist[@title="' + title + '"]')
-    key = PlayLists[0].get('ratingKey').decode('utf-8')
+    key = PlayLists[0].get('key').decode('utf-8')
     PlayListType = PlayLists[0].get('playlistType').decode('utf-8')
     Log.Debug('Key detected as %s and type as %s' % (key, PlayListType))
-    return
-
-    # scanPList
-
-
-
-
+    Thread.Create(
+        backgroundScanThread,
+        globalize=True,
+        title=title,
+        key=key,
+        sectiontype='playlists',
+        skipts=skipts,
+        level=level
+        )
     return
 
 
@@ -440,13 +442,11 @@ def ValidatePrefs():
         ResetToIdle()
         Thread.Create(sectionList(), globalize=True)
         return
-    if SelectedPList not in ['*** Reload Playlists ***', '*** Idle ***', None]:
-        print 'Ged Exporterer playlists', SelectedPList
+    if SelectedPList not in ['*** Reload Playlists ***', '*** Idle ***', None]:        
         ResetToIdle()
-        scanPListFromPrefsOrURL(title=SelectedPList)        
+        scanPListFromPrefsOrURL(title=SelectedPList)
         return
-    SelectedLib = Prefs['Libraries']
-    print 'Ged2 Library', SelectedLib
+    SelectedLib = Prefs['Libraries']    
     if SelectedLib == '*** Reload Library List ***':
         # Start by flipping prefs back to idle
         ResetToIdle()
@@ -711,7 +711,7 @@ def backgroundScanThread(title, key, sectiontype, skipts=False, level=None):
     global bScanStatusCount
     global bScanStatusCountOf
     global EXPORTPATH
-    try:
+    try:        
         bScanStatus = 1
         Log.Debug("Section type is %s" % sectiontype)
         # Generate parameters
@@ -730,7 +730,7 @@ def backgroundScanThread(title, key, sectiontype, skipts=False, level=None):
         elif sectiontype == 'playlists':
             myLevel = Prefs['PlayList_Level']
         else:
-            myLevel = ''
+            myLevel = ''        
         # Create the output file
         [outFile, myMediaURL] = output.createFile(
             key, sectiontype,
@@ -1122,12 +1122,15 @@ def scanPList(key, outFile):
     bScanStatusCount = 0
     try:
         # Get playlist type once more
-        playListType = XML.ElementFromURL(
+        playListXML = XML.ElementFromURL(
             key + '?X-Plex-Container-Start=0&X-Plex-Container-Size=0',
-            timeout=float(PMSTIMEOUT)).get('playlistType')
+            timeout=float(PMSTIMEOUT))
+        playListType = playListXML.get('playlistType')
         Log.Debug('Writing headers for Playlist Export')
         output.createHeader(outFile, 'playlist', playListType)
+        bScanStatusCountOf = playListXML.get('leafCount')                
         iCount = bScanStatusCount
+        output.setMax(int(bScanStatusCountOf))
         Log.Debug('Starting to fetch the list of items in this section')
         myRow = {}
         if playListType == 'video':

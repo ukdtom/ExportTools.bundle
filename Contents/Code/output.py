@@ -62,7 +62,7 @@ def createFile(sectionKey, sectionType, title, skipts=False, level=None):
     # Placeholder for return array
     retVal = []
     if sectionType == 'playlists':
-        myMediaURL = misc.GetLoopBack() + sectionKey
+        myMediaURL = misc.GetLoopBack() + sectionKey        
         playListType = title
         title = XML.ElementFromURL(
             myMediaURL,
