@@ -55,22 +55,55 @@ EXPORTPATH = ''
 
 
 @route(PREFIX + '/launch')
-def launch(title='', skipts='False', level=None):
+def launch(title='', skipts='False', level=None, playlist='False'):
     '''
     Used to launch an export from an url
     Syntax is:
-    http://IP-OF-PMS:32400/applications/ExportTools/launch?title=TITLE-OF-SECTION&skipts=False&level=Level%203&X-Plex-Token=MY-TOKEN
+    http://IP-OF-PMS:32400/applications/ExportTools/launch?title=TITLE-OF-SECTION&skipts=False&level=Level%203&playlist=False&X-Plex-Token=MY-TOKEN
     '''
     skipts = (skipts.upper() == 'TRUE')
-    Log.Debug('I was asked via url to scan section: "%s" with skip timestamp set to "%s" and with a level of "%s"' % (title, str(skipts), level))
+    playlist = (playlist.upper() == 'TRUE')
+    strFeedback = ''.join((
+        'I was asked via url to scan section: "%s" ' % (title),
+        'with skip timestamp set to "%s" ' % (str(skipts)),
+        'and with a level of "%s". ' % (level),
+        'PlayList is set to %s' % (playlist)
+    ))
+    Log.Debug(strFeedback)
+    ValidateExportPath()
     try:
-        ScanLib(title=title, skipts=skipts, level=level)
-        return 'I was asked via url to scan section: "%s" with skip timestamp set to "%s" and with a level of "%s"' % (title, str(skipts), level)
+        if playlist:
+            scanPListFromPrefsOrURL(title=title, skipts=skipts, level=level)
+        else:
+            ScanLib(title=title, skipts=skipts, level=level)
+        return strFeedback
     except Exception, e:
         if str(e) == 'list index out of range':
             return 'Library not found'
         else:
             return str(e)
+
+
+@route(PREFIX + '/scanPListFromPrefsOrURL')
+def scanPListFromPrefsOrURL(title='', skipts=False, level=None):
+    Log.Debug('Starting to scan Playlist from prefs: %s' % title)
+    # Get list of Playlists
+    PlayListsURL = misc.GetLoopBack() + '/playlists'
+    PlayLists = XML.ElementFromURL(PlayListsURL).xpath(
+        '//Playlist[@title="' + title + '"]')
+    key = PlayLists[0].get('key').decode('utf-8')
+    PlayListType = PlayLists[0].get('playlistType').decode('utf-8')
+    Log.Debug('Key detected as %s and type as %s' % (key, PlayListType))
+    Thread.Create(
+        backgroundScanThread,
+        globalize=True,
+        title=title,
+        key=key,
+        sectiontype='playlists',
+        skipts=skipts,
+        level=level
+        )
+    return
 
 
 @route(PREFIX + '/restart')
@@ -122,6 +155,18 @@ def sectionList():
         if item['id'] == 'Libraries':
             item['values'] = LibraryValues
             break
+    PlayListValues = []
+    PlayListValues.append('*** Idle ***'.decode('utf-8'))
+    PlayListValues.append('*** Reload Playlists ***'.decode('utf-8'))
+    PlayListURL = misc.GetLoopBack() + '/playlists'
+    PlayLists = XML.ElementFromURL(PlayListURL).xpath('//Playlist')
+    for PlayList in PlayLists:
+        PlayListValues.append(PlayList.get('title').decode('utf-8'))
+    for item in data:
+        if item['id'] == 'Playlists':
+            item['values'] = PlayListValues
+            break
+
     with io.open(prefsFile, 'wb') as outfile:
         json.dump(data, outfile, indent=4)
     restart()
@@ -355,7 +400,7 @@ def ValidateExportPath():
 @route(PREFIX + '/ResetToIdle')
 def ResetToIdle():
     '''
-    Reset Library Prefs to idle
+    Reset Library and PlayList Prefs to idle
     '''
     pFile = Core.storage.join_path(
         Core.app_support_path,
@@ -369,7 +414,7 @@ def ResetToIdle():
         misc.GetLoopBack(),
         '/:/plugins/',
         CFBundleIdentifier,
-        '/prefs/set?Libraries=***%20Idle%20***'))
+        '/prefs/set?Libraries=&Playlists='))
     HTTP.Request(url, cacheTime=0, immediate=True)
     return
 
@@ -401,17 +446,29 @@ def ValidatePrefs():
     '''
     Called by the framework every time a user changes the prefs
     '''
+    # Handle Playlists
+    SelectedPList = Prefs['Playlists']
+    if SelectedPList == '*** Reload Playlists ***':
+        # Start by flipping prefs back to idle
+        ResetToIdle()
+        ValidateExportPath()
+        Thread.Create(sectionList(), globalize=True)
+        return
+    if SelectedPList not in ['*** Reload Playlists ***', '*** Idle ***', None]:
+        ResetToIdle()
+        ValidateExportPath()
+        scanPListFromPrefsOrURL(title=SelectedPList)
+        return
     SelectedLib = Prefs['Libraries']
     if SelectedLib == '*** Reload Library List ***':
         # Start by flipping prefs back to idle
         ResetToIdle()
         Thread.Create(sectionList(), globalize=True)
         return
-    elif SelectedLib == '*** Idle ***':
-        return
-    elif SelectedLib is None:
-        return
-    else:
+    if SelectedLib not in [
+        '*** Reload Library List ***',
+            '*** Idle ***',
+            None]:
         ScanLib(title=SelectedLib)
         ResetToIdle()
         return
@@ -701,7 +758,7 @@ def backgroundScanThread(title, key, sectiontype, skipts=False, level=None):
         elif sectiontype == "show":
             scanShowDB(myMediaURL, outFile, level=myLevel, key=key)
         elif sectiontype == "playlists":
-            scanPList(myMediaURL, outFile)
+            scanPList(myMediaURL, outFile, level=myLevel)
         elif sectiontype == "photo":
             scanPhotoDB(myMediaURL, outFile, level=myLevel)
         else:
@@ -963,7 +1020,15 @@ def scanShowDB(myMediaURL, outFile, level=None, key=None):
                             str(episodeCounter),
                             '&X-Plex-Container-Size=',
                             str(CONTAINERSIZEEPISODES)))
-                        Log.Debug('Show %s of %s with a RatingKey of %s at myURL: %s with a title of "%s" episode %s of %s' % (iCount, bScanStatusCountOf, ratingKey, myURL, title, episodeCounter, episodeTotalSize))
+                        strLog = ''.join((
+                            'Show %s of ' % (iCount),
+                            '%s with a RatingKey of ' % (bScanStatusCountOf),
+                            '%s at myURL: ' % (ratingKey),
+                            '%s with a title of "%s" ' % (myURL, title),
+                            'episode %s ' % (episodeCounter),
+                            'of %s' % (episodeTotalSize)
+                        ))
+                        Log.Debug(strLog)
                         MainEpisodes = XML.ElementFromURL(
                             myURL,
                             timeout=float(PMSTIMEOUT))
@@ -1069,7 +1134,7 @@ def selectPList():
 
 
 @route(PREFIX + '/getPListContents')
-def scanPList(key, outFile):
+def scanPList(key, outFile, level=None):
     ''' Here we go for the actual playlist '''
     Log.Debug("******* Starting scanPList with an URL of: %s" % key)
     global bScanStatusCount
@@ -1078,12 +1143,15 @@ def scanPList(key, outFile):
     bScanStatusCount = 0
     try:
         # Get playlist type once more
-        playListType = XML.ElementFromURL(
+        playListXML = XML.ElementFromURL(
             key + '?X-Plex-Container-Start=0&X-Plex-Container-Size=0',
-            timeout=float(PMSTIMEOUT)).get('playlistType')
+            timeout=float(PMSTIMEOUT))
+        playListType = playListXML.get('playlistType')
         Log.Debug('Writing headers for Playlist Export')
-        output.createHeader(outFile, 'playlist', playListType)
+        output.createHeader(outFile, 'playlist', playListType, level=level)
+        bScanStatusCountOf = playListXML.get('leafCount')
         iCount = bScanStatusCount
+        output.setMax(int(bScanStatusCountOf))
         Log.Debug('Starting to fetch the list of items in this section')
         myRow = {}
         if playListType == 'video':
@@ -1099,7 +1167,11 @@ def scanPList(key, outFile):
                 key,
                 timeout=float(PMSTIMEOUT)).xpath('//Photo')
         for playListItem in playListItems:
-            playlists.getPlayListInfo(playListItem, myRow, playListType)
+            playlists.getPlayListInfo(
+                playListItem,
+                myRow,
+                playListType,
+                level=level)
             output.writerow(myRow)
         output.closefile()
     except:

@@ -90,15 +90,17 @@ def getPlayListHeader(listtype, level):
     return fieldnames
 
 
-def getPlayListInfo(playListItem, myRow, playListType):
+def getPlayListInfo(playListItem, myRow, playListType, level=None):
     '''
     This function will export and return the info for the Playlist
     '''
+    if not level:
+        level = Prefs['PlayList_Level']
     # Get Simple Info
     if playListType == 'video':
         myRow = getPlayListSimpleVideo(playListItem, myRow)
         # Get Basic Info
-        if Prefs['PlayList_Level'] in [
+        if level in [
                 'Basic',
                 "Extended",
                 "Extreme",
@@ -107,7 +109,7 @@ def getPlayListInfo(playListItem, myRow, playListType):
             myRow = getPlayListBasicVideo(playListItem, myRow)
     elif playListType == 'audio':
         myRow = getPlayListSimpleAudio(playListItem, myRow)
-        if Prefs['PlayList_Level'] in [
+        if level in [
                 'Basic',
                 "Extended",
                 "Extreme",
@@ -116,7 +118,7 @@ def getPlayListInfo(playListItem, myRow, playListType):
             myRow = getPlayListBasicAudio(playListItem, myRow)
     elif playListType == 'photo':
         myRow = getPlayListSimplePhoto(playListItem, myRow)
-        if Prefs['PlayList_Level'] in [
+        if level in [
                 'Basic',
                 "Extended",
                 "Extreme",
