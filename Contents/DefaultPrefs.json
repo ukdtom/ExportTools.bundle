@@ -51,7 +51,7 @@
         "default": "75", 
         "type": "text", 
         "id": "Poster_Hight", 
-        "label": "Poster Hight"
+        "label": "Poster Height"
     }, 
     {
         "default": "50", 
