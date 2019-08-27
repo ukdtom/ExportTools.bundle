@@ -70,6 +70,7 @@ def launch(title='', skipts='False', level=None, playlist='False'):
         'PlayList is set to %s' % (playlist)
     ))
     Log.Debug(strFeedback)
+    ValidateExportPath()
     try:
         if playlist:
             scanPListFromPrefsOrURL(title=title, skipts=skipts, level=level)
@@ -450,10 +451,12 @@ def ValidatePrefs():
     if SelectedPList == '*** Reload Playlists ***':
         # Start by flipping prefs back to idle
         ResetToIdle()
+        ValidateExportPath()
         Thread.Create(sectionList(), globalize=True)
         return
     if SelectedPList not in ['*** Reload Playlists ***', '*** Idle ***', None]:
         ResetToIdle()
+        ValidateExportPath()
         scanPListFromPrefsOrURL(title=SelectedPList)
         return
     SelectedLib = Prefs['Libraries']

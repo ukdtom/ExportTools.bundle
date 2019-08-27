@@ -1,6 +1,8 @@
 V2.0.0.6:
 	- New:
-		- # 105 Allow playlist export again
+		- #105 Allow playlist export again
+	- Bug:
+		- #106 ExportPath only created if using old meny system
 
 V2.0.0.5:
 	- Fix:
