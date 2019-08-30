@@ -273,6 +273,9 @@ def getItemInfo(et, myRow, fieldList):
                         else:
                             element = GetRegInfo2(
                                 et, value, consts.DEFAULT, key=key)
+                    else:
+                        element = GetRegInfo2(
+                            et, value, consts.DEFAULT, key=key)
                 elif key.startswith('Extras-'):
                     retVals = et.xpath(value)
                     element = str(len(retVals))
