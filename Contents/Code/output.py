@@ -43,6 +43,43 @@ def setMax(Max):
     io.open(CurStatusFile, 'a').close()
 
 
+def getOutFileName(title, skipts, level, playlist):
+    ''' returns the name of the output file to create '''
+    extension = '.' + Prefs['Output_Format']
+    # Get current date and time
+    if skipts:
+        timestr = ''
+    else:
+        timestr = '-' + time.strftime("%Y%m%d-%H%M%S")
+    # Generate Output FileName
+
+    # Remove invalid caracters, if on Windows......
+    newtitle = re.sub('[\/[:#*?"<>|]', '_', title).strip()
+    if playlist:
+        outFile = os.path.join(
+            Prefs['Export_Path'],
+            APPNAME,
+            'Playlist-' + newtitle + '-' + level + timestr + extension)
+    else:
+        if Prefs['Auto_Path']:
+            # Need to grap the first location for the section
+            locations = XML.ElementFromURL(
+                misc.GetLoopBack() + '/library/sections/',
+                timeout=float(PMSTIMEOUT)).xpath(
+                    './/Directory[@title="' + title + '"]')[0]
+            location = locations[0].get('path')
+            outFile = os.path.join(
+                location,
+                APPNAME,
+                newtitle + '-' + level + timestr + extension)
+        else:
+            outFile = os.path.join(
+                Prefs['Export_Path'],
+                APPNAME,
+                newtitle + '-' + level + timestr + extension)
+    return outFile
+
+
 def createFile(sectionKey, sectionType, title, skipts=False, level=None):
     '''
     Create the output file,
@@ -117,7 +154,7 @@ def createFile(sectionKey, sectionType, title, skipts=False, level=None):
             outFile = os.path.join(
                 location,
                 APPNAME,
-                newtitle + '-' + myLevel + '-' + timestr + extension)
+                newtitle + '-' + myLevel + timestr + extension)
             if not os.path.exists(os.path.join(location, APPNAME)):
                 os.makedirs(os.path.join(location, APPNAME))
                 Log.Debug('Auto Created directory named: %s' % (os.path.join(
