@@ -1,10 +1,6 @@
-V2.0.0.8:
+V2.0.0.7:
 	- New:
 		- #109 Write name of output file to result screen
-	- Bug:
-		- #108 SortTitle is always set to title
-
-V2.0.0.7:
 	- Bug:
 		- #108 SortTitle is always set to title
 		
