@@ -63,11 +63,18 @@ def launch(title='', skipts='False', level=None, playlist='False'):
     '''
     skipts = (skipts.upper() == 'TRUE')
     playlist = (playlist.upper() == 'TRUE')
+    outFile = output.getOutFileName(
+        title=title,
+        skipts=skipts,
+        level=level,
+        playlist=playlist)
+
     strFeedback = ''.join((
         'I was asked via url to scan section: "%s" ' % (title),
         'with skip timestamp set to "%s" ' % (str(skipts)),
         'and with a level of "%s". ' % (level),
-        'PlayList is set to %s' % (playlist)
+        'PlayList is set to %s. ' % (playlist),
+        'Output file is: "%s"' % (outFile)
     ))
     Log.Debug(strFeedback)
     ValidateExportPath()
