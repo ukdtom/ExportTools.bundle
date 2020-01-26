@@ -222,7 +222,7 @@ def getShowOnly(myMedia, myRow, level):
                     str(directMedia.xpath('//Directory/@guid')))
             elif key == 'Delete Item Watched after days':
                 deleteDays = directMedia.xpath(
-                    '//Directory/@autoDeletionItemPolicyWatchedLibrary')                
+                    '//Directory/@autoDeletionItemPolicyWatchedLibrary')
                 if deleteDays == ['100']:
                     deleteDays = 'Next Refresh'
                 elif deleteDays == []:
