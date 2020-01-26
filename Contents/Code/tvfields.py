@@ -221,7 +221,8 @@ Show_3 = [
     ('Location', '//Location/@path'),
     ('MetaDB Link', '@guid'),
     ('Labels', '//Label/@tag'),
-    ('Collection', '')
+    ('Collection', ''),
+    ('Delete Item Watched after days', '@autoDeletionItemPolicyWatchedLibrary')
 ]
 
 # Define rows and element name for PlayCount 1 (one calls pr. episode)

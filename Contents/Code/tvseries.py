@@ -220,6 +220,20 @@ def getShowOnly(myMedia, myRow, level):
             if key == 'MetaDB Link':
                 myRow[key] = misc.metaDBLink(
                     str(directMedia.xpath('//Directory/@guid')))
+            elif key == 'Delete Item Watched after days':
+                deleteDays = directMedia.xpath(
+                    '//Directory/@autoDeletionItemPolicyWatchedLibrary')                
+                if deleteDays == ['100']:
+                    deleteDays = 'Next Refresh'
+                elif deleteDays == []:
+                    deleteDays = 'Never'
+                elif deleteDays == ['0']:
+                    deleteDays = 'Never'
+                elif deleteDays == ['1']:
+                    deleteDays = '1 Day'
+                elif deleteDays == ['7']:
+                    deleteDays = '7 Days'
+                myRow[key] = deleteDays
             elif key == 'Collection':
                 serieInfo = directMedia.xpath('//Directory/Collection')
                 myCol = ''
