@@ -132,7 +132,7 @@ Level_3 = [
     ('Chapter Title',
         'Chapter/@tag'),
     ('Chapter Count',
-        'Chapter/@tag')
+        'Chapter/@index')
     ]
 
 # Define rows and element name for level 4 (One call pr. movie)
