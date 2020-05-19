@@ -301,8 +301,6 @@ def Start():
     ))
     IOENCODING = str(sys.getfilesystemencoding())
 
-    print 'Ged encoding', IOENCODING
-
     if DEBUGMODE:
         try:
             print strLog
