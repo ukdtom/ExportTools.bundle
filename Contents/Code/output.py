@@ -44,7 +44,8 @@ def setMax(Max):
         io.open(CurStatusFile, 'a').close()
     except expression as identifier:
         # Failback to utf8 if encoding cant be found
-        io.open(CurStatusFile, 'a', encoding='utf8').close()    
+        io.open(CurStatusFile, 'a', encoding='utf8').close()
+
 
 def getOutFileName(title, skipts, level, playlist):
     ''' returns the name of the output file to create '''
@@ -190,7 +191,7 @@ def createFile(sectionKey, sectionType, title, skipts=False, level=None):
                 "Level 2",
                 "Special Level 1"
             ]:
-                    doPosters = True
+                doPosters = True
         if doPosters:
             posterDir = os.path.join(os.path.dirname(outFile), 'posters')
             if not os.path.exists(posterDir):
@@ -233,7 +234,7 @@ def createHeader(outFile, sectionType, playListType='', level=None):
     if extension == '.csv':
         try:
             targetfile = io.open(outFile, 'wb')
-        except:
+        except Exception, e:
             targetfile = io.open(outFile, 'wb', encoding='utf8')
         # Create output file, and print the header
         writer = csv.DictWriter(
@@ -409,7 +410,7 @@ def writerow(rowentry):
             try:
                 with io.open(thumbFile, 'wb') as handler:
                     handler.write(thumb)
-            except:
+            except Exception, e:
                 with io.open(thumbFile, 'wb', encoding='utf8') as handler:
                     handler.write(thumb)
         except Exception, e:

@@ -32,10 +32,10 @@ import moviefields
 import audiofields
 import tvfields
 import photofields
-from consts import NAME, VERSION, PREFIX, ICON, ART, PLAYLIST, APPNAME, IOENCODING
+from consts import NAME, VERSION, PREFIX, ICON, ART, PLAYLIST, APPNAME
 from consts import CONTAINERSIZEMOVIES, PMSTIMEOUT, CONTAINERSIZETV
 from consts import CONTAINERSIZEEPISODES, CONTAINERSIZEPHOTO
-from consts import CONTAINERSIZEAUDIO, PLAYCOUNTEXCLUDE
+from consts import CONTAINERSIZEAUDIO, PLAYCOUNTEXCLUDE, IOENCODING
 
 
 import output
@@ -137,7 +137,7 @@ def restart():
             HTTP.Request(
                 misc.GetLoopBack() + '/:/plugins/com.plexapp.system/restart',
                 immediate=True)
-        except:
+        except Exception, e:
             pass
 
 
@@ -151,7 +151,7 @@ def sectionList():
     try:
         with io.open(prefsFile) as json_file:
             data = json.load(json_file)
-    except:
+    except Exception, e:
         with io.open(prefsFile, encoding='utf8') as json_file:
             data = json.load(json_file)
     # Get list of libraries
@@ -180,7 +180,7 @@ def sectionList():
     try:
         with io.open(prefsFile, 'wb') as outfile:
             json.dump(data, outfile, indent=4)
-    except:
+    except Exception, e:
         with io.open(prefsFile, 'wb', encoding='utf8') as outfile:
             json.dump(data, outfile, indent=4)
     restart()
@@ -306,28 +306,28 @@ def Start():
     if DEBUGMODE:
         try:
             print strLog
-        except:
+        except Exception, e:
             pass
     Log.Debug(strLog)
     try:
         Log.Debug('Platform is %s' % (
             os.environ['PLEX_MEDIA_SERVER_INFO_VENDOR']))
-    except:
+    except Exception, e:
         pass
     try:
         Log.Debug('Device is %s' % (
             os.environ['PLEX_MEDIA_SERVER_INFO_DEVICE']))
-    except:
+    except Exception, e:
         pass
     try:
         Log.Debug('Model is %s' % (
             os.environ['PLEX_MEDIA_SERVER_INFO_MODEL']))
-    except:
+    except Exception, e:
         pass
     try:
         Log.Debug('OS Version is %s' % (
             os.environ['PLEX_MEDIA_SERVER_INFO_PLATFORM_VERSION']))
-    except:
+    except Exception, e:
         pass
     Plugin.AddPrefixHandler(PREFIX, launch, NAME, ICON, ART)
     Plugin.AddViewGroup('List', viewMode='List', mediaType='items')
@@ -396,7 +396,7 @@ def MainMenu(random=0):
             oc.add(DirectoryObject(
                 key=Callback(MainMenu, random=time.clock()),
                 title="Select Preferences to set the export path"))
-    except:
+    except Exception, e:
         Log.Critical("Exception happened in MainMenu")
         raise
     oc.add(PrefsObject(title='Preferences', thumb=R(ICON)))
@@ -746,7 +746,7 @@ def backgroundScan(title='', key='', sectiontype='', random=0, statusCheck=0):
                     title="*** Unknown status from scanner ***",
                     summary=summary))
             bScanStatus = 0
-    except:
+    except Exception, e:
         Log.Critical("Detected an exception in backgroundScan")
         raise
     Log.Debug("******* Ending backgroundScan ***********")
@@ -1143,7 +1143,7 @@ def selectPList():
         title = playlist.get('title')
         try:
             thumb = misc.GetLoopBack() + playlist.get('composite')
-        except:
+        except Exception, e:
             pass
         playListType = playlist.get('playlistType')
         if playListType in ['video', 'audio', 'photo']:
@@ -1212,7 +1212,7 @@ def scanPList(key, outFile, level=None):
                 level=level)
             output.writerow(myRow)
         output.closefile()
-    except:
+    except Exception, e:
         Log.Critical("Detected an exception in scanPList")
         bScanStatus = 99
         # Dumps the error so you can see what the problem is
@@ -1288,7 +1288,7 @@ def scanArtistDB(myMediaURL, outFile, level=None):
             HTTP.Request(
                 misc.GetLoopBack() + '/applications/ExportTools/:/prefs',
                 cacheTime=0,
-                immediate=True)                        
+                immediate=True)
         output.closefile()
     except Exception, e:
         Log.Exception("Detected an exception in scanArtistDB as: %s" % str(e))
@@ -1338,7 +1338,7 @@ def scanPhotoDB(myMediaURL, outFile, level=None):
             getPhotoItems(medias=medias, bExtraInfo=bExtraInfo, level=level)
             iLocalCounter += int(CONTAINERSIZEPHOTO)
         output.closefile()
-    except:
+    except Exception, e:
         Log.Critical("Detected an exception in scanPhotoDB")
         bScanStatus = 99
         # Dumps the error so you can see what the problem is
