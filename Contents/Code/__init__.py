@@ -32,7 +32,7 @@ import moviefields
 import audiofields
 import tvfields
 import photofields
-from consts import NAME, VERSION, PREFIX, ICON, ART, PLAYLIST, APPNAME
+from consts import NAME, VERSION, PREFIX, ICON, ART, PLAYLIST, APPNAME, IOENCODING
 from consts import CONTAINERSIZEMOVIES, PMSTIMEOUT, CONTAINERSIZETV
 from consts import CONTAINERSIZEEPISODES, CONTAINERSIZEPHOTO
 from consts import CONTAINERSIZEAUDIO, PLAYCOUNTEXCLUDE
@@ -148,8 +148,12 @@ def sectionList():
         Core.app_support_path,
         Core.config.bundles_dir_name,
         APPNAME + '.bundle', 'Contents', 'DefaultPrefs.json')
-    with io.open(prefsFile) as json_file:
-        data = json.load(json_file)
+    try:
+        with io.open(prefsFile) as json_file:
+            data = json.load(json_file)
+    except:
+        with io.open(prefsFile, encoding='utf8') as json_file:
+            data = json.load(json_file)
     # Get list of libraries
     SectionsURL = misc.GetLoopBack() + '/library/sections'
     SectionList = XML.ElementFromURL(SectionsURL).xpath('//Directory')
@@ -173,9 +177,12 @@ def sectionList():
         if item['id'] == 'Playlists':
             item['values'] = PlayListValues
             break
-
-    with io.open(prefsFile, 'wb') as outfile:
-        json.dump(data, outfile, indent=4)
+    try:
+        with io.open(prefsFile, 'wb') as outfile:
+            json.dump(data, outfile, indent=4)
+    except:
+        with io.open(prefsFile, 'wb', encoding='utf8') as outfile:
+            json.dump(data, outfile, indent=4)
     restart()
     return
 
@@ -292,12 +299,36 @@ def Start():
         ' and file system encoding is % s' % str(sys.getfilesystemencoding()),
         ' **********'
     ))
+    IOENCODING = str(sys.getfilesystemencoding())
+
+    print 'Ged encoding', IOENCODING
+
     if DEBUGMODE:
         try:
             print strLog
         except:
             pass
     Log.Debug(strLog)
+    try:
+        Log.Debug('Platform is %s' % (
+            os.environ['PLEX_MEDIA_SERVER_INFO_VENDOR']))
+    except:
+        pass
+    try:
+        Log.Debug('Device is %s' % (
+            os.environ['PLEX_MEDIA_SERVER_INFO_DEVICE']))
+    except:
+        pass
+    try:
+        Log.Debug('Model is %s' % (
+            os.environ['PLEX_MEDIA_SERVER_INFO_MODEL']))
+    except:
+        pass
+    try:
+        Log.Debug('OS Version is %s' % (
+            os.environ['PLEX_MEDIA_SERVER_INFO_PLATFORM_VERSION']))
+    except:
+        pass
     Plugin.AddPrefixHandler(PREFIX, launch, NAME, ICON, ART)
     Plugin.AddViewGroup('List', viewMode='List', mediaType='items')
     Plugin.AddViewGroup("Details", viewMode="InfoList", mediaType="items")
@@ -1254,6 +1285,10 @@ def scanArtistDB(myMediaURL, outFile, level=None):
                         timeout=float(PMSTIMEOUT)).xpath('//Track')[0]
                 audio.getAudioInfo(track, myRow, level=level)
                 output.writerow(myRow)
+            HTTP.Request(
+                misc.GetLoopBack() + '/applications/ExportTools/:/prefs',
+                cacheTime=0,
+                immediate=True)                        
         output.closefile()
     except Exception, e:
         Log.Exception("Detected an exception in scanArtistDB as: %s" % str(e))

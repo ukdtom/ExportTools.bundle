@@ -4,7 +4,7 @@
 ########################################################################
 
 # APP specific stuff
-VERSION = ' V2.0.0.9'
+VERSION = ' V2.0.0.10'
 APPNAME = 'ExportTools'
 NAME = APPNAME + VERSION
 DESCRIPTION = 'Export Plex libraries to csv-files or xlsx-files'
@@ -14,6 +14,7 @@ PREFIX = '/applications/ExportTools'
 APPGUID = '7608cf36-742b-11e4-8b39-00af17210b2'
 PLAYLIST = 'playlist.png'
 DEFAULT = 'N/A'
+IOENCODING = ''
 
 # How many items we ask for each time, when accessing a section
 CONTAINERSIZEMOVIES = 30
