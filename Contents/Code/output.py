@@ -41,7 +41,7 @@ def setMax(Max):
     global CurStatusFile
     CurStatusFile = getStatusFileName()
     try:
-        io.open(CurStatusFile, 'a').close()    
+        io.open(CurStatusFile, 'a').close()
     except Exception, e:
         # Failback to utf8 if encoding cant be found
         io.open(CurStatusFile, 'a', encoding='utf8').close()
