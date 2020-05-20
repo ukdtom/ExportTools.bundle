@@ -35,7 +35,7 @@ import photofields
 from consts import NAME, VERSION, PREFIX, ICON, ART, PLAYLIST, APPNAME
 from consts import CONTAINERSIZEMOVIES, PMSTIMEOUT, CONTAINERSIZETV
 from consts import CONTAINERSIZEEPISODES, CONTAINERSIZEPHOTO
-from consts import CONTAINERSIZEAUDIO, PLAYCOUNTEXCLUDE
+from consts import CONTAINERSIZEAUDIO, PLAYCOUNTEXCLUDE, IOENCODING
 
 
 import output
@@ -137,7 +137,7 @@ def restart():
             HTTP.Request(
                 misc.GetLoopBack() + '/:/plugins/com.plexapp.system/restart',
                 immediate=True)
-        except:
+        except Exception, e:
             pass
 
 
@@ -148,8 +148,12 @@ def sectionList():
         Core.app_support_path,
         Core.config.bundles_dir_name,
         APPNAME + '.bundle', 'Contents', 'DefaultPrefs.json')
-    with io.open(prefsFile) as json_file:
-        data = json.load(json_file)
+    try:
+        with io.open(prefsFile) as json_file:
+            data = json.load(json_file)
+    except Exception, e:
+        with io.open(prefsFile, encoding='utf8') as json_file:
+            data = json.load(json_file)
     # Get list of libraries
     SectionsURL = misc.GetLoopBack() + '/library/sections'
     SectionList = XML.ElementFromURL(SectionsURL).xpath('//Directory')
@@ -173,9 +177,12 @@ def sectionList():
         if item['id'] == 'Playlists':
             item['values'] = PlayListValues
             break
-
-    with io.open(prefsFile, 'wb') as outfile:
-        json.dump(data, outfile, indent=4)
+    try:
+        with io.open(prefsFile, 'wb') as outfile:
+            json.dump(data, outfile, indent=4)
+    except Exception, e:
+        with io.open(prefsFile, 'wb', encoding='utf8') as outfile:
+            json.dump(data, outfile, indent=4)
     restart()
     return
 
@@ -292,12 +299,34 @@ def Start():
         ' and file system encoding is % s' % str(sys.getfilesystemencoding()),
         ' **********'
     ))
+    IOENCODING = str(sys.getfilesystemencoding())
+
     if DEBUGMODE:
         try:
             print strLog
-        except:
+        except Exception, e:
             pass
     Log.Debug(strLog)
+    try:
+        Log.Debug('Platform is %s' % (
+            os.environ['PLEX_MEDIA_SERVER_INFO_VENDOR']))
+    except Exception, e:
+        pass
+    try:
+        Log.Debug('Device is %s' % (
+            os.environ['PLEX_MEDIA_SERVER_INFO_DEVICE']))
+    except Exception, e:
+        pass
+    try:
+        Log.Debug('Model is %s' % (
+            os.environ['PLEX_MEDIA_SERVER_INFO_MODEL']))
+    except Exception, e:
+        pass
+    try:
+        Log.Debug('OS Version is %s' % (
+            os.environ['PLEX_MEDIA_SERVER_INFO_PLATFORM_VERSION']))
+    except Exception, e:
+        pass
     Plugin.AddPrefixHandler(PREFIX, launch, NAME, ICON, ART)
     Plugin.AddViewGroup('List', viewMode='List', mediaType='items')
     Plugin.AddViewGroup("Details", viewMode="InfoList", mediaType="items")
@@ -365,7 +394,7 @@ def MainMenu(random=0):
             oc.add(DirectoryObject(
                 key=Callback(MainMenu, random=time.clock()),
                 title="Select Preferences to set the export path"))
-    except:
+    except Exception, e:
         Log.Critical("Exception happened in MainMenu")
         raise
     oc.add(PrefsObject(title='Preferences', thumb=R(ICON)))
@@ -715,7 +744,7 @@ def backgroundScan(title='', key='', sectiontype='', random=0, statusCheck=0):
                     title="*** Unknown status from scanner ***",
                     summary=summary))
             bScanStatus = 0
-    except:
+    except Exception, e:
         Log.Critical("Detected an exception in backgroundScan")
         raise
     Log.Debug("******* Ending backgroundScan ***********")
@@ -867,6 +896,11 @@ def scanMovieDB(myMediaURL, outFile, level=None):
                 break
             if bScanStatus == 3:
                 break
+            # Keep Alive ping to PMS
+            HTTP.Request(
+                misc.GetLoopBack() + PREFIX + '/:/prefs',
+                cacheTime=0,
+                immediate=True)
         output.closefile()
     except ValueError, Argument:
         Log.Critical('Unknown error in scanMovieDb %s' % Argument)
@@ -1072,6 +1106,11 @@ def scanShowDB(myMediaURL, outFile, level=None, key=None):
                         episodeCounter += CONTAINERSIZEEPISODES
                         if episodeCounter > int(episodeTotalSize):
                             break
+            # KeepAlive ping to PMS
+            HTTP.Request(
+                misc.GetLoopBack() + PREFIX + '/:/prefs',
+                cacheTime=0,
+                immediate=True)
             # Got to the end of the line?
             if int(partMedias.get('size')) == 0:
                 break
@@ -1112,7 +1151,7 @@ def selectPList():
         title = playlist.get('title')
         try:
             thumb = misc.GetLoopBack() + playlist.get('composite')
-        except:
+        except Exception, e:
             pass
         playListType = playlist.get('playlistType')
         if playListType in ['video', 'audio', 'photo']:
@@ -1181,7 +1220,7 @@ def scanPList(key, outFile, level=None):
                 level=level)
             output.writerow(myRow)
         output.closefile()
-    except:
+    except Exception, e:
         Log.Critical("Detected an exception in scanPList")
         bScanStatus = 99
         # Dumps the error so you can see what the problem is
@@ -1254,6 +1293,10 @@ def scanArtistDB(myMediaURL, outFile, level=None):
                         timeout=float(PMSTIMEOUT)).xpath('//Track')[0]
                 audio.getAudioInfo(track, myRow, level=level)
                 output.writerow(myRow)
+            HTTP.Request(
+                misc.GetLoopBack() + PREFIX + '/:/prefs',
+                cacheTime=0,
+                immediate=True)
         output.closefile()
     except Exception, e:
         Log.Exception("Detected an exception in scanArtistDB as: %s" % str(e))
@@ -1303,7 +1346,7 @@ def scanPhotoDB(myMediaURL, outFile, level=None):
             getPhotoItems(medias=medias, bExtraInfo=bExtraInfo, level=level)
             iLocalCounter += int(CONTAINERSIZEPHOTO)
         output.closefile()
-    except:
+    except Exception, e:
         Log.Critical("Detected an exception in scanPhotoDB")
         bScanStatus = 99
         # Dumps the error so you can see what the problem is

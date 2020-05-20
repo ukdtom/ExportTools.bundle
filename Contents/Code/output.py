@@ -40,7 +40,11 @@ def setMax(Max):
     iCurrent = 0
     global CurStatusFile
     CurStatusFile = getStatusFileName()
-    io.open(CurStatusFile, 'a').close()
+    try:
+        io.open(CurStatusFile, 'a').close()
+    except Exception, e:
+        # Failback to utf8 if encoding cant be found
+        io.open(CurStatusFile, 'a', encoding='utf8').close()
 
 
 def getOutFileName(title, skipts, level, playlist):
@@ -187,7 +191,7 @@ def createFile(sectionKey, sectionType, title, skipts=False, level=None):
                 "Level 2",
                 "Special Level 1"
             ]:
-                    doPosters = True
+                doPosters = True
         if doPosters:
             posterDir = os.path.join(os.path.dirname(outFile), 'posters')
             if not os.path.exists(posterDir):
@@ -228,7 +232,10 @@ def createHeader(outFile, sectionType, playListType='', level=None):
             playListType, level)
     # Do we have an csv output here?
     if extension == '.csv':
-        targetfile = io.open(outFile, 'wb')
+        try:
+            targetfile = io.open(outFile, 'wb')
+        except Exception, e:
+            targetfile = io.open(outFile, 'wb', encoding='utf8')
         # Create output file, and print the header
         writer = csv.DictWriter(
             targetfile,
@@ -400,8 +407,12 @@ def writerow(rowentry):
         try:
             thumbFile = os.path.join(posterDir, rowentry['Media ID'] + '.jpg')
             thumb = HTTP.Request(posterUrl).content
-            with io.open(thumbFile, 'wb') as handler:
-                handler.write(thumb)
+            try:
+                with io.open(thumbFile, 'wb') as handler:
+                    handler.write(thumb)
+            except Exception, e:
+                with io.open(thumbFile, 'wb', encoding='utf8') as handler:
+                    handler.write(thumb)
         except Exception, e:
             Log.Exception('Exception was %s' % str(e))
 
