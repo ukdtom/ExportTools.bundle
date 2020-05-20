@@ -1,3 +1,10 @@
+V2.0.0.10:
+	- New:
+		- #131 Additional device logging
+	- Bug:
+		- #130 PMS Timeout kills ET after 30 min.
+		- #128 Shield fails badly
+
 V2.0.0.9:
 	- Bug:
 		- #126 Chapter count

@@ -896,6 +896,11 @@ def scanMovieDB(myMediaURL, outFile, level=None):
                 break
             if bScanStatus == 3:
                 break
+            # Keep Alive ping to PMS
+            HTTP.Request(
+                misc.GetLoopBack() + PREFIX + '/:/prefs',
+                cacheTime=0,
+                immediate=True)
         output.closefile()
     except ValueError, Argument:
         Log.Critical('Unknown error in scanMovieDb %s' % Argument)
@@ -1101,6 +1106,11 @@ def scanShowDB(myMediaURL, outFile, level=None, key=None):
                         episodeCounter += CONTAINERSIZEEPISODES
                         if episodeCounter > int(episodeTotalSize):
                             break
+            # KeepAlive ping to PMS
+            HTTP.Request(
+                misc.GetLoopBack() + PREFIX + '/:/prefs',
+                cacheTime=0,
+                immediate=True)
             # Got to the end of the line?
             if int(partMedias.get('size')) == 0:
                 break
@@ -1284,7 +1294,7 @@ def scanArtistDB(myMediaURL, outFile, level=None):
                 audio.getAudioInfo(track, myRow, level=level)
                 output.writerow(myRow)
             HTTP.Request(
-                misc.GetLoopBack() + '/applications/ExportTools/:/prefs',
+                misc.GetLoopBack() + PREFIX + '/:/prefs',
                 cacheTime=0,
                 immediate=True)
         output.closefile()
