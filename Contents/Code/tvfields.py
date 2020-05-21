@@ -135,6 +135,9 @@ Level_5 = [
 ]
 
 Level_6 = [
+    ('Audio Stream Title', 'Media/Part/Stream[@streamType=2]/@title'),
+    ('Audio Stream Display Title',
+     'Media/Part/Stream[@streamType=2]/@displayTitle'),
     ('Audio Stream Selected', 'Media/Part/Stream[@streamType=2]/@selected'),
     ('Audio Stream Default', 'Media/Part/Stream[@streamType=2]/@default'),
     ('Audio Stream Codec', 'Media/Part/Stream[@streamType=2]/@codec'),
