@@ -143,55 +143,64 @@ def restart():
 
 @route(PREFIX + '/sectionList')
 def sectionList():
-    # Path to DefaultPrefs.json
-    prefsFile = Core.storage.join_path(
-        Core.app_support_path,
-        Core.config.bundles_dir_name,
-        APPNAME + '.bundle', 'Contents', 'DefaultPrefs.json')
     try:
-        with io.open(prefsFile) as json_file:
-            data = json.load(json_file)
-    except Exception, e:
-        with io.open(prefsFile, encoding='utf8') as json_file:
-            data = json.load(json_file)
-    # Get list of libraries
-    SectionsURL = misc.GetLoopBack() + '/library/sections'
-    SectionList = XML.ElementFromURL(SectionsURL).xpath('//Directory')
-    LibraryValues = []
-    LibraryValues.append('*** Idle ***'.decode('utf-8'))
-    LibraryValues.append('*** Reload Library List ***'.decode('utf-8'))
-    for Section in SectionList:
-        LibraryValues.append(Section.get('title').decode('utf-8'))
-    for item in data:
-        if item['id'] == 'Libraries':
-            item['values'] = LibraryValues
-            break
-    PlayListValues = []
-    PlayListValues.append('*** Idle ***'.decode('utf-8'))
-    PlayListValues.append('*** Reload Playlists ***'.decode('utf-8'))
-    PlayListURL = misc.GetLoopBack() + '/playlists'
-    PlayLists = XML.ElementFromURL(PlayListURL).xpath('//Playlist')
-    for PlayList in PlayLists:
-        PlayListValues.append(PlayList.get('title').decode('utf-8'))
-    for item in data:
-        if item['id'] == 'Playlists':
-            item['values'] = PlayListValues
-            break
-    try:
-        with io.open(prefsFile, 'wb') as outfile:
-            json.dump(data, outfile, indent=4)
-    except Exception, e:
+        # Path to DefaultPrefs.json
+        prefsFile = Core.storage.join_path(
+            Core.app_support_path,
+            Core.config.bundles_dir_name,
+            APPNAME + '.bundle', 'Contents', 'DefaultPrefs.json')
         try:
-            Log.Debug('Exception handling due to %s', str(e))
-            with io.open(prefsFile, 'wb', encoding='utf8') as outfile:
-                json.dump(data, outfile, indent=4)
-            pass
+            with io.open(prefsFile) as json_file:
+                data = json.load(json_file)
         except Exception, e:
-            Log.Debug('Exception handling due to %s', str(e))
-            with io.open(prefsFile, 'w', encoding='utf8') as outfile:
+            with io.open(prefsFile, encoding='utf8') as json_file:
+                data = json.load(json_file)
+        # Get list of libraries
+        SectionsURL = misc.GetLoopBack() + '/library/sections'
+        SectionList = XML.ElementFromURL(SectionsURL).xpath('//Directory')
+        LibraryValues = []
+        LibraryValues.append('*** Idle ***'.decode('utf-8'))
+        LibraryValues.append('*** Reload Library List ***'.decode('utf-8'))
+        try:
+            for Section in SectionList:
+                LibraryValues.append(Section.get('title').decode('utf-8'))
+        except Exception e:
+            Log.Exception('Exception handling due to %s' % (str(e)))
+        try:
+            for item in data:
+                if item['id'] == 'Libraries':
+                    item['values'] = LibraryValues
+                    break
+        except Exception e:
+            Log.Exception('Exception handling due to %s' % (str(e)))
+        PlayListValues = []
+        PlayListValues.append('*** Idle ***'.decode('utf-8'))
+        PlayListValues.append('*** Reload Playlists ***'.decode('utf-8'))
+        PlayListURL = misc.GetLoopBack() + '/playlists'
+        PlayLists = XML.ElementFromURL(PlayListURL).xpath('//Playlist')
+        for PlayList in PlayLists:
+            PlayListValues.append(PlayList.get('title').decode('utf-8'))
+        for item in data:
+            if item['id'] == 'Playlists':
+                item['values'] = PlayListValues
+                break
+        try:
+            with io.open(prefsFile, 'wb') as outfile:
                 json.dump(data, outfile, indent=4)
-            pass
-    restart()
+        except Exception, e:
+            try:
+                Log.Debug('Exception handling due to %s' % (str(e)))
+                with io.open(prefsFile, 'wb', encoding='utf8') as outfile:
+                    json.dump(data, outfile, indent=4)
+                pass
+            except Exception, e:
+                Log.Debug('Exception handling due to %s' % (str(e)))
+                with io.open(prefsFile, 'w', encoding='utf8') as outfile:
+                    json.dump(data, outfile, indent=4)
+                pass
+        restart()
+    except Exception e:
+        Log.Exception('Exception handling due to %s' % (str(e)))
     return
 
 
