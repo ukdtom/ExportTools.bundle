@@ -17,8 +17,8 @@
 dateTimeFields = ['addedAt', 'updatedAt',
                   'lastViewedAt', 'originallyAvailableAt']
 
-# Fields that contains a timestamp and should return a time
-timeFields = ['duration']
+# Fields that contains a timestamp and should return a time,
+# see moviefields
 
 # Levels that only req. a single call towards PMS
 singleCall = ['Level 1', 'Level 2', 'Level 3', 'PlayCount 1']
@@ -72,6 +72,8 @@ Level_3 = [
 ]
 
 Level_4 = [
+    ('Intro Start', 'Marker[@type="intro"]/@startTimeOffset'),
+    ('Intro Stop', 'Marker[@type="intro"]/@endTimeOffset'),
     ('MetaDB Link', '@guid'),
     ('MetaData Language', '@guid'),
     ('Part File Combined',

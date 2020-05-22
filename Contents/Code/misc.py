@@ -162,12 +162,12 @@ def GetRegInfo2(myMedia, myField, default=consts.DEFAULT, key='N/A'):
             # Attributes from xpath
             try:
                 retVals = myMedia.xpath(fieldsplit[0][:-1])
-            except:
+            except:                
                 retVals = []
                 retVals[0] = myField
                 pass
             for retVal2 in retVals:
-                try:
+                try:                    
                     # Get attribute
                     retVal = default
                     retVal = String.Unquote(retVal2.get(fieldsplit[1]))
