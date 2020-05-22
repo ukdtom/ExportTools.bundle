@@ -181,8 +181,14 @@ def sectionList():
         with io.open(prefsFile, 'wb') as outfile:
             json.dump(data, outfile, indent=4)
     except Exception, e:
-        with io.open(prefsFile, 'wb', encoding='utf8') as outfile:
-            json.dump(data, outfile, indent=4)
+        try:
+            Log.Debug('Exception handling due to', str(e))
+            with io.open(prefsFile, 'wb', encoding='utf8') as outfile:
+                json.dump(data, outfile, indent=4)
+        except Exception, e:
+            Log.Debug('Exception handling due to', str(e))
+            with io.open(prefsFile, 'w', encoding='utf8') as outfile:
+                json.dump(data, outfile, indent=4)
     restart()
     return
 
