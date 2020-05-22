@@ -181,8 +181,16 @@ def sectionList():
         with io.open(prefsFile, 'wb') as outfile:
             json.dump(data, outfile, indent=4)
     except Exception, e:
-        with io.open(prefsFile, 'wb', encoding='utf8') as outfile:
-            json.dump(data, outfile, indent=4)
+        try:
+            Log.Debug('Exception handling due to %s', str(e))
+            with io.open(prefsFile, 'wb', encoding='utf8') as outfile:
+                json.dump(data, outfile, indent=4)
+            pass
+        except Exception, e:
+            Log.Debug('Exception handling due to %s', str(e))
+            with io.open(prefsFile, 'w', encoding='utf8') as outfile:
+                json.dump(data, outfile, indent=4)
+            pass
     restart()
     return
 
@@ -1081,7 +1089,8 @@ def scanShowDB(myMediaURL, outFile, level=None, key=None):
                                 strUrl = ''.join((
                                     misc.GetLoopBack(),
                                     '/library/metadata/',
-                                    misc.GetRegInfo(Episode, 'ratingKey')
+                                    misc.GetRegInfo(Episode, 'ratingKey'),
+                                    '?includeMarkers=1'
                                 ))
                                 myExtendedInfoURL = genParam(strUrl)
                                 Episode = XML.ElementFromURL(

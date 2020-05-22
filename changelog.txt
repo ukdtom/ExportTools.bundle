@@ -1,3 +1,10 @@
+V2.0.0.11:
+	- New:
+		- #129 TV Series Export - Audio Title
+			- Added Audio stream title and Audio stream displayTitle to shows level 6
+		- #134 Consider export of Intro marker for episodes
+			- Added to Level 4 and above
+
 V2.0.0.10:
 	- New:
 		- #131 Additional device logging

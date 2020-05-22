@@ -17,7 +17,7 @@
 dateTimeFields = ['addedAt', 'updatedAt', 'lastViewedAt']
 
 # Fields that contains a timestamp and should return a time
-timeFields = ['duration']
+timeFields = ['duration', 'startTimeOffset', 'endTimeOffset']
 
 # Levels that only req. a single call towards PMS
 singleCall = ['Level 1', 'Level 2', 'PlayCount 1']
