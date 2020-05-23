@@ -164,14 +164,14 @@ def sectionList():
         try:
             for Section in SectionList:
                 LibraryValues.append(Section.get('title').decode('utf-8'))
-        except Exception e:
+        except Exception, e:
             Log.Exception('Exception handling due to %s' % (str(e)))
         try:
             for item in data:
                 if item['id'] == 'Libraries':
                     item['values'] = LibraryValues
                     break
-        except Exception e:
+        except Exception, e:
             Log.Exception('Exception handling due to %s' % (str(e)))
         PlayListValues = []
         PlayListValues.append('*** Idle ***'.decode('utf-8'))
@@ -199,7 +199,7 @@ def sectionList():
                     json.dump(data, outfile, indent=4)
                 pass
         restart()
-    except Exception e:
+    except Exception, e:
         Log.Exception('Exception handling due to %s' % (str(e)))
     return
 
