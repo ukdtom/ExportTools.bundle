@@ -90,6 +90,7 @@ def getOutFileName(title, skipts, level, playlist):
         Log.Critical('timestr is %s' % (timestr))
         Log.Exception('Exception handling due to %s' % (str(e)))
 
+
 def createFile(sectionKey, sectionType, title, skipts=False, level=None):
     '''
     Create the output file,
