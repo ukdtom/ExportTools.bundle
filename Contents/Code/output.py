@@ -55,6 +55,8 @@ def getOutFileName(title, skipts, level, playlist):
         timestr = ''
     else:
         timestr = '-' + time.strftime("%Y%m%d-%H%M%S")
+    if not level:
+        level = ''
     # Generate Output FileName
 
     # Remove invalid caracters, if on Windows......
