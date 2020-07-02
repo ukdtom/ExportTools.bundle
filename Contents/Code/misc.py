@@ -305,6 +305,12 @@ def getItemInfo(et, myRow, fieldList):
                         else:
                             element = GetRegInfo2(
                                 et, value, consts.DEFAULT, key=key)
+                    else:
+                        element = GetRegInfo2(
+                            et,
+                            value,
+                            consts.DEFAULT,
+                            key=key)
                 # part file
                 elif key.startswith('Part File'):
                     element = GetRegInfo2(et, value, consts.DEFAULT, key=key)

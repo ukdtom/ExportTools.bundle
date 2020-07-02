@@ -55,33 +55,42 @@ def getOutFileName(title, skipts, level, playlist):
         timestr = ''
     else:
         timestr = '-' + time.strftime("%Y%m%d-%H%M%S")
+    if not level:
+        level = ''
     # Generate Output FileName
 
     # Remove invalid caracters, if on Windows......
     newtitle = re.sub('[\/[:#*?"<>|]', '_', title).strip()
-    if playlist:
-        outFile = os.path.join(
-            Prefs['Export_Path'],
-            APPNAME,
-            'Playlist-' + newtitle + '-' + level + timestr + extension)
-    else:
-        if Prefs['Auto_Path']:
-            # Need to grap the first location for the section
-            locations = XML.ElementFromURL(
-                misc.GetLoopBack() + '/library/sections/',
-                timeout=float(PMSTIMEOUT)).xpath(
-                    './/Directory[@title="' + title + '"]')[0]
-            location = locations[0].get('path')
-            outFile = os.path.join(
-                location,
-                APPNAME,
-                newtitle + '-' + level + timestr + extension)
-        else:
+    try:
+        if playlist:
             outFile = os.path.join(
                 Prefs['Export_Path'],
                 APPNAME,
-                newtitle + '-' + level + timestr + extension)
-    return outFile
+                'Playlist-' + newtitle + '-' + level + timestr + extension)
+        else:
+            if Prefs['Auto_Path']:
+                # Need to grap the first location for the section
+                locations = XML.ElementFromURL(
+                    misc.GetLoopBack() + '/library/sections/',
+                    timeout=float(PMSTIMEOUT)).xpath(
+                        './/Directory[@title="' + title + '"]')[0]
+                location = locations[0].get('path')
+                outFile = os.path.join(
+                    location,
+                    APPNAME,
+                    newtitle + '-' + level + timestr + extension)
+            else:
+                outFile = os.path.join(
+                    Prefs['Export_Path'],
+                    APPNAME,
+                    newtitle + '-' + level + timestr + extension)
+        return outFile
+    except Exception, e:
+        Log.Critical('Export Path is %s' % (Prefs['Export_Path']))
+        Log.Critical('Newtitle is %s' % (newtitle))
+        Log.Critical('Level is %s' % (level))
+        Log.Critical('timestr is %s' % (timestr))
+        Log.Exception('Exception handling due to %s' % (str(e)))
 
 
 def createFile(sectionKey, sectionType, title, skipts=False, level=None):
