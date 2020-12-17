@@ -1,3 +1,12 @@
+V2.0.0.13:
+	- New:
+		- #143 Guid broken with new movie agent
+		    - Added the following fields to movies level 3:
+			  * IMDB ID
+			  * IMDB Link
+			  * TMDB ID
+			  * TMDB Link
+			  
 V2.0.0.12:
 	Bug:
 		- #136 URL Launch without level
