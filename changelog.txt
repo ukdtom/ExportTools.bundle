@@ -6,6 +6,9 @@ V2.0.0.13:
 			  * IMDB Link
 			  * TMDB ID
 			  * TMDB Link
+	- Bug:
+		- #146 Special Level 1 for Episodes
+			- Level didn't exists, so removed from prefs
 			  
 V2.0.0.12:
 	Bug:
