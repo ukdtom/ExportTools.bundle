@@ -158,7 +158,9 @@ def GetRegInfo2(myMedia, myField, default=consts.DEFAULT, key='N/A'):
                                     '@type')[0]).encode('utf8')
                         except Exception, e:
                             pass
-            except:
+                    if returnVal.startswith('plex://'):
+                        returnVal = default
+            except Exception, e:
                 Log.Critical('Exception on field: ' + myField)
                 returnVal = default
                 return WrapStr(fixCRLF(returnVal)).encode('utf8')
@@ -166,16 +168,18 @@ def GetRegInfo2(myMedia, myField, default=consts.DEFAULT, key='N/A'):
             if key in ['IMDB ID', 'TMDB ID', 'IMDB Link', 'TMDB Link']:
                 try:
                     if key == 'IMDB Link':
-                        returnVal = 'https://www.imdb.com/title/' + myMedia.xpath(myField)[0].split("//")[1]
+                        returnVal = ''.join((
+                            'https://www.imdb.com/title/',
+                            myMedia.xpath(myField)[0].split("//")[1]))
                     elif key == 'TMDB Link':
-                        returnVal = 'https://www.themoviedb.org/movie/' + myMedia.xpath(myField)[0].split("//")[1]
+                        returnVal = ''.join((
+                            'https://www.themoviedb.org/movie/',
+                            myMedia.xpath(myField)[0].split("//")[1]))
                     else:
                         returnVal = myMedia.xpath(myField)[0].split("//")[1]
                 except Exception, e:
-                    returnVal = consts.DEFAULT
-                    print 'Ged Not Avail: ' + default
+                    returnVal = default
                     pass
-                print 'Ged End New Guid with value: ' + returnVal
             else:
                 # Attributes from xpath
                 try:
@@ -186,7 +190,6 @@ def GetRegInfo2(myMedia, myField, default=consts.DEFAULT, key='N/A'):
                     pass
                 for retVal2 in retVals:
                     try:
-                        print 'Ged retVal2: ' + retVal2
                         # Get attribute
                         retVal = default
                         retVal = String.Unquote(retVal2.get(fieldsplit[1]))
@@ -344,6 +347,10 @@ def getItemInfo(et, myRow, fieldList):
                         element = element[element.index('?lang=') + 6:]
                     if element == '':
                         element = consts.DEFAULT
+                    if element.startswith('plex://'):
+                        element = consts.DEFAULT
+                    if element.startswith('local://'):
+                        element = consts.DEFAULT
                 elif key == 'Total Playcount':
                     element = consts.DEFAULT
                     url = ''.join((
@@ -437,6 +444,8 @@ def metaDBLink(guid, mediatype='episode', default='N/A'):
         sTmp = 'https://anidb.net/perl-bin/animedb.pl?show=anime&aid=' + linkID
     elif 'com.plexapp.agents.data18' in guid:
         sTmp = 'http://www.data18.com/movies/' + linkID
+    elif guid.startswith('plex://'):
+        sTmp = default
     else:
         sTmp = default
     return sTmp
