@@ -199,6 +199,8 @@ Show_1 = [
     ('Original Title', '@originalTitle'),
     ('Summary', '@summary'),
     ('Originally Aired', '@originallyAvailableAt'),
+    ('Added', '@addedAt'),
+    ('Updated', '@updatedAt'),
     ('Year', '@year'),
     ('Rating', '@rating'),
     ('Content Rating', '@contentRating'),

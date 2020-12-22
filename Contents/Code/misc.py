@@ -256,7 +256,10 @@ def ConvertDateStamp(timeStamp):
     '''
     return a date string in ISO 8601 format from a millisecond timestamp
     '''
-    return Datetime.FromTimestamp(float(timeStamp)).date().isoformat()
+    try:
+        return Datetime.FromTimestamp(float(timeStamp)).date().isoformat()
+    except Exception, e:
+        return timeStamp
 
 
 def getLevelFields(levelFields, fieldnames):

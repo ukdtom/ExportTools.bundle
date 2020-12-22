@@ -202,6 +202,9 @@ def getShowOnly(myMedia, myRow, level):
             element = misc.WrapStr(misc.fixCRLF(element).encode('utf8'))
             if key == 'MetaDB Link':
                 myRow[key] = misc.metaDBLink(element)
+            # Is it a dateStamp?
+            elif value[1:] in tvfields.dateTimeFields:
+                myRow[key] = misc.ConvertDateStamp(element)
             elif key in myRow:
                 myRow[key] = myRow[key] + Prefs['Seperator'] + element
             else:

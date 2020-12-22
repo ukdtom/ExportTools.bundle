@@ -1,5 +1,8 @@
 V2.0.0.13:
 	- New:
+		- #149 Export TV Show Original Added Date when using Shows Only Levels
+			* Added field "Added" to level "Show 1"
+			* Added field "Updated" to level "Show 1"
 		- #143 Guid broken with new movie agent
 		    - Added the following fields to movies level 3:
 			  * IMDB ID
