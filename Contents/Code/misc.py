@@ -52,7 +52,7 @@ def getToken():
             'user']['authentication_token']
         Log.Debug('Response from plex.tv was : %s' %
                   (httpResponse.headers["status"]))
-    except:
+    except Exception, e:
         Log.Critical(
             'Exception happend when trying to get a token from plex.tv')
         Log.Critical('Returned answer was %s' % httpResponse.content)
@@ -69,7 +69,7 @@ def GetLoopBack():
         httpResponse = HTTP.Request(
             'http://[::1]:32400/web', immediate=True, timeout=5)
         return 'http://[::1]:32400'
-    except:
+    except Exception, e:
         return 'http://127.0.0.1:32400'
 
 
@@ -97,7 +97,7 @@ def GetExtInfo(ExtInfo, myField, default=''):
         myLookUp = WrapStr(ExtInfo.xpath('Media/@' + myField)[0])
         if not myLookUp:
             myLookUp = WrapStr(default)
-    except:
+    except Exception, e:
         myLookUp = WrapStr(default)
     return myLookUp.encode('utf8')
 
@@ -108,7 +108,7 @@ def GetMoviePartInfo(ExtInfo, myField, default=''):
         myLookUp = WrapStr(ExtInfo.get(myField))
         if not myLookUp:
             myLookUp = WrapStr(default)
-    except:
+    except Exception, e:
         myLookUp = WrapStr(default)
     return myLookUp.encode('utf8')
 
@@ -122,7 +122,7 @@ def GetRegInfo(myMedia, myField, default=''):
             myLookUp = WrapStr(fixCRLF(myMedia.get(myField)))
         if not myLookUp:
             myLookUp = WrapStr(default)
-    except:
+    except Exception, e:
         myLookUp = WrapStr(default)
     return myLookUp.encode('utf8')
 
@@ -149,53 +149,75 @@ def GetRegInfo2(myMedia, myField, default=consts.DEFAULT, key='N/A'):
                         returnVal = ConvertTimeStamp(returnVal)
                         if returnVal == '01/01/1970':
                             returnVal = default
-                    # IMDB or TheMovieDB?
+                    # Plex origen GUID
                     elif fieldsplit[1] == 'guid':
-                        return metaDBLink(
-                            returnVal,
-                            mediatype=myMedia.xpath('@type')[0]).encode('utf8')
-            except:
+                        try:
+                            return metaDBLink(
+                                returnVal,
+                                mediatype=myMedia.xpath(
+                                    '@type')[0]).encode('utf8')
+                        except Exception, e:
+                            pass
+                    if returnVal.startswith('plex://'):
+                        returnVal = default
+            except Exception, e:
                 Log.Critical('Exception on field: ' + myField)
                 returnVal = default
                 return WrapStr(fixCRLF(returnVal)).encode('utf8')
         else:
-            # Attributes from xpath
-            try:
-                retVals = myMedia.xpath(fieldsplit[0][:-1])
-            except:
-                retVals = []
-                retVals[0] = myField
-                pass
-            for retVal2 in retVals:
+            if key in ['IMDB ID', 'TMDB ID', 'IMDB Link', 'TMDB Link']:
                 try:
-                    # Get attribute
-                    retVal = default
-                    retVal = String.Unquote(retVal2.get(fieldsplit[1]))
-                    # Did it exists?
-                    if retVal in [None, '']:
-                        retVal = default
-                    # Is it a dateStamp?
-                    elif fieldsplit[1] in moviefields.dateTimeFields:
-                        retVal = ConvertDateStamp(retVal)
-                    # Got a timestamp?
-                    elif fieldsplit[1] in moviefields.timeFields:
-                        retVal = ConvertTimeStamp(retVal)
-                    # size conversion?
-                    elif key == 'Part Size':
-                        retVal = ConvertSize(retVal)
-                    if returnVal == '':
-                        returnVal = retVal
+                    if key == 'IMDB Link':
+                        returnVal = ''.join((
+                            'https://www.imdb.com/title/',
+                            myMedia.xpath(myField)[0].split("//")[1]))
+                    elif key == 'TMDB Link':
+                        returnVal = ''.join((
+                            'https://www.themoviedb.org/movie/',
+                            myMedia.xpath(myField)[0].split("//")[1]))
                     else:
-                        returnVal = returnVal + Prefs['Seperator'] + retVal
+                        returnVal = myMedia.xpath(myField)[0].split("//")[1]
                 except Exception, e:
-                    if returnVal != '':
-                        returnVal = returnVal + Prefs['Seperator'] + retVal
-                        pass
-                    else:
-                        returnVal = default
-                        pass
+                    returnVal = default
+                    pass
+            else:
+                # Attributes from xpath
+                try:
+                    retVals = myMedia.xpath(fieldsplit[0][:-1])
+                except Exception, e:
+                    retVals = []
+                    retVals[0] = myField
+                    pass
+                for retVal2 in retVals:
+                    try:
+                        # Get attribute
+                        retVal = default
+                        retVal = String.Unquote(retVal2.get(fieldsplit[1]))
+                        # Did it exists?
+                        if retVal in [None, '']:
+                            retVal = default
+                        # Is it a dateStamp?
+                        elif fieldsplit[1] in moviefields.dateTimeFields:
+                            retVal = ConvertDateStamp(retVal)
+                        # Got a timestamp?
+                        elif fieldsplit[1] in moviefields.timeFields:
+                            retVal = ConvertTimeStamp(retVal)
+                        # size conversion?
+                        elif key == 'Part Size':
+                            retVal = ConvertSize(retVal)
+                        if returnVal == '':
+                            returnVal = retVal
+                        else:
+                            returnVal = returnVal + Prefs['Seperator'] + retVal
+                    except Exception, e:
+                        if returnVal != '':
+                            returnVal = returnVal + Prefs['Seperator'] + retVal
+                            pass
+                        else:
+                            returnVal = default
+                            pass
         return WrapStr(fixCRLF(returnVal)).encode('utf8')
-    except:
+    except Exception, e:
         returnVal = default
 
 
@@ -234,7 +256,10 @@ def ConvertDateStamp(timeStamp):
     '''
     return a date string in ISO 8601 format from a millisecond timestamp
     '''
-    return Datetime.FromTimestamp(float(timeStamp)).date().isoformat()
+    try:
+        return Datetime.FromTimestamp(float(timeStamp)).date().isoformat()
+    except Exception, e:
+        return timeStamp
 
 
 def getLevelFields(levelFields, fieldnames):
@@ -324,6 +349,10 @@ def getItemInfo(et, myRow, fieldList):
                     if '?lang=' in element:
                         element = element[element.index('?lang=') + 6:]
                     if element == '':
+                        element = consts.DEFAULT
+                    if element.startswith('plex://'):
+                        element = consts.DEFAULT
+                    if element.startswith('local://'):
                         element = consts.DEFAULT
                 elif key == 'Total Playcount':
                     element = consts.DEFAULT
@@ -418,6 +447,8 @@ def metaDBLink(guid, mediatype='episode', default='N/A'):
         sTmp = 'https://anidb.net/perl-bin/animedb.pl?show=anime&aid=' + linkID
     elif 'com.plexapp.agents.data18' in guid:
         sTmp = 'http://www.data18.com/movies/' + linkID
+    elif guid.startswith('plex://'):
+        sTmp = default
     else:
         sTmp = default
     return sTmp
