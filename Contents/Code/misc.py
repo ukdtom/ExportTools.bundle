@@ -127,7 +127,8 @@ def GetRegInfo(myMedia, myField, default=''):
     return myLookUp.encode('utf8')
 
 
-def GetRegInfo2(myMedia, myField, default=consts.DEFAULT, key='N/A'):
+def GetRegInfo2(
+    myMedia, myField, default=consts.DEFAULT, key='N/A', mediaType='movie'):
     ''' Pull's a field from the xml '''
     returnVal = ''
     global retVal
@@ -165,15 +166,26 @@ def GetRegInfo2(myMedia, myField, default=consts.DEFAULT, key='N/A'):
                 returnVal = default
                 return WrapStr(fixCRLF(returnVal)).encode('utf8')
         else:
-            if key in ['IMDB ID', 'TMDB ID', 'IMDB Link', 'TMDB Link']:
+            if key in [
+                'IMDB ID', 'TMDB ID', 'IMDB Link',
+                'TMDB Link', 'TVDB ID', 'TVDB Link']:
                 try:
                     if key == 'IMDB Link':
                         returnVal = ''.join((
                             'https://www.imdb.com/title/',
                             myMedia.xpath(myField)[0].split("//")[1]))
                     elif key == 'TMDB Link':
+                        if mediaType == 'movie':
+                            returnVal = ''.join((
+                                'https://www.themoviedb.org/movie/',
+                                myMedia.xpath(myField)[0].split("//")[1]))
+                        else:
+                            returnVal = ''.join((
+                                'https://www.themoviedb.org/tv/',
+                                myMedia.xpath(myField)[0].split("//")[1]))
+                    elif key == 'TVDB Link':
                         returnVal = ''.join((
-                            'https://www.themoviedb.org/movie/',
+                            'https://www.GED.org/TEST/',
                             myMedia.xpath(myField)[0].split("//")[1]))
                     else:
                         returnVal = myMedia.xpath(myField)[0].split("//")[1]
@@ -270,7 +282,7 @@ def getLevelFields(levelFields, fieldnames):
     return fieldnamesList
 
 
-def getItemInfo(et, myRow, fieldList):
+def getItemInfo(et, myRow, fieldList, mediaType='movie'):
     ''' fetch the actual info for the element '''
     intBehindthescenes = 0
     intDeleted = 0
@@ -294,13 +306,16 @@ def getItemInfo(et, myRow, fieldList):
                                 consts.DEFAULT,
                                 key=key):
                             element = GetRegInfo2(
-                                et, '@title', consts.DEFAULT, key='Title')
+                                et, '@title', consts.DEFAULT, key='Title',
+                                mediaType=mediaType)
                         else:
                             element = GetRegInfo2(
-                                et, value, consts.DEFAULT, key=key)
+                                et, value, consts.DEFAULT, key=key,
+                                mediaType=mediaType)
                     else:
                         element = GetRegInfo2(
-                            et, value, consts.DEFAULT, key=key)
+                            et, value, consts.DEFAULT, key=key,
+                            mediaType=mediaType)
                 elif key.startswith('Extras-'):
                     retVals = et.xpath(value)
                     element = str(len(retVals))
@@ -312,7 +327,8 @@ def getItemInfo(et, myRow, fieldList):
                             et,
                             value,
                             consts.DEFAULT,
-                            key='Part File Only')
+                            key='Part File Only',
+                            mediaType=mediaType)
                     if key == 'Part File Only':
                         element = os.path.split(element)[1]
                     else:
@@ -324,21 +340,27 @@ def getItemInfo(et, myRow, fieldList):
                                 et,
                                 value,
                                 consts.DEFAULT,
-                                key=key):
+                                key=key,
+                                mediaType=mediaType):
                             element = GetRegInfo2(
-                                et, '@title', consts.DEFAULT, key='Title')
+                                et, '@title', consts.DEFAULT, key='Title',
+                                mediaType=mediaType)
                         else:
                             element = GetRegInfo2(
-                                et, value, consts.DEFAULT, key=key)
+                                et, value, consts.DEFAULT, key=key,
+                                mediaType=mediaType)
                     else:
                         element = GetRegInfo2(
                             et,
                             value,
                             consts.DEFAULT,
-                            key=key)
+                            key=key,
+                            mediaType=mediaType)
                 # part file
                 elif key.startswith('Part File'):
-                    element = GetRegInfo2(et, value, consts.DEFAULT, key=key)
+                    element = GetRegInfo2(
+                        et, value, consts.DEFAULT, key=key,
+                        mediaType=mediaType)
                     if key == 'Part File':
                         element = os.path.split(element)[1]
                     elif key == 'Part File Path':
