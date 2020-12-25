@@ -239,6 +239,22 @@ Show_2 = [
 Show_3 = [
     ('Location', '//Location/@path'),
     ('MetaDB Link', '@guid'),
+    ('IMDB ID',
+        '//Guid[starts-with(@id, "imdb")]/@id'),
+    ('IMDB Link',
+        '//Guid[starts-with(@id, "imdb")]/@id'),
+    ('TMDB ID',
+        '//Guid[starts-with(@id, "tmdb")]/@id'),
+#    ('TMDB Link',
+#        '//Guid[starts-with(@id, "tmdb")]/@id'),
+    ('TVDB ID',
+        '//Guid[starts-with(@id, "tvdb")]/@id'),
+#    ('TVDB Link',
+#        '//Guid[starts-with(@id, "tvdb")]/@id'),
+
+
+
+
     ('Labels', '//Label/@tag'),
     ('Collection', ''),
     ('Delete Item Watched after days', '@autoDeletionItemPolicyWatchedLibrary')

@@ -212,7 +212,7 @@ def getShowOnly(myMedia, myRow, level):
         for key, value in tvfields.Show_1:
             element = myMedia.get(value[1:])
             if element is None:
-                element = 'N/A'
+                element = consts.DEFAULT
             element = misc.WrapStr(misc.fixCRLF(element).encode('utf8'))
             if key == 'MetaDB Link':
                 myRow[key] = misc.metaDBLink(element)
@@ -233,37 +233,79 @@ def getShowOnly(myMedia, myRow, level):
             myRow['Media ID']
         directMedia = XML.ElementFromURL(
             directURL, timeout=float(consts.PMSTIMEOUT))
-        for key, value in tvfields.Show_3:
+        for key, value in tvfields.Show_3:            
             if key == 'MetaDB Link':
-                myRow[key] = misc.metaDBLink(
-                    str(directMedia.xpath('//Directory/@guid')))
+                try:
+                    myRow[key] = misc.metaDBLink(
+                        str(directMedia.xpath('//Directory/@guid')))
+                except Exception, e:
+                    myRow[key] = consts.DEFAULT
+                    pass
             elif key == 'Delete Item Watched after days':
-                deleteDays = directMedia.xpath(
-                    '//Directory/@autoDeletionItemPolicyWatchedLibrary')
-                if deleteDays == ['100']:
-                    deleteDays = 'Next Refresh'
-                elif deleteDays == []:
-                    deleteDays = 'Never'
-                elif deleteDays == ['0']:
-                    deleteDays = 'Never'
-                elif deleteDays == ['1']:
-                    deleteDays = '1 Day'
-                elif deleteDays == ['7']:
-                    deleteDays = '7 Days'
-                myRow[key] = deleteDays
+                try:
+                    deleteDays = directMedia.xpath(
+                        '//Directory/@autoDeletionItemPolicyWatchedLibrary')                    
+                    if deleteDays == ['100']:
+                        deleteDays = 'Next Refresh'
+                    elif deleteDays == []:
+                        deleteDays = 'Never'
+                    elif deleteDays == ['0']:
+                        deleteDays = 'Never'
+                    elif deleteDays == ['1']:
+                        deleteDays = '1 Day'
+                    elif deleteDays == ['7']:
+                        deleteDays = '7 Days'
+                    myRow[key] = deleteDays
+                except Exception, e:
+                    myRow[key] = consts.DEFAULT
+                    pass
             elif key == 'Collection':
-                serieInfo = directMedia.xpath('//Directory/Collection')
-                myCol = ''
-                for collection in serieInfo:
+                try:
+                    serieInfo = directMedia.xpath('//Directory/Collection')
+                    myCol = ''
+                    for collection in serieInfo:
+                        if myCol == '':
+                            myCol = collection.get('tag')
+                        else:
+                            myCol = myCol + \
+                                Prefs['Seperator'] + collection.get('tag')
                     if myCol == '':
-                        myCol = collection.get('tag')
+                        myCol = consts.DEFAULT
+                    myRow[key] = myCol
+                except Exception, e:
+                    myRow[key] = consts.DEFAULT
+                    pass
+            elif key in [
+                'IMDB ID', 'TMDB ID', 'IMDB Link',
+                    'TMDB Link', 'TVDB ID', 'TVDB Link']:
+                try:
+                    if key == 'IMDB Link':
+                        myRow[key] = ''.join((
+                            'https://www.imdb.com/title/',
+                            directMedia.xpath(value)[0].split("//")[1]))
+                    elif key == 'TMDB Link':
+                        if mediaType == 'movie':
+                            myRow[key] = ''.join((
+                                'https://www.themoviedb.org/movie/',
+                                directMedia.xpath(value)[0].split("//")[1]))
+                        else:
+                            myRow[key] = ''.join((
+                                'https://www.themoviedb.org/tv/',
+                                directMedia.xpath(value)[0].split("//")[1]))
+                    elif key == 'TVDB Link':
+                        myRow[key] = ''.join((
+                            'https://PLEASE REPORT THIS LINK IN THE PLEX FORUMS',
+                            directMedia.xpath(value)[0].split("//")[1]))
                     else:
-                        myCol = myCol + \
-                            Prefs['Seperator'] + collection.get('tag')
-                if myCol == '':
-                    myCol = 'N/A'
-                myRow[key] = myCol
+                        myRow[key] = directMedia.xpath(value)[0].split("//")[1]
+                except Exception, e:
+                    myRow[key] = consts.DEFAULT
+                    pass
             else:
-                myRow[key] = misc.GetArrayAsString(
-                    directMedia, value, default=consts.DEFAULT)
+                try:
+                    myRow[key] = misc.GetArrayAsString(
+                        directMedia, value, default=consts.DEFAULT)
+                except Exception, e:
+                    myRow[key] = consts.DEFAULT
+                    pass
     return myRow
