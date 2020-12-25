@@ -233,7 +233,7 @@ def getShowOnly(myMedia, myRow, level):
             myRow['Media ID']
         directMedia = XML.ElementFromURL(
             directURL, timeout=float(consts.PMSTIMEOUT))
-        for key, value in tvfields.Show_3:            
+        for key, value in tvfields.Show_3:
             if key == 'MetaDB Link':
                 try:
                     myRow[key] = misc.metaDBLink(
@@ -244,7 +244,7 @@ def getShowOnly(myMedia, myRow, level):
             elif key == 'Delete Item Watched after days':
                 try:
                     deleteDays = directMedia.xpath(
-                        '//Directory/@autoDeletionItemPolicyWatchedLibrary')                    
+                        '//Directory/@autoDeletionItemPolicyWatchedLibrary')
                     if deleteDays == ['100']:
                         deleteDays = 'Next Refresh'
                     elif deleteDays == []:

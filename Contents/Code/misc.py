@@ -128,7 +128,8 @@ def GetRegInfo(myMedia, myField, default=''):
 
 
 def GetRegInfo2(
-    myMedia, myField, default=consts.DEFAULT, key='N/A', mediaType='movie'):
+        myMedia, myField, default=consts.DEFAULT,
+        key='N/A', mediaType='movie'):
     ''' Pull's a field from the xml '''
     returnVal = ''
     global retVal
@@ -168,7 +169,7 @@ def GetRegInfo2(
         else:
             if key in [
                 'IMDB ID', 'TMDB ID', 'IMDB Link',
-                'TMDB Link', 'TVDB ID', 'TVDB Link']:
+                    'TMDB Link', 'TVDB ID', 'TVDB Link']:
                 try:
                     if key == 'IMDB Link':
                         returnVal = ''.join((
