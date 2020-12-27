@@ -299,7 +299,7 @@ def getItemInfo(et, myRow, fieldList, mediaType='movie'):
                 key = str(item[0])
                 value = str(item[1])
                 # Special deal for Sort Title
-                if key == 'Sort title':
+                if key in ['Sort title', 'Episode Sort Title']:
                     if Prefs['Sort_title']:
                         if consts.DEFAULT == GetRegInfo2(
                                 et,
