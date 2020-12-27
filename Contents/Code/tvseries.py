@@ -117,27 +117,35 @@ def getTvInfo(myMedia, myRow, level=None):
     else:
         prefsLevel = Prefs['TV_Level']
     if prefsLevel in ['Show Only 1', 'Show Only 2']:
-        myRow = misc.getItemInfo(myMedia, myRow, tvfields.Show_1)
+        myRow = misc.getItemInfo(
+            myMedia, myRow, tvfields.Show_1, mediaType='show')
         if prefsLevel == 'Show Only 2':
-            myRow = misc.getItemInfo(myMedia, myRow, tvfields.Show_2)
+            myRow = misc.getItemInfo(
+                myMedia, myRow, tvfields.Show_2, mediaType='show')
         return myRow
     elif 'Special' in prefsLevel:
         if prefsLevel == 'Special Level 1':
-            myRow = misc.getItemInfo(myMedia, myRow, tvfields.SLevel_1)
+            myRow = misc.getItemInfo(
+                myMedia, myRow, tvfields.SLevel_1, mediaType='episode')
         elif prefsLevel == 'Special Level 2':
-            myRow = misc.getItemInfo(myMedia, myRow, tvfields.SLevel_2)
+            myRow = misc.getItemInfo(
+                myMedia, myRow, tvfields.SLevel_2, mediaType='episode')
         elif prefsLevel == 'Special Level 3':
-            myRow = misc.getItemInfo(myMedia, myRow, tvfields.SLevel_3)
+            myRow = misc.getItemInfo(
+                myMedia, myRow, tvfields.SLevel_3, mediaType='episode')
         elif prefsLevel == 'Special Level 4':
-            myRow = misc.getItemInfo(myMedia, myRow, tvfields.SLevel_4)
+            myRow = misc.getItemInfo(
+                myMedia, myRow, tvfields.SLevel_4, mediaType='episode')
         elif prefsLevel == 'Special Level 666':
-            myRow = misc.getItemInfo(myMedia, myRow, tvfields.SLevel_666)
+            myRow = misc.getItemInfo(
+                myMedia, myRow, tvfields.SLevel_666, mediaType='episode')
         if '666' in prefsLevel:
             myRow = misc.getMediaPath(myMedia, myRow)
         return myRow
     else:
         # Get Simple Info
-        myRow = misc.getItemInfo(myMedia, myRow, tvfields.Level_1)
+        myRow = misc.getItemInfo(
+            myMedia, myRow, tvfields.Level_1, mediaType='episode')
         # Get Basic Info
         if prefsLevel in [
                 'Level 2',
@@ -148,7 +156,8 @@ def getTvInfo(myMedia, myRow, level=None):
                 'Level 7',
                 'Level 8',
                 'Level 666']:
-            myRow = misc.getItemInfo(myMedia, myRow, tvfields.Level_2)
+            myRow = misc.getItemInfo(
+                myMedia, myRow, tvfields.Level_2, mediaType='episode')
         # Get Extended Info
         if prefsLevel in [
                 'Level 3',
@@ -158,7 +167,8 @@ def getTvInfo(myMedia, myRow, level=None):
                 'Level 7',
                 'Level 8',
                 'Level 666']:
-            myRow = misc.getItemInfo(myMedia, myRow, tvfields.Level_3)
+            myRow = misc.getItemInfo(
+                myMedia, myRow, tvfields.Level_3, mediaType='episode')
         # Get Extreme Info
         if prefsLevel in [
                 'Level 4',
@@ -167,7 +177,8 @@ def getTvInfo(myMedia, myRow, level=None):
                 'Level 7',
                 'Level 8',
                 'Level 666']:
-            myRow = misc.getItemInfo(myMedia, myRow, tvfields.Level_4)
+            myRow = misc.getItemInfo(
+                myMedia, myRow, tvfields.Level_4, mediaType='episode')
         # Get Extreme 2 Info
         if prefsLevel in [
                 'Level 5',
@@ -175,13 +186,16 @@ def getTvInfo(myMedia, myRow, level=None):
                 'Level 7',
                 'Level 8',
                 'Level 666']:
-            myRow = misc.getItemInfo(myMedia, myRow, tvfields.Level_5)
+            myRow = misc.getItemInfo(
+                myMedia, myRow, tvfields.Level_5, mediaType='episode')
         # Get Extreme 3 Info
         if prefsLevel in ['Level 6', 'Level 7', 'Level 8', 'Level 666']:
-            myRow = misc.getItemInfo(myMedia, myRow, tvfields.Level_6)
+            myRow = misc.getItemInfo(
+                myMedia, myRow, tvfields.Level_6, mediaType='episode')
         # Get Extreme 3 Info
         if prefsLevel in ['Level 7', 'Level 8', 'Level 666']:
-            myRow = misc.getItemInfo(myMedia, myRow, tvfields.Level_7)
+            myRow = misc.getItemInfo(
+                myMedia, myRow, tvfields.Level_7, mediaType='episode')
         # Get Media Path as well
         if '666' in prefsLevel:
             myRow = misc.getMediaPath(myMedia, myRow)
@@ -198,7 +212,7 @@ def getShowOnly(myMedia, myRow, level):
         for key, value in tvfields.Show_1:
             element = myMedia.get(value[1:])
             if element is None:
-                element = 'N/A'
+                element = consts.DEFAULT
             element = misc.WrapStr(misc.fixCRLF(element).encode('utf8'))
             if key == 'MetaDB Link':
                 myRow[key] = misc.metaDBLink(element)
@@ -221,35 +235,77 @@ def getShowOnly(myMedia, myRow, level):
             directURL, timeout=float(consts.PMSTIMEOUT))
         for key, value in tvfields.Show_3:
             if key == 'MetaDB Link':
-                myRow[key] = misc.metaDBLink(
-                    str(directMedia.xpath('//Directory/@guid')))
+                try:
+                    myRow[key] = misc.metaDBLink(
+                        str(directMedia.xpath('//Directory/@guid')))
+                except Exception, e:
+                    myRow[key] = consts.DEFAULT
+                    pass
             elif key == 'Delete Item Watched after days':
-                deleteDays = directMedia.xpath(
-                    '//Directory/@autoDeletionItemPolicyWatchedLibrary')
-                if deleteDays == ['100']:
-                    deleteDays = 'Next Refresh'
-                elif deleteDays == []:
-                    deleteDays = 'Never'
-                elif deleteDays == ['0']:
-                    deleteDays = 'Never'
-                elif deleteDays == ['1']:
-                    deleteDays = '1 Day'
-                elif deleteDays == ['7']:
-                    deleteDays = '7 Days'
-                myRow[key] = deleteDays
+                try:
+                    deleteDays = directMedia.xpath(
+                        '//Directory/@autoDeletionItemPolicyWatchedLibrary')
+                    if deleteDays == ['100']:
+                        deleteDays = 'Next Refresh'
+                    elif deleteDays == []:
+                        deleteDays = 'Never'
+                    elif deleteDays == ['0']:
+                        deleteDays = 'Never'
+                    elif deleteDays == ['1']:
+                        deleteDays = '1 Day'
+                    elif deleteDays == ['7']:
+                        deleteDays = '7 Days'
+                    myRow[key] = deleteDays
+                except Exception, e:
+                    myRow[key] = consts.DEFAULT
+                    pass
             elif key == 'Collection':
-                serieInfo = directMedia.xpath('//Directory/Collection')
-                myCol = ''
-                for collection in serieInfo:
+                try:
+                    serieInfo = directMedia.xpath('//Directory/Collection')
+                    myCol = ''
+                    for collection in serieInfo:
+                        if myCol == '':
+                            myCol = collection.get('tag')
+                        else:
+                            myCol = myCol + \
+                                Prefs['Seperator'] + collection.get('tag')
                     if myCol == '':
-                        myCol = collection.get('tag')
+                        myCol = consts.DEFAULT
+                    myRow[key] = myCol
+                except Exception, e:
+                    myRow[key] = consts.DEFAULT
+                    pass
+            elif key in [
+                'IMDB ID', 'TMDB ID', 'IMDB Link',
+                    'TMDB Link', 'TVDB ID', 'TVDB Link']:
+                try:
+                    if key == 'IMDB Link':
+                        myRow[key] = ''.join((
+                            'https://www.imdb.com/title/',
+                            directMedia.xpath(value)[0].split("//")[1]))
+                    elif key == 'TMDB Link':
+                        if mediaType == 'movie':
+                            myRow[key] = ''.join((
+                                'https://www.themoviedb.org/movie/',
+                                directMedia.xpath(value)[0].split("//")[1]))
+                        else:
+                            myRow[key] = ''.join((
+                                'https://www.themoviedb.org/tv/',
+                                directMedia.xpath(value)[0].split("//")[1]))
+                    elif key == 'TVDB Link':
+                        myRow[key] = ''.join((
+                            'This should not show up',
+                            directMedia.xpath(value)[0].split("//")[1]))
                     else:
-                        myCol = myCol + \
-                            Prefs['Seperator'] + collection.get('tag')
-                if myCol == '':
-                    myCol = 'N/A'
-                myRow[key] = myCol
+                        myRow[key] = directMedia.xpath(value)[0].split("//")[1]
+                except Exception, e:
+                    myRow[key] = consts.DEFAULT
+                    pass
             else:
-                myRow[key] = misc.GetArrayAsString(
-                    directMedia, value, default=consts.DEFAULT)
+                try:
+                    myRow[key] = misc.GetArrayAsString(
+                        directMedia, value, default=consts.DEFAULT)
+                except Exception, e:
+                    myRow[key] = consts.DEFAULT
+                    pass
     return myRow

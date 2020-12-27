@@ -1,3 +1,20 @@
+V2.0.0.14:
+	- New:
+		- #151 Handle new Guid for shows with the new TV Agent
+		    * Added fields to episodes level 4 as:
+			  * IMDB ID       
+    		  * IMDB Link
+			  * TMDB ID
+			  * TVDB ID
+			* Added fields to Show_Only level 3 as:
+			  * IMDB ID
+			  * IMDB Link
+			  * TMDB ID
+			  * TVDB ID
+	- Fix:
+		-  #144 binary mode doesn't take an encoding argument
+		-  #147 Default Sort Title to Title, if empty
+		
 V2.0.0.13:
 	- New:
 		- #149 Export TV Show Original Added Date when using Shows Only Levels
