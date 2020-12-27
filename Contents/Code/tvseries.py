@@ -294,7 +294,7 @@ def getShowOnly(myMedia, myRow, level):
                                 directMedia.xpath(value)[0].split("//")[1]))
                     elif key == 'TVDB Link':
                         myRow[key] = ''.join((
-                            'https://PLEASE REPORT THIS LINK IN THE PLEX FORUMS',
+                            'This should not show up',
                             directMedia.xpath(value)[0].split("//")[1]))
                     else:
                         myRow[key] = directMedia.xpath(value)[0].split("//")[1]

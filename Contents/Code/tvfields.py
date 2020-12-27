@@ -75,19 +75,15 @@ Level_4 = [
     ('Intro Start', 'Marker[@type="intro"]/@startTimeOffset'),
     ('Intro Stop', 'Marker[@type="intro"]/@endTimeOffset'),
     ('MetaDB Link', '@guid'),
+    ('MetaData Language', '@guid'),
     ('IMDB ID',
         '//Guid[starts-with(@id, "imdb")]/@id'),
     ('IMDB Link',
         '//Guid[starts-with(@id, "imdb")]/@id'),
     ('TMDB ID',
         '//Guid[starts-with(@id, "tmdb")]/@id'),
-#    ('TMDB Link',
-#        '//Guid[starts-with(@id, "tmdb")]/@id'),
     ('TVDB ID',
         '//Guid[starts-with(@id, "tvdb")]/@id'),
-#    ('TVDB Link',
-#        '//Guid[starts-with(@id, "tvdb")]/@id'),
-    ('MetaData Language', '@guid'),
     ('Part File Combined',
         'Media/Part/@file'),
     ('Part File',
@@ -245,16 +241,8 @@ Show_3 = [
         '//Guid[starts-with(@id, "imdb")]/@id'),
     ('TMDB ID',
         '//Guid[starts-with(@id, "tmdb")]/@id'),
-#    ('TMDB Link',
-#        '//Guid[starts-with(@id, "tmdb")]/@id'),
     ('TVDB ID',
         '//Guid[starts-with(@id, "tvdb")]/@id'),
-#    ('TVDB Link',
-#        '//Guid[starts-with(@id, "tvdb")]/@id'),
-
-
-
-
     ('Labels', '//Label/@tag'),
     ('Collection', ''),
     ('Delete Item Watched after days', '@autoDeletionItemPolicyWatchedLibrary')

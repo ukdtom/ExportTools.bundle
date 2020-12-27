@@ -1,6 +1,16 @@
 V2.0.0.14:
 	- New:
 		- #151 Handle new Guid for shows with the new TV Agent
+		    * Added fields to episodes level 4 as:
+			  * IMDB ID       
+    		  * IMDB Link
+			  * TMDB ID
+			  * TVDB ID
+			* Added fields to Show_Only level 3 as:
+			  * IMDB ID
+			  * IMDB Link
+			  * TMDB ID
+			  * TVDB ID
 		
 V2.0.0.13:
 	- New:
