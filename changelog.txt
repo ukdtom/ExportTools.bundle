@@ -11,6 +11,8 @@ V2.0.0.14:
 			  * IMDB Link
 			  * TMDB ID
 			  * TVDB ID
+	- Fix:
+		-  #144 binary mode doesn't take an encoding argument
 		
 V2.0.0.13:
 	- New:

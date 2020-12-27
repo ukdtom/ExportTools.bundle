@@ -242,9 +242,9 @@ def createHeader(outFile, sectionType, playListType='', level=None):
     # Do we have an csv output here?
     if extension == '.csv':
         try:
-            targetfile = io.open(outFile, 'wb')
+            targetfile = io.open(outFile, 'w', encoding='utf8')
         except Exception, e:
-            targetfile = io.open(outFile, 'wb', encoding='utf8')
+            targetfile = io.open(outFile, 'w')
         # Create output file, and print the header
         writer = csv.DictWriter(
             targetfile,
