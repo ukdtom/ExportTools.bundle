@@ -241,23 +241,17 @@ def createHeader(outFile, sectionType, playListType='', level=None):
             playListType, level)
     # Do we have an csv output here?
     if extension == '.csv':
-        Log.Debug('Creating CSV file %s' % str(targetfile))
         try:
-            targetfile = io.open(outFile, 'wb')
+            targetfile = io.open(outFile, 'w', encoding='utf8')
         except Exception, e:
-            Log.Exception('Error creating CSV file %s' % str(e))
+            targetfile = io.open(outFile, 'w')
         # Create output file, and print the header
-        Log.Debug('FieldNames: ' + str(fieldnames))
         writer = csv.DictWriter(
             targetfile,
             fieldnames=fieldnames,
             delimiter=Prefs['Delimiter'],
             quoting=csv.QUOTE_NONNUMERIC)
-        try:
-            writer.writeheader()
-            Log.Debug('CSV Header written okay')
-        except Exception, e:
-            Log.Exception('Exception happened in WriteHeader was %s' % str(e))
+        writer.writeheader()
     elif extension == '.xlsx':
         targetfile = xlsxwriter.Workbook(outFile)
         writer = targetfile.add_worksheet(newtitle)
@@ -277,7 +271,6 @@ def createHeader(outFile, sectionType, playListType='', level=None):
             global wrap
             wrap = targetfile.add_format()
             wrap.set_text_wrap()
-        Log.Debug('CSVGED****** Header written okay')
     return
 
 
