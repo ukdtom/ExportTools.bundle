@@ -404,7 +404,7 @@ def getItemInfo(et, myRow, fieldList, mediaType='movie'):
 
 
 def getMediaPath(myMedia, myRow):
-    ''' return the media path info for movies '''
+    ''' return the media path info '''
     # Get tree info for media
     try:
         myMediaTreeInfoURL = GetLoopBack() + '/library/metadata/' + \
@@ -423,6 +423,30 @@ def getMediaPath(myMedia, myRow):
     except Exception, e:
         Log.Exception('Bad Media Path with error: %s' % (str(e)))
         myRow['PMS Media Path'] = 'Error'
+        return myRow
+
+
+def getMetadataPath(myMedia, myRow):
+    ''' return the Metadata path info '''
+    # Get tree info for media
+    try:
+        MediaHash = Hash.SHA1(GetRegInfo(myMedia, 'guid'))
+        mediaType = GetRegInfo(myMedia, 'type')
+        if mediaType == 'movie':
+            mediaType = 'Movies'
+        elif mediaType == 'show':
+            mediaType = 'TV Shows'
+        MetadataPath = os.path.join(
+                Core.app_support_path,
+                'Metadata',
+                mediaType,
+                MediaHash[0], MediaHash[1:] + '.bundle'
+                )
+        myRow['PMS Metadata Path'] = MetadataPath.encode('utf8')
+        return myRow
+    except Exception, e:
+        Log.Exception('Bad Metadata Path with error: %s' % (str(e)))
+        myRow['PMS Metadata Path'] = 'Error'
         return myRow
 
 

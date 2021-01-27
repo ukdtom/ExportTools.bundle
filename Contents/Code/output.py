@@ -277,7 +277,7 @@ def createHeader(outFile, sectionType, playListType='', level=None):
             global wrap
             wrap = targetfile.add_format()
             wrap.set_text_wrap()
-        Log.Debug('CSVGED****** Header written okay')
+        Log.Debug('Header written okay')
     return
 
 

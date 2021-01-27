@@ -1,3 +1,9 @@
+V2.0.0.16:
+	- New:
+		#159 Export PMS path to the Metadata bundle path
+		  * Added to shows at level 3
+		  * Added to movies at level 666
+
 V2.0.0.15:
 	- Fix:
 	  - #153 Blocker: CSV Export broken
