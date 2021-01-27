@@ -245,7 +245,9 @@ Show_3 = [
         '//Guid[starts-with(@id, "tvdb")]/@id'),
     ('Labels', '//Label/@tag'),
     ('Collection', ''),
-    ('Delete Item Watched after days', '@autoDeletionItemPolicyWatchedLibrary')
+    ('Delete Item Watched after days',
+        '@autoDeletionItemPolicyWatchedLibrary'),
+    ('PMS Metadata Path', 'SHA1')  # Field auto added
 ]
 
 # Define rows and element name for PlayCount 1 (one calls pr. episode)

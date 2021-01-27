@@ -241,6 +241,10 @@ def getShowOnly(myMedia, myRow, level):
                 except Exception, e:
                     myRow[key] = consts.DEFAULT
                     pass
+            elif key == 'PMS Metadata Path':
+                myRow = misc.getMetadataPath(
+                    myMedia,
+                    myRow)
             elif key == 'Delete Item Watched after days':
                 try:
                     deleteDays = directMedia.xpath(

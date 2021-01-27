@@ -324,6 +324,7 @@ Level_9 = {
 # Define rows and element name for level 666 (Two calls pr. movie)
 Level_666 = [
     # ('PMS Media Path' , 'hash')   # Field auto added
+    # ('PMS Metadata Path' , 'SHA1') # Field auto added
     ]
 
 # Define rows and element name for Special level 1 (one call pr. movie)
