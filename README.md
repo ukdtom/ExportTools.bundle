@@ -8,6 +8,13 @@ ExportTools.bundle
 [![master](https://img.shields.io/badge/master-stable-green.svg?maxAge=2592000)]()
 ![Maintenance](https://img.shields.io/badge/Maintained-Yes-green.svg)
 
+# Notice:
+
+ExportTools is getting near End-Of-Life !
+It's replacement tool is:
+
+https://forums.plex.tv/t/webtools-ng/598539
+
 Export Plex Library to a csv, xlsx or m3u8 file
 
 To get futher info about this plugin, check out the wiki:
