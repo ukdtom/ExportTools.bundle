@@ -13,6 +13,8 @@ ExportTools.bundle
 ExportTools is getting near End-Of-Life !
 It's replacement tool is:
 
+# About:
+
 https://forums.plex.tv/t/webtools-ng/598539
 
 Export Plex Library to a csv, xlsx or m3u8 file
