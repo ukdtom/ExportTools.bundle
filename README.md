@@ -11,7 +11,9 @@ ExportTools.bundle
 # Notice:
 
 ExportTools is getting near End-Of-Life !
-All development on this has ended
+
+All development on this has ended !
+
 It's replacement tool is:
 
 https://forums.plex.tv/t/webtools-ng/598539
