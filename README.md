@@ -6,7 +6,7 @@ ExportTools.bundle
 [![Download of latest release](https://img.shields.io/github/downloads/ukdtom/ExportTools.bundle/latest/total.svg?style=flat)](https://github.com/ukdtom/ExportTools.bundle/releases/latest)
 [![Download total](https://img.shields.io/github/downloads/ukdtom/ExportTools.bundle/total.svg)](https://github.com/ukdtom/WebTools.bundle/releases)
 [![master](https://img.shields.io/badge/master-stable-green.svg?maxAge=2592000)]()
-![Maintenance](https://img.shields.io/badge/Maintained-Yes-green.svg)
+![Maintenance](https://img.shields.io/badge/Maintained-no-red.svg)
 
 # Notice:
 
